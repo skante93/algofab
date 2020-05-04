@@ -1,0 +1,86 @@
+            
+        
+            <% if(typeof algos != 'undefined' && algos.length > 0) { %>
+            <div class="algos row">  
+                <% for(var i=0; i < algos.length; i++) { %>
+                    <div class="col-sm-3">
+                        <div class="algo" id="<%= i %>">
+                            <div class="apparent" >
+                                <div class="title"> <%= algos[i].title %> </div>
+                                <hr/>
+                                
+                                <div class="description" >
+                                    <span class="content-to-middle"> 
+                                        <% if(typeof algos[i].logo !== 'undefined') { %>
+                                            <img src="<%= algos[i].logo %>" width="100%" height="100%"/>
+                                        <% } else { %>
+                                            There is no logo for this algorithm.
+                                        <% } %> 
+                                    </span>
+                                </div>
+                                <div id="link_to_page"> 
+                                    <% if ( typeof initiator !== 'undefined' && initiator == "myalgos"){ %>
+                                        /user/myalgos/<%= algos[i]._id %>
+                                    <% } else { %>
+                                        /algo/<%= algos[i]._id %>/page
+                                    <% } %>
+                                </div>
+                            </div>
+
+                            <div class="t-tip">
+                                <% if(algos[i].logo) { %>
+                                    <div class="row">
+                                        <img src="<%= algos[i].logo %>" alt="algo's image" style="max-width: 200px; max-height: 200px; display: block; margin : 0 auto"/>
+                                    </div>
+                                    <hr/>
+                                <% } %>
+                                <div class="row">
+                                    <%- algos[i].description %>
+                                </div>
+                                <hr/>
+                                <div class="row">
+                                    Algorithm designed by <a href="<%= algos[i].author.email %>"><%= algos[i].author.username %></a> <% if( algos[i].author.company_name ) { %> at <%= algos[i].author.company_name %> <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        <!--
+                        <div id="link_to_page">
+                            <% if ( typeof initiator !== 'undefined' && initiator == "myalgos"){ %>
+                                <a href="/user/myalgos/<%= algos[i]._id %>" target="blank">Visit page</a>
+                            <% } else { %>
+                                <a href="/algo/<%= algos[i]._id %>/page" target="blank">Visit page</a>
+                            <% } %>
+                        </div>
+                        -->
+
+
+                        <!--
+                        <div class="row versions" style="margin-top:1em; margin-left : auto">
+                            <u style="font-size: 1.5em">Versions</u> :
+                            <div class="row">
+                                <% if(algos[i].versions && algos[i].versions.length > 0) { %>
+                                    <div class="panel-group" id="accordion<%= i %>">
+                                        <% for(var j=0; j < algos[i].versions.length; j++) { %>
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                <h4 class="panel-title">
+                                                    <a data-toggle="collapse" data-parent="#accordion<%= i %>" href="#collapse<%= i %>-<%= j %>"><%= algos[i].versions[j].version %></a>
+                                                </h4>
+                                                </div>
+                                                <div id="collapse<%= i %>-<%= j %>" class="panel-collapse collapse">
+                                                    <div class="panel-body"><%- algos[i].versions[j].comment %></div>
+                                                </div>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                        -->
+                    </div>
+                    
+                <% } %>
+            </div>
+            <% } %>
+
+        

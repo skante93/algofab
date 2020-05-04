@@ -1,0 +1,1 @@
+{"spec":{"ports":[{"port":3306,"protocol":"TCP"}],"selector":{"by":"LIRIS","role":"db"}},"metadata":{"namespace":"eeerdfd","name":"db"},"kind":"Service","apiVersion":"v1"}

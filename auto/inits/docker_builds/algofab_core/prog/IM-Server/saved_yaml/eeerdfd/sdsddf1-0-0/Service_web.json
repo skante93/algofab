@@ -1,0 +1,1 @@
+{"spec":{"ports":[{"port":80,"protocol":"TCP"}],"type":"NodePort","selector":{"by":"LIRIS","role":"web"}},"metadata":{"namespace":"eeerdfd","name":"web"},"kind":"Service","apiVersion":"v1"}

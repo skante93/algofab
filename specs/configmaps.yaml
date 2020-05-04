@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ldap-config
+  namespace: algofab
+data:
+  LDAP_SERVER_NAME: "Algofab LDAP"
+  LDAP_BASE_DN: "dc=ldap,dc=algofab,dc=fr"
+  LDAP_DEBCONF_DOMAIN: "ldap.algofab.fr"
+  LDAP_DEBCONF_ORG: "TeraLab IMT"
+  LDAP_PASSWORD: "password"
+
+--- 
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common
+  namespace: algofab
+data:
+  PV_DIR: /home/skante/Kube_algofab
+  PV_HOST: 10.32.2.2
+  

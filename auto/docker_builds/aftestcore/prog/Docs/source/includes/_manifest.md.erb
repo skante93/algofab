@@ -1,0 +1,461 @@
+# Manifest reference
+
+
+> Structure of an algorithm's version's Manifest (fileds and types) : 
+
+```javascript
+{
+	version : {type : String, default : "1.0.0"},
+	comment : String,
+	keywords : Array,
+	deployment : {
+		main_service : String,
+		kubernetes : { type : Array, default : undefined }
+	},
+	API : {
+		GET : {
+			type : [{
+				uri : {type : String, default : '/'},
+				inputs : {
+		    			type : [ 
+				    		{
+							name : String,
+							type : [String],
+							required : Boolean
+						}
+					],
+					default : []
+				},
+				outputs : [String],
+				description : [String]
+			}], 
+			default : undefined
+		},
+		POST : {
+			type : [{
+				uri : {type : String, default : '/'},
+				inputs : {
+		    			type : [ 
+				    		{
+							name : String,
+							type : [String],
+							required : Boolean
+						}
+					],
+					default : []
+				},
+				outputs : [String],
+				description : [String]
+			}], 
+			default : undefined
+		},
+		PUT : {
+			type : [{
+				uri : {type : String, default : '/'},
+				inputs : {
+		    			type : [ 
+				    		{
+							name : String,
+							type : [String],
+							required : Boolean
+						}
+					],
+					default : []
+				},
+				outputs : [String],
+				description : [String]
+			}], 
+			default : undefined
+		},
+		DELETE : {
+			type : [{
+				uri : {type : String, default : '/'},
+				inputs : {
+		    			type : [ 
+				    		{
+							name : String,
+							type : [String],
+							required : Boolean
+						}
+					],
+					default : []
+				},
+				outputs : [String],
+				description : [String]
+			}], 
+			default : undefined
+		}
+	}
+}
+```
+
+
+<!--
+> The example of helloWorld algorithm from the Getting Started tutorial
+
+```javascript
+{
+	"version" : "1.0.0",
+	"comment" : [""],
+	"API" : {
+		"GET" : [
+			{
+				"uri" : "/",
+				"inputs" : [
+					{
+						"name" : "firstname",
+						"mime_types" : "text",
+						"required" : true
+					},
+					{
+						"name" : "lastname",
+						"mime_types" : "text",
+						"required" : false
+					},
+					{
+						"name" : "outformat",
+						"mime_types" : "text",
+						"required" : false
+					}
+				],
+				"outputs" : ["xml", "json", "html"],
+				"description" : ""
+			},
+			{
+				"uri" : "/:daytime",
+				"inputs" : [
+					{
+						"name" : "firstname",
+						"mime_types" : "text",
+						"required" : true
+					},
+					{
+						"name" : "lastname",
+						"mime_types" : "text",
+						"required" : false
+					},
+					{
+						"name" : "outformat",
+						"mime_types" : "text",
+						"required" : false
+					}
+				],
+				"outputs" : ["xml", "json", "html"],
+				"description" : ""
+			}
+		],
+		"POST" :[
+			{
+				"uri" : "/",
+				"inputs" : [
+					{
+						"name" : "firstname",
+						"mime_types" : "text",
+						"required" : true
+					},
+					{
+						"name" : "lastname",
+						"mime_types" : "text",
+						"required" : false
+					},
+					{
+						"name" : "outformat",
+						"mime_types" : "text",
+						"required" : false
+					}
+				],
+				"outputs" : ["xml", "json", "html"],
+				"description" : ""
+			},
+			{
+				"uri" : "/:daytime",
+				"inputs" : [
+					{
+						"name" : "firstname",
+						"mime_types" : "text",
+						"required" : true
+					},
+					{
+						"name" : "lastname",
+						"mime_types" : "text",
+						"required" : false
+					},
+					{
+						"name" : "outformat",
+						"mime_types" : "text",
+						"required" : false
+					}
+				],
+				"outputs" : ["xml", "json", "html"],
+				"description" : ""
+			}
+		]
+	},
+	"deployment" : {
+		"main_service" : "helloworld",
+		"kubernetes" : [
+			{
+				"apiVersion" : "v1",
+				"kind" : "ReplicationController",
+				"metadata" : {
+					"name" : "helloworld"
+				},
+				"spec" : {
+					"replicas" : 1,
+					"selector": {
+						"app" : "helloworld",
+						"by" : "John_Doe",
+						"from" : "Company"
+					},
+					"template" : {
+						"metadata" : {
+							"name" : "helloworld",	
+							"labels" : {
+								"app" : "helloworld",
+								"by" : "John_Doe",
+								"from" : "Company"
+							}
+						},
+						"spec" : {
+							"containers" : [
+								{
+									"name" : "hello",
+									"image" : "ws37-docker.tl.teralab-datascience.fr:666/helloworld/with_delay",
+									"ports" : [
+										{
+											"name" : "http",
+											"containerPort" : 3000
+										}
+									],
+									"resources": {
+		                                "requests" : { "cpu" : "1000m" }
+		                            }
+
+								}
+							]
+						}
+					}
+				} 
+			},
+			
+			{
+				"apiVersion" : "v1",
+				"kind" : "Service",
+				"metadata" : {
+					"name" : "helloworld"
+				},
+				"spec" : {
+					"selector" : {
+						"app" : "helloworld",
+						"by" : "John_Doe",
+						"from" : "Company"
+					},
+					"type" : "NodePort",
+					"ports" : [
+						{
+						 "port" : 3000
+						}
+					]
+				}
+			}
+		]
+	}
+}
+```
+-->
+
+The JSON manifest is the file in which you express every useful information about a particular version of your algorithm. This file is not only required for management purposes (for AlgoFab) but also for infrastructure purposes (to build the resources in our Kubernetes environment). 
+
+To summarize it, here are the different fields of our manifest : 
+
+<aside style="background: none;">
+	<div style="background-color: black; color: white; font-size: 1.5em; border-radius: 5px; padding: 2em; ">
+<code style="width: 100%; background: none;">
+{<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;version : {type : String, default : "1.0.0"},<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;comment : String,<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;credits_per_call : Number,<br>
+<!--	&nbsp;&nbsp;&nbsp;&nbsp;RRM : { type : String, default : "synchronous",<br>-->
+	&nbsp;&nbsp;&nbsp;&nbsp;deployment : Object,<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;API : Object<br>
+}
+</code>
+	</div>
+</aside>
+
+<aside class="warning">
+	Be cautious of the case when wrtitting your manifest. Indeed, while analysing your manifest, the AlgoFab servers are case-sensitive. 
+</aside>
+
+### version
+
+This field express the version of the algorithm. It is in a String format as you can see above. Its default value is “1.0.0”. If this manifest is for a different version of your algorithm (1.0.1 for example), then when specified, the version has to match this regular expression : **“^[0-9]+\\.[0-9]+\\.[0-9]+$”**. 
+
+### comment
+
+This field describes and present specificities related to this particular version. 
+It will to be used - with the description of your algorithm (given when you first create the algorithm on the Portal) - to present the version on the Algorithm Page. You don't have to specify it but you do, note that it must be a String or an Array of String. To give an example, the following should work just fine :
+
+<aside style="background: none;">
+	<div style="background-color: black; color: white; font-size: 1.5em; border-radius: 5px; padding: 2em; ">
+<code style="width: 100%; background: none;">
+comment : [ <br>
+	&nbsp;&nbsp;&nbsp;&nbsp;“&lt;p&gt;Paragraph beginning | line 1 &lt;br&gt;”, <br>
+	&nbsp;&nbsp;&nbsp;&nbsp;“line 2 &lt;br&gt;”, <br>
+	&nbsp;&nbsp;&nbsp;&nbsp;… <br>
+	&nbsp;&nbsp;&nbsp;&nbsp;“line n | Paragraph ending : &lt;/p&gt;” <br>
+]
+</code>
+	</div>
+</aside>
+
+In this way you can write multiple lines separately instead of having everything in just one String. In tha Analyse process Alofab will **join** the array to form a single String like you would have if you had chosen a String instead of an Array of String. 
+
+Needless to say that it accepts HTML code but the *script* tags are removed automatically. 
+
+### credits_per_call :
+
+This field is the number of credits used by a client for each API call on your this version. See [billing](#) to have further explanations.
+
+<!--
+### RRM : 
+
+This field is method to retrieve the response. The possible Values are : "polling", "websocket" and "synchronous" by default. 
+-->
+
+### deployment
+
+This field is partly used by the [IM](#) to create the Kubernetes objects for our algorithm. Therefore in order to create an algorithm on our platform you have to know at least basics of Kubernetes (enough to make an application according to your need). We suggest you begin by the excellent [Interactive tutorial](#) on Kubernetes’ website. The field deployment is required.
+
+Inside the field deployment are two other fields (both required) : “kubernetes” and “main_service”. 
+
+#### kubernetes
+
+The Kubernetes field is an array of objects, each object being the JSON specification of a Kubernetes object. Please note that the order of the kubernetes objects inside this Array is important because creation of the objects are launched one after another in the order they appear inside the Array kubernetes. In other words the next object in the array kubernetes is created only after Algofab confirms that the current one is created and running.
+
+In the kubernetes object types allowed by Algofab as of today (March 2018), there are three : Pod, ReplicationController and Service. 
+
+You should put in the field kubernetes all the specifications of all the objects needed to run the algorithm.
+
+#### main_service
+
+Among the kubernetes objects needed there is a particular service we need to clearly identity in case you have multiple services and will serve as entry point to the algorithm as a whole.
+
+Indeed think about the algorithms which need multiple Pods to run and multiple services to expose those Pods. We need to have a well known service through which all requests for treatments addressed to the algorithm. That service is the main_service.
+
+In algofab we have only two requirements for the main_service : 
+
+* It has to be of type NodePort : the point here is to expose the algorithm to other users. 
+* It should have only one port (field **spec.ports** is an array of one element) : the point here is to have only one entry point to the Algorithm.
+
+The second point might seem a bit too much restrictive but it is all for the sake of clarity and simplicity. It is up to the Contributor to make sure every service the algorithm has to offer is available through this unique entry point.
+
+Let's have an exmaple to apply what we just learned.
+
+_Let’s say your application is a webserver that requires two pods to run. Let’s say first pod is a webserver called “web” and the other is a database called “db”. 
+
+You should create two services. The first one called “db-service” to expose your pod “db” inside the kubernetes cluster so the web server (pod web) can access it. The second Service called “web-service” of type “NodePort” that will expose your pod “web” outside the cluster. This way your application will be accessible by other users. The main service here will be our service "web-service", through it we can query the Pod web which holds the algorithm.
+
+There is one last step to not forget otherwise we might have an error while building the algorithm on Algofab : the order in which we deploy our kubernetes objects. 
+
+Indeed we should start by the pod “db” since this pod does not depend on any other objects. Then we create the service “db-service” to expose it inside the cluster. After that comes the pod “web” that now can use the pod “db” through the service “db-service”. Finally we create the main_service to expose the whole application outside the cluster. Therefore inside your subfield kubernetes you need to put your objects in that order : Pod "db", Service "db-service", Pod "web", Service "web-service"._ 
+
+
+
+### API
+
+This field is meant to explain the API of you algorithm to other users for effective use in execution mode. This field is also required.
+
+This is how its content is structured : 
+
+<aside style="background: none;">
+	<div style="background-color: black; color: white; font-size: 1.5em; border-radius: 5px; padding: 2em; ">
+<code style="width: 100%; background: none;">
+{<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;GET : { type : [ AUO ], default : undefined },<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;POST : { type : [ AUO ], default : undefined },<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;PUT : { type : [ AUO ], default : undefined },<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;DELETE : { type : [ AUO ], default : undefined },<br>
+}
+</code>
+	</div>
+</aside>
+
+
+From the API’s content structure shown above let’s notice the following :
+
+* For now there are only four Verbs taken into account by the API description (as they are the most commonly used) : GET, POST, PUT, DELETE.
+* None of those Verbs is particularly required, you should only specify the ones your algorithm use. However, though none of them is required, you cannot omit all of them at once either. Doing so will cause an error during the control process and prevent the creation of your algorithm to proceed any further.
+* Type AUO does not actually exist in JavaScript. AUO (for Api Uri Object) is a name we use to refer to a JavaScript Object structure suitable to describe part of the API.
+* Any Verb we specify must be an Array of AUOs.
+
+#### Api Uri Object (AUO) :
+
+Like said before, AUOs help define the API, you can also compare it to an API call to the server of your algorithm. It is structured like the following : 
+
+<aside style="background: none;">
+	<div style="background-color: black; color: white; font-size: 1.5em; border-radius: 5px; padding: 2em; ">
+<code style="width: 100%; background: none;">
+{<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;uri : { type : String, default : “/”},<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;inputs : { type : [ UIO ], default : [] },<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;outputs : [String],<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;description : String <br>
+}
+</code>
+	</div>
+</aside>
+
+
+Here is the explanation of every field inside AUO objects :
+
+* **uri** : is a String identifying the URI this object is applied to. It has a default value of “/”.
+* **inputs** : this field shows the possible input objects for the corresponding Verb (the verb our AUO object is part of) on this “uri” (first point described just above). “inputs” subfield is an Array of another self-defined object structure called UIO (more on that below). We leave the possibility that the “inputs” subfield is (by default) an empty Array, in which case there is no input (not even optional ones) for the matching Verb and URI.
+* **outputs** : this field is an Array of String representing the output formats available with your algorithm. You are free to put whatever you like into this Array as we don’t put any constraints on it during the control process, but make sure the values you put in there are meaningful (examples : “html”, “json”, “xml”) to the users.
+* **description** : Similar to the field "comment" described above but rather explaining the use of the current AUO. It indeed is similar to the description field above in that you can : either specify it either as a String or an Array of String, you can put html inside (except for script elements). However it is required unlike "comment". 
+
+<!--
+<aside class="notice">
+	You should know that AlgoFab considers your algorithm as having only one way to communicate (through the main_service), therefore you cannot have more than one Server (in you Kubernetes Objects) as entry points to your algorithm. Please take notice of this fact an change your API Server accordingly. If you must expose several resources to the outside, use a single Server to serve them all or a use proxy, just make you have one entry point to your algorithm. 
+</aside>
+-->
+
+When you design your algorithm we ask of you to anticipate that your algorithm will be used both in Demonstration mode as well as in API mode. The Demonstration mode is a graphical mode (HTML) with the purpose to present the algorithm through Algofab's Portal. On the other hand the API mode is when a user submits a task to the algorithm in order to use its output data for in his own applications. In API mode the contributor should make sure to return the response in a paticular format (json, xml, yaml ...) so the user can parse it and use it for his app.
+
+However at the end of the day, wether your algorithm has an API mode or not, wether it has a demonstration mode or not, depends on the contributor. Wether you want to conform to our [contraints on the API server](#) if also all on contributor. If he decides to stray away, then he should be really clear in the descriptions.
+
+<!--
+<aside class="notice">
+	The API Server should have an output format control parameter allowing the user to specify which format is more suitable for him. We decided to standardize a query parameter "outformat" for the sake of simplicity for the users. 
+</aside>
+-->
+<!--
+<aside class="notice">
+	For each algorithm, AlgoFab considers the demonstration available at “GET /”. That means that we are expecting an HTML content whenever we send that request to the main_service of your algorithm. Therefore the default value of your "outformat" must be “html”. 
+</aside>
+-->
+
+#### Uri Input Object (UIO):
+
+The UIO is an object structure expressing the inputs of a given API call. It is structured as such : 
+
+<aside style="background: none;">
+	<div style="background-color: black; color: white; font-size: 1.5em; border-radius: 5px; padding: 2em; ">
+<code style="width: 100%; background: none;">
+{<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;name : String,<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;mime_types : [String],<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;required : Boolean<br>
+}
+</code>
+	</div>
+</aside>
+
+The meaning of the subfields are pretty straight forward. The reason we set the type of mime_types to an Array is to express that an input can expect different types of data. 
+
+As an example we might give possibility to users to either upload a file or to give an URL to a file as the value for an input. Let’s say the file is an mp3 file, then in the first case the input’s type should be “audio/mp3” and in the second case it should be “text/plain”.
+
+Important : We ask so many details about your API so it can benefit the users whenever they subscribe to your algorithm and want to use it in API mode. We don’t actually use any information in the API for anything on AlgoFab, we just display it to the users just as you provided it. Thus you should make sure the API matches the REST API of your algorithm.
+
+Let’s put everything together and see the structure of a manifest (plainly detailed without the use of AUO or UIO), by doing so we obtain the JSON structure detailed in the API section of the doc.
+

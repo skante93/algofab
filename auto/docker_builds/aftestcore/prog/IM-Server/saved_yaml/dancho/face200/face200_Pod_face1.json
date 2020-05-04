@@ -1,0 +1,1 @@
+{"spec":{"containers":[{"ports":[{"containerPort":8000,"protocol":"TCP","name":"http1"},{"containerPort":9000,"protocol":"TCP","name":"http"}],"command":["/root/openface/demos/web/start-servers.sh"],"image":"bamos/openface","name":"face"}]},"metadata":{"labels":{"by":"ARTEMIS","version":"0.2.0","app":"face1"},"name":"face1"},"kind":"Pod","apiVersion":"v1"}

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: web
+    namespace: jdoe
+    labels: 
+        by: LIRIS
+        role: web
+spec:
+    containers:
+    -   name: web
+        image: lirisl2im/web
+        ports:
+        -   containerPort: 80
+            protocol: TCP
+            name: http
+    imagePullSecrets:
+    -   name: skante-registry-secret

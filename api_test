@@ -1,0 +1,1 @@
+curl -H "Authorization: Bearer $TKN" -H "Content-Type: application/json" -X POST -d '{"apiVersion":"v1","kind":"namespace","metadata":{"name":"bobo"}}' https://$KUBERNETES_SERVICE_HOST:$KUBERETES_PORT_443_TCP_PORT/api/v1/namespace -k

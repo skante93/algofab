@@ -1,0 +1,577 @@
+
+<!DOCTYPE html>
+<html>
+  	<head>
+		<% include partials/head %>
+    
+  	</head>
+  	<body>
+    	<% include partials/header %>
+
+
+		<div class="container">
+			<aside class="col-sm-2" id="side-nav">
+				<div id="side-nav-title" class="row"> Summary </div>
+				<ul class="row">
+					<li id="intro"> <a href="/docs/getting-started/intro"> Introduction </a> </li>
+					<li id="algo"> <a href="/docs/getting-started/algo"> Creation of an algorithm </a> </li>
+					<li id="api"> <a href="/docs/getting-started/api"> REST API </a> </li>
+					<li id="docker"> <a href="/docs/getting-started/docker"> Dockerization </a> </li>
+					<li id="json"> <a href="/docs/getting-started/json"> JSON Manifest </a> </li>
+					<li id="upload"> <a href="/docs/getting-started/upload"> Upload the algorithm </a> </li>
+					<li id="tests"> <a href="/docs/getting-started/tests"> Tests </a> </li>
+				</ul>
+			</aside>
+			<% if(typeof err_page !== 'undefined') { %>
+			<div style="text-align: center">
+				<h2> ERROR 404 : </h2><p> The requested page "/docs/getting-started/<%= err_page %>" does not exist.</p>
+			</div>
+			<% } else if( page == "algo" ) { %>
+				<div class="col-sm-10" id="current-content">
+					<h3> Creation of an algorithm </h3>
+					<p>
+						The very first step to using AlgoFab platform is to make sur you have an algorithm at your disposal ready to be deployed at any time. In this section we’ll cover the creation of a simple example of algorithm so can continue to the next sections.
+					</p> 
+					<p>
+						We are going to create a very simple “SHELL” based algorithm. However, the fact that we are using SHELL does not mean you can’t use other languages. In fact you can use any language you are familiar with because as you’ll see later on, in AlgoFab server-side we won’t be accessing your executables directly (rather you’ll be conceiving an API allowing users to access you application).
+					</p>
+					<p>
+						We create a file named “hello.sh” inside of which we write a script that works as the following : <br/>
+						<ul>
+							<li> It takes three parameters : FIRSTNAME (first name of the person to greet), LASTNAME (last name of the person to greet) and DAYTIME (morning evening or night) and returns a string corresponding to a greeting. </li>
+							<li> If  DAYTIME is given, the script answers with : “Good $DAYTIME $FISTNAME $LASTNAME” otherwise it answers with : “Hello $FISTNAME $LASTNAME” </li>
+							<li> One of names (FIRSTNAME or LASTNAME) can be omitted but not both, in which case the script answers : “Error : At least one name required” </li>
+						</ul>
+					</p>
+					<p>
+						Here is the code below (on Ubuntu 16.04) : <br />
+						<code id="hello-shell-code" class="open-close-content">
+							#!/bin/bash
+							for i in "$@"
+							do
+								case $i in
+									-f=*|--firstname=*)
+									FIRSTNAME="${i#*=}"
+									shift # past argument=value
+									;;
+									-l=*|--lastname=*)
+									LASTNAME="${i#*=}"
+									shift # past argument=value
+									;;
+									-t=*|--daytime=*)
+									DAYTIME="${i#*=}"
+									shift # past argument=value
+									;;
+									*)
+									# unknown option
+									;;
+								esac
+							done
+							if [ "$FIRSTNAME" == "" ] && [ "$LASTNAME" == "" ]; then
+								echo "Error : At least one name required"
+							elif [ "$DAYTIME" != "" ]; then
+								#echo "daytime : $DAYTIME"
+								SHOW="Good $DAYTIME"
+								if [ "$FIRSTNAME" == "" ]; then
+									SHOW="$SHOW $LASTNAME."
+								elif [ "$LASTNAME" == "" ]; then
+					                SHOW="$SHOW $FIRSTNAME."
+								else
+									SHOW="$SHOW $FIRSTNAME $LASTNAME."
+								fi
+								echo $SHOW
+							else
+								SHOW="Hello"
+								if [ "$FIRSTNAME" == "" ]; then
+									SHOW="$SHOW $LASTNAME."
+								elif [ "$LASTNAME" == "" ]; then
+									SHOW="$SHOW $FIRSTNAME."
+								else
+									SHOW="$SHOW $FIRSTNAME $LASTNAME."
+								fi
+								echo $SHOW
+							fi
+
+						</code>
+					</p>
+					<p>
+						<em>Remark : We will pass the arguments to the program by using flags “—firstname=” or “-f=” for FIRSTNAME, “—lastname=” or “-l=” for lastname and “--daytime” or “-t” for DAYTIME.</em>
+					</p>
+					<p>
+						The next step is to create a REST API that will encapsulate this algorithm and allow distant users to call for it. 
+					</p>
+
+					<!-- DONE WITH PAGE, NOW PUTTING NAV -->
+					<div class="row" id="change-nav">
+						<div class="col-sm-3"><a href="/docs/getting-started/intro"><button class="btn btn-primary"> <span class="a-span">&lt;</span> <span>Back to "Introduction"</span> </button></a></div>
+						<div class="col-sm-offset-6 col-sm-3"><a href="/docs/getting-started/api"><button class="btn btn-primary"> <span>Continue to "REST API"<span> <span class="a-span">&gt;</span> </button></a></div>
+					</div>
+				</div>
+			<% } else if ( page == "api" ) { %>
+				<div class="col-sm-10" id="current-content">
+					<h3> REST API </h3>
+					<p>
+						In this section we will use nodejs with its powerfull module “Express” to create an HTTP Server wrapped around “hello.sh” script to handle all incoming execution requests. In order to do that let’s visualize the API we want to conceive first. The tables 1 and  2 represent our views of the application.
+					</p>
+
+
+					<div style="margin: 1em">
+						<div class="row">
+							<table class="table table-bordered api-table">
+				              	<thead>
+				                	<tr>
+					                  	<th colspan="8"> URI : / </th>
+					                </tr>
+					                <tr>
+					                  	<th rowspan="2"> Verb </th>
+					                  	<th colspan="2"> Query </th>
+					                  	<th colspan="2"> Body </th>
+					                  	<th rowspan="2"> Invocation </th>
+					                  	<th colspan="2"> Response </th>
+					                </tr>
+									<tr>
+					                  	<th> Name </th>
+					                  	<th> Importance </th>
+					                  	<th> Name </th>
+					                  	<th> Importance </th>
+					                  	<th> Type </th>
+					                  	<th> Content </th>
+					                </tr>
+				              	</thead>
+				              	<tbody>
+				              		<tr>
+					                  	<td rowspan="3"> GET </td>
+					                  	<td> firstname </td>
+					                  	<td> required </td>
+					                  	<td rowspan="3" colspan="2"> X </td>
+					                  	<td rowspan="5"> bash hello.sh -f=firsnatme -l=lastname </td>
+					                  	<td rowspan="5"> application/{outformat} </td>
+										<td rowspan="3"> “Hello {firstname} {lastname}” </td>
+					                </tr>
+				              		<tr>
+					                  	<td> lastname </td>
+					                  	<td> optional </td>
+					                </tr>
+					                <tr>
+					                  	<td> outformat </td>
+					                  	<td> optional </td>
+					                </tr>
+				              		
+				              	</tbody>
+				            </table>
+				            <div style="text-align: center; margin-bottom: 1em">
+			            		Tab 1 : REST API for uri "/"
+			            	</div>
+			            </div>
+			            <div class="row">
+							<table class="table table-bordered api-table">
+				              	<thead>
+				                	<tr>
+					                  	<th colspan="8"> URI : /:daytime </th>
+					                </tr>
+					                <tr>
+					                  	<th rowspan="2"> Verb </th>
+					                  	<th colspan="2"> Query </th>
+					                  	<th colspan="2"> Body </th>
+					                  	<th rowspan="2"> Invocation </th>
+					                  	<th colspan="2"> Response </th>
+					                </tr>
+									<tr>
+					                  	<th> Name </th>
+					                  	<th> Importance </th>
+					                  	<th> Name </th>
+					                  	<th> Importance </th>
+					                  	<th> Type </th>
+					                  	<th> Content </th>
+					                </tr>
+				              	</thead>
+				              	<tbody>
+				              		<tr>
+					                  	<td rowspan="3"> GET </td>
+					                  	<td> firstname </td>
+					                  	<td> required </td>
+					                  	<td rowspan="3" colspan="2"> X </td>
+					                  	<td rowspan="5"> bash hello.sh -f=firsnatme -l=lastname -t=daytime </td>
+					                  	<td rowspan="5"> application/{outformat} </td>
+										<td rowspan="3"> “Good {daytime} {firstname} {lastname}” </td>
+					                </tr>
+				              		<tr>
+					                  	<td> lastname </td>
+					                  	<td> optional </td>
+					                </tr>
+					                <tr>
+					                  	<td> outformat </td>
+					                  	<td> optional </td>
+					                </tr>
+				              		
+				              	</tbody>
+				            </table>
+				            <div style="text-align: center; margin-bottom: 1em">
+			            		Tab 2 : REST API for uri "/"
+			            	</div>
+			            </div>
+		            </div>
+		            <h4 style="text-decoration: underline;"> A- Explanations </h4>
+		            <p>
+						The two tables, Tab 1 and Tab2, represent respectively the API for URI “/” and “/:daytime”-like URIs. The difference is that in the second case the daytime is specified in the URI itself, that is why the response is “Good {daytime}  {firstname} {lastname}” whereas for the first case, where no daytime is specified, we reply with “Hello {firstname} {lastname}”.
+					</p>
+					<p> 
+						We created an option to allow users to get their result in one of the following formats : xml, json or html (by default). This option is specified (no matter the request Verb or the URI) through the query parameter “outformat”. However we made this an optional parameter so as not to bother users, that said the Server returns an html page by default.
+					</p>
+					<p> 
+						<b> It is highly recommended that you put such a parameter in your application and if possible name it the same way (outformat) for the sake of simplicity (though it is not obligatory, it is just a convention to ease up the use for users). </b>
+					</p>
+					<p>
+						<b> Do not forget that your application needs to have two modes at least : the demonstration mode and the execution mode. The difference is that the demonstration mode will be a Web interface Our Portal (inside a browser) use to promote / introduce your algorithm to users (if convinced, they can afterwards subscribe to you algorithm) and the execution mode is your full functioning REST API that can be used from any external application (ex : curl inside a Linux terminal) given that the user conforms to your API description. Please keep in mind that when asked for the demonstration page, the Portal calls your API server at “/” so make sure your demonstration web server is turning there. </b>
+					</p>
+					<p>
+						The column Verbs refers to the HTTP method, Query refers to the query parameters of the request, Body is the body parameters of the request, Invocation is the way we call our algo (script shell written previously) to serve the client, Response type is the type of data (HTTP content-type) we return and Response content is the actual content we return.
+					</p>
+					<p> 
+						Note also that we made firstname required but not lastname, that is a choice me made to make sure that at least one of the two is given before we call the algorithm. We decided to handle this error from the API Server though we could have just called the algorithm and return an error 500 if script replies with “Error : At least one name required”.
+						As for the error cases, we have the following :
+						<ul>
+							<li>
+								“outformat” is given but not in [‘html’, ‘json’, ‘xml’] : we return status code 500 with : “content-type specified not understood”
+							</li> 
+							<li>
+								FIRSTNAME is not specified : we return status code 500 with : “Firstname is required”
+							</li> 
+							<li>
+								The value of DAYTIME is not in [“morning”, ‘evening’, “night”] : we return status code 500 with : “daytime should either be ‘morning’, ‘evening’ or ‘night’”.
+							</li>
+						</ul>
+					</p>
+					<h4 style="text-decoration: underline;"> B- Code : </h4>
+					<p>
+						The code of this server (written in nodejs) is here to download if you need it.
+						<a href="/docs/getting-started/Hello-World.zip" download><div id="api-code" style="text-align: center; font-size: 2em; font-weight: bold; padding: 1em; border-radius: 5px; border: 2px dotted black"> Download Code </div> </a>
+						To test the server, extract the archive change directory to the root folder extracted and run "npm install".
+					</p>
+
+
+		            <!-- DONE WITH PAGE, NOW PUTTING NAV -->				
+					<div class="row" id="change-nav">
+						<div class="col-sm-3"><a href="/docs/getting-started/algo"><button class="btn btn-primary"> <span class="a-span">&lt;</span> Back to "Creation of an algorithm" </button></a></div>
+						<div class="col-sm-offset-6 col-sm-3"><a href="/docs/getting-started/docker"><button class="btn btn-primary"> <span>Continue to "Dockerization"<span> <span class="a-span">&gt;</span> </button></a></div>
+					</div>
+				</div>
+			<% } else if ( page == "docker") { %>
+				<div class="col-sm-10" id="current-content">
+					<!-- Code here -->
+					<h3> Dockerization </h3>
+					<p>
+						Now that we built our Algorithm and our API Server wrapped around it, let’s dockerize the application.
+					</p>
+					<p>
+						<b>If you don’t know what docker is we suggest you read the <a href="https://docs.docker.com"> documentation </a>before you continue.</b>
+					</p>
+					<p>
+						Let’s start by creating a dockerfile. Here is the content of the dockerfile we will use to create the image of our application : <br/>
+						<code id="hello-docker-code" class="open-close-content">
+							
+							# Base image from which we construct our own
+							FROM ubuntu:16.04
+
+							# Update the image and install the tools we need
+							RUN apt-get update -y && apt-get install -y nodejs-legacy npm curl nano
+
+							RUN mkdir /Hello-World
+							COPY ./Hello-World/  /Hello-World
+
+							# Chane the current working directory
+							WORKDIR /Hello-World
+
+							# Command executed each time a container created from this image is started
+							CMD npm start
+
+						</code>
+						<p>
+							The comments above every command explains exactly what we are doing. If you need a reminder take a look at the <a href=”https://docs.docker.com/engine/reference/builder/”>dockerfile reference</a>.
+						</p>
+					</p>
+
+					<p>
+						We then need to build this image while tagging it with our login. Place into the same folder as your Docker file and make sure your Hello-World folder also present then type the following : <br/>
+
+						<code class="open-close-content">
+							sudo docker build -t &lt;Your Hub Login&gt;/helloworld .
+						</code> <br/>
+
+						where &lt;Your Hub Login&gt; is your docker hub username. This way of tagging (preceding the image name by your Login) will allow us to push the image to our docker registry. <br/>
+						To push the image to you registry you must connect to it first by tapping : <br/>
+						<code class="open-close-content">
+							sudo docker login -u &lt;Your Hub Login&gt; -p &lt;Your Hub Password&gt;
+						</code> <br/>
+						where &lt;Your Hub Password&gt; is the password to you docker hub account. <br/>
+						Then type the following to realize the actual push : <br/>
+						<code  class="open-close-content">
+							sudo docker push &lt;Your Hub Login&gt;/helloworld
+						</code> <br/>
+						Now you are done with the dockerization, but before we leave the reason you are asked to push your images to the docker registry is for our <a href="#">IM</a> to be able to pull on it. <br/>
+						<b>If you decide to make your image private don't forget to add "skante" as collaborator otherwise we won't be able to pull on your image therefore the whole process will fail.</b> <br/>
+						Now you are ready to create a manifest for your algorithm.
+					</p>
+
+					<!-- DONE WITH PAGE, NOW PUTTING NAV -->								
+					<div class="row" id="change-nav">
+						<div class="col-sm-3"><a href="/docs/getting-started/api"><button class="btn btn-primary"> <span class="a-span">&lt;</span> <span>Back to "REST API"</span> </button></a></div>
+						<div class="col-sm-offset-6 col-sm-3"><a href="/docs/getting-started/json"><button class="btn btn-primary"> <span>Continue to "JSON Manifest"<span> <span class="a-span">&gt;</span> </button></a></div>
+					</div>
+				</div>
+			<% } else if ( page == "json") { %>
+				<div class="col-sm-10" id="current-content">
+					<!-- Code here -->
+					<% include docs/gettingstarted/json %>
+
+
+					<!-- DONE WITH PAGE, NOW PUTTING NAV -->				
+					<div class="row" id="change-nav">
+						<div class="col-sm-3"><a href="/docs/getting-started/docker"><button class="btn btn-primary"> <span class="a-span">&lt;</span> <span>Back to "Dockerization"</span> </button></a></div>
+						<div class="col-sm-offset-6 col-sm-3"><a href="/docs/getting-started/upload"><button class="btn btn-primary"> <span>Continue to "Upload the algorithm"</span> <span class="a-span">&gt;</span> </button></a></div>
+					</div>
+				</div>
+			<% } else if ( page == "upload") { %>
+				<div class="col-sm-10" id="current-content">
+					<!-- Code here -->
+					<p>
+						UPLOAD
+					</p>
+					
+
+					<!-- DONE WITH PAGE, NOW PUTTING NAV -->				
+					<div class="row" id="change-nav">
+						<div class="col-sm-3"><a href="/docs/getting-started/json"><button class="btn btn-primary"> <span class="a-span">&lt;</span> Back to "JSON Manifest" </button></a></div>
+						<div class="col-sm-offset-6 col-sm-3"><a href="/docs/getting-started/tests"><button class="btn btn-primary"> <span>Continue to "Tests"</span> <span class="a-span">&gt;</span> </button></a></div>
+					</div>
+				</div>
+			<% } else if ( page == "tests") { %>
+				<div class="col-sm-10" id="current-content">
+					<!-- Code here -->
+					<p>
+						TESTS
+					</p>
+
+					<!-- DONE WITH PAGE, NOW PUTTING NAV -->				
+					<div class="row" id="change-nav">
+						<div class="col-sm-3"><a href="/docs/getting-started/upload"><button class="btn btn-primary"> <span class="a-span">&lt;</span> <span>Back to "Upload the algorithm"</span> </button></a></div>
+						<!--<div class="pull-right"><a href="/docs/getting-started/algo">Continue to "Creation of an algorithm"</a></div>-->
+					</div>
+				</div>
+			<% } else { %>
+				<div class="col-sm-10" id="current-content">
+					<h3>Getting started </h3>
+					<p>
+						This tutorial is a guide that will walk you through the process of setting up you own algorithm and it’s upload on our plateform AlgoFab.
+					</p>
+
+					<p>
+						You will see a basic “Hello World”-like algorithm as you continue to read this guide, however other examples more likely to fit your needs are available <a href="">here</a>. If this is the first time you are using AlgoFab, we recommend you to finish this tutorial first.
+					</p>
+					<p> 
+						Before you continue, make sure you are comfortable with the following technologies : 
+						<ul>
+							<li> A programming Language (C, Java, Python …) </li>
+							<li> An HTTP / Web / REST Server programming language (php, nodejs …) </li>
+							<li> Containerization with Docker </li>
+							<li> Orchestration with Kubernetes </li>
+						</ul>
+					</p>
+
+
+					<!-- DONE WITH PAGE, NOW PUTTING NAV -->				
+					<div class="row" id="change-nav">
+						<!--<div class="pull-left"><a href="/docs/getting-started/">Back to ""</a></div>-->
+						<div class="col-sm-offset-9 col-sm-3"><a href="/docs/getting-started/algo"><button class="btn btn-primary"> <span>Continue to "Creation of an algorithm"</span> <span class="a-span">&gt;</span></button></a></div>
+					</div>
+				</div>
+			<% } %>
+		</div>
+
+    	<% include partials/footer %>
+    	<script type="text/javascript">
+    		$(function(){
+    			function strIsHtml(s){
+    				//
+    				try {
+	    				return $(s);
+	    			}
+	    			catch(e) {
+	    				return false;
+	    			}
+    			}
+
+    			$('#side-nav').css({
+    				"background-color" : "#D3D3D3",
+    				"border-radius" : "5px"
+    			});
+    			$('#current-content').css({
+
+    			});
+    			$('#side-nav-title').css({
+    				"text-align" : "center",
+    				"font-size" : "1.5em",
+    				"border" : "1px solid black",
+    				"border-radius" : "5px 5px 0px 0px",
+    				"padding" : "1em",
+    				"background-color" : "#383838",
+    				"color" : "white"
+    			});
+    			$('#side-nav ul').css({
+    				"list-style-type" : "none",
+    				"margin" : "0",
+    				"padding-left" : "0",
+    				"padding-right" : "0",
+    				"padding-top" : "1em",
+    				"padding-bottom" : "1em",
+    			});
+
+    			$('#side-nav ul li a:link').css({"color" : "black"});
+    			$('#side-nav ul li a:visited').css({"color" : "#669999"});
+    			$('#side-nav ul li a:hover').css({"color" : "green"});
+
+
+    			$('#change-nav div').css("margin-top" , "1em");
+    			$('#change-nav div button span').css("vertical-align" , "middle");
+    			$('.a-span').css({
+    				"font-weight" : "bold",
+    				"font-size" : "2em"
+    			});
+    			/*
+    			$("#hello-shell-code").html(
+    				'<pre>'+'\n'+
+    				'	#!/bin/bash '+'\n'+
+					'	for i in "$@" '+'\n'+
+					'	do '+'\n'+
+					'		case $i in '+'\n'+
+					'			-f=*|--firstname=*) '+'\n'+
+					'			FIRSTNAME="${i#*=}" '+'\n'+
+					'			shift # past argument=value '+'\n'+
+					'			;; '+'\n'+
+					'			-l=*|--lastname=*) '+'\n'+
+					'			LASTNAME="${i#*=}" '+'\n'+
+					'			shift # past argument=value '+'\n'+
+					'			;; '+'\n'+
+					'			-t=*|--daytime=*) '+'\n'+
+					'			DAYTIME="${i#*=}" '+'\n'+
+					'			shift # past argument=value '+'\n'+
+					'			;; '+'\n'+
+					'			*) '+'\n'+
+					'			# unknown option '+'\n'+
+					'			;; '+'\n'+
+					'		esac '+'\n'+
+					'	done '+'\n'+
+					'	if [ "$FIRSTNAME" == "" ] && [ "$LASTNAME" == "" ]; then '+'\n'+
+					'		echo "Error : At least one name required" '+'\n'+
+					'	elif [ "$DAYTIME" != "" ]; then '+'\n'+
+					'		#echo "daytime : $DAYTIME" '+'\n'+
+					'		SHOW="Good $DAYTIME" '+'\n'+
+					'		if [ "$FIRSTNAME" == "" ]; then '+'\n'+
+					'			SHOW="$SHOW $LASTNAME." '+'\n'+
+					'		elif [ "$LASTNAME" == "" ]; then '+'\n'+
+					'			SHOW="$SHOW $FIRSTNAME." '+'\n'+
+					'		else '+'\n'+
+					'			SHOW="$SHOW $FIRSTNAME $LASTNAME." '+'\n'+
+					'		fi '+'\n'+
+					'		echo $SHOW '+'\n'+
+					'	else '+'\n'+
+					'		SHOW="Hello" '+'\n'+
+					'		if [ "$FIRSTNAME" == "" ]; then '+'\n'+
+					'			SHOW="$SHOW $LASTNAME." '+'\n'+
+					'		elif [ "$LASTNAME" == "" ]; then '+'\n'+
+					'			SHOW="$SHOW $FIRSTNAME." '+'\n'+
+					'		else '+'\n'+
+					'			SHOW="$SHOW $FIRSTNAME $LASTNAME." '+'\n'+
+					'		fi '+'\n'+
+					'		echo $SHOW '+'\n'+
+					'	fi '+'\n'+
+    				'</pre>'
+    			);
+    			
+    			$("#hello-docker-code").html(
+    				'<pre>'+'\n'+
+    				'	# Base image from which we construct our own '+'\n'+
+					'	FROM ubuntu:16.04 '+'\n\n'+
+					'	# Update the image and install the tools we need '+'\n'+
+					'	RUN apt-get update -y && apt-get install -y nodejs-legacy npm curl nano '+'\n\n'+
+					'	# Create folder for our app '+'\n'+
+					'	RUN mkdir /Hello-World '+'\n\n'+
+					'	# Upload our code into the image '+'\n'+
+					'	COPY ./Hello-World/  /Hello-World '+'\n\n'+
+					'	# Change the current working directory '+'\n'+
+					'	WORKDIR /Hello-World '+'\n\n'+
+					'	# Command executed each time a container created from this image is started '+'\n'+
+					'	CMD npm start '+'\n'+
+    				'</pre>'
+    			);
+    			*/
+    			$('.open-close-content').html(function(){
+    				//
+    				var content = $(this).html(), lines = content.split('\n');
+    				var indent_min = Infinity;
+    				console.log( $(this).attr('id') +' : '+content);
+    				var h = strIsHtml(content);
+    				console.log("H : "+h);
+    				if(h != false && h.prop('tagName') == "UL"){
+    					//
+    					for(var i=0; i < lines.length; i++)
+       						lines[i] = lines[i].replace(new RegExp('^\t*'), '');
+       					content = lines.join('\n');
+    				}
+    				else{
+	    				for(var i=0; i < lines.length; i++){
+
+	    					var splitted = lines[i].split(/^\t*/);
+	    					//console.log('Line : 'i, "splitted"+indent_min);
+	       					if(splitted.length == 0 ){
+	       						console.log("Line : "+i+', continue, splitted : '+splitted);
+	    						continue;
+	       					}
+	    					if (indent_min > (lines[i].length-splitted[1].length)){
+	    						indent_min = lines[i].length-splitted[1].length+1;
+	    					
+		    					console.log( $(this).attr('id')+' : indent_min : '+indent_min+', line : '+i);
+		       				}
+	       				}
+	       				if (indent_min != Infinity && indent_min > 0){
+	       					for(var i=0; i < lines.length; i++)
+	       						lines[i] = lines[i].replace(new RegExp('^\t{'+(indent_min)+'}'), '');
+	       					content = lines.join('\n');
+	       				}
+	       				console.log('\n\n');
+	       			}
+
+
+    				content = $('<pre>'+content+'</pre>');
+    				content.hide();
+    				
+    				var toggle = $('<span>Toggle content <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></span>');
+    				
+    				toggle.click(function(){
+    					content.toggle();
+    					toggle.html(function(){
+    						if(/chevron-down/.test(toggle.html()))
+    							return '<span>Toggle content <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></span>';
+    						else
+    							return '<span>Toggle content <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></span>'
+    					});
+    				});
+    				toggle.css({
+    					"color" : "red",
+    					"text-decoration" : "underline",
+    					"cursor" : "pointer"
+    				});
+    				var new_content = $('<div></div>');
+    				new_content.append(toggle);
+					new_content.append(content);
+					
+    				return new_content;
+    			});
+    			$('.api-table th, .api-table td').css({
+    				"text-align" : "center",
+    				"vertical-align" : "middle"
+    			});
+    		});
+    	</script>
+	</body>
+</html>

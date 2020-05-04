@@ -1,0 +1,1 @@
+{"spec":{"containers":[{"ports":[{"containerPort":27017,"protocol":"TCP","name":"mongodb"}],"image":"skante/db_eyesnap","name":"mongo"}]},"metadata":{"labels":{"by":"Globe_VIP","version":"1.3.1","app":"eyesnap-mongo4"},"name":"jdoe-eyesnap-mongo4"},"kind":"Pod","apiVersion":"v1"}

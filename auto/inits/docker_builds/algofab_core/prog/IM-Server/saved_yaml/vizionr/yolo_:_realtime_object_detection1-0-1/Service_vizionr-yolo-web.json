@@ -1,0 +1,1 @@
+{"spec":{"ports":[{"port":3101,"protocol":"TCP"}],"type":"NodePort","selector":{"by":"vizionr","version":"1.0.1","app":"yolo-web"}},"metadata":{"namespace":"vizionr","name":"vizionr-yolo-web"},"kind":"Service","apiVersion":"v1"}

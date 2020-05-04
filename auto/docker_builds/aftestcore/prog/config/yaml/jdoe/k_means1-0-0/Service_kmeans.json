@@ -1,0 +1,1 @@
+{"spec":{"ports":[{"targetPort":3000,"port":80}],"type":"NodePort","selector":{"from":"TeraLab","by":"TeraLab","app":"kmeans"}},"metadata":{"namespace":"jdoe","name":"kmeans"},"kind":"Service","apiVersion":"v1"}

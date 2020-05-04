@@ -1,0 +1,32 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-configs
+  namespace: algofab
+data:
+  LDAP_SERVER_NAME: "Algofab LDAP Server"
+  LDAP_BASE_DN: "dc=ldap,dc=algofab,dc=fr"
+  LDAP_DEBCONF_DOMAIN: "ldap.algofab.fr"
+  LDAP_DEBCONF_ORG: "TeraLab IMT"
+  LDAP_PASSWORD: "password"
+  
+  PORTAL_EXT_PROTOCOL: "300"
+  PORTAL_EXT_NAME: "ws67-af-portal.tl.teralab-datascience.fr"
+  
+  PROXY_EXT_PROTOCOL: "300"
+  PROXY_EXT_NAME: "ws67-af-proxy.tl.teralab-datascience.fr"
+  
+  DOCS_EXT_PROTOCOL: "300"
+  DOCS_EXT_NAME: "ws67-af-docs.tl.teralab-datascience.fr"
+  
+--- 
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common
+  namespace: algofab
+data:
+  PV_DIR: https
+  PV_HOST: ws67-af-portal

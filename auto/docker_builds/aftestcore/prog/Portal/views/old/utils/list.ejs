@@ -1,0 +1,64 @@
+		<% if(!algos || algos.length == 0) { %>
+            <% if(title == "Algorithms") { %>
+              <h1>There is not any algorithm registered, click <a href="/algo/new">here</a> to add a new one.</h1>
+            <% } else if(title == "Subscriptions") {%>
+              <h1>You are not subscribed to any algorithm yet, click <a href="/algo/catalog">here</a> to see the catalog.</h1>
+            <% } else { %>
+              <h1>You didn't post any algorithm yet, click <a href="/algo/new">here</a> to add a new one.</h1>
+            <% } %>
+      	<% } else { %>
+            <% if(title == "Algorithms") { %>
+              <h1> Catalog of Algos :  </h1>
+            <% } else if(title == "Subscriptions") {%>
+              <h1> Your Subscriptions (from the most recent to the least) :  </h1>
+            <% } else { %>
+              <h1> Your algos (from the most recent to the least) :  </h1>
+            <% } %>
+      
+            <table class="table">
+              <thead>
+                <tr>
+                  <th> Title </th>
+                  <th> Description </th>
+                  <th> Company </th>
+                  <%- (title == "My Algorithms")? '<th> Hidden </th>' : '' %>
+                  <th> Visit Page </th>
+                </tr>
+              </thead>
+              <tbody>
+            <% for(var i=0; i < algos.length; i++) { %>
+                  <tr class="item-<%= i %>">
+                    <td> <%= algos[i].title %> v<%= algos[i].version %> </td>
+                    <td> <%- algos[i].description %> </td>
+                    <td> <a href="mailto:<%= algos[i].author.contact %>"> <%= algos[i].author.name %> </a> </td>
+                    <%- (title == "My Algorithms")? '<td> ' + algos[i].hidden + ' </td>': '' %>
+                    <% if(title == "Subscriptions") {%>
+	                    <td>
+		                    <form action="/user/unsubscribe" method="post" target="unSubsFrame" id="hiddenForm">
+          								<input type="hidden" name="algoName" value="<%= algos[i].title %>" />
+          								<input type="hidden" name="item" value="<%= i %>" />
+          								<div class="form-group">
+        					    			<button type="sumbit" class="btn bt-info">Unsubscribe</button>
+        					    		</div>
+        						    </form>
+        						</td>
+					          <iframe src="#" name="unSubsFrame" id="unSubsFrame" style="display: none;"></iframe>
+                    	<!--<td> <a href="/user/unsubscribe?algoName=<%= algos[i].title %>" target="blank"> <button type="button">Unsubscribe</button> </a> </td>-->
+                    <% } else { %>
+	                    <td> <a href="/algo/<%= algos[i]._id %>/page" target="blank"> <button type="button">See for yourself</button> </a> </td>
+	                    <!--
+	                    <td> <a href="<%= algos[i].url %>" target="blank"> <button type="button">See for yourself</button> </a> </td>
+	                    -->
+                    <% } %>
+                    
+                  </tr>
+            <% } %>
+              </tbody>
+            </table>
+            <div class="pull-left">
+              <a href="?page=<%= page-1 %>"> <button type="button">Prev</button> </a>
+            </div>
+            <div class="pull-right">
+              <a href="?page=<%= page+1 %>"> <button type="button">Next</button> </a>
+            </div>
+      	<% } %>

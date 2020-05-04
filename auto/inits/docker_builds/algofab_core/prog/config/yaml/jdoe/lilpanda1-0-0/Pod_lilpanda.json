@@ -1,0 +1,1 @@
+{"spec":{"imagePullSecrets":[{"name":"skante-registry-secret"},{"name":"admin-private-secret"}],"containers":[{"ports":[{"containerPort":3000,"name":"http"}],"imagePullPolicy":"Always","image":"skante/connector-app","name":"hello"}]},"metadata":{"namespace":"jdoe","labels":{"from":"teralab","app":"lilpanda"},"name":"lilpanda"},"kind":"Pod","apiVersion":"v1"}

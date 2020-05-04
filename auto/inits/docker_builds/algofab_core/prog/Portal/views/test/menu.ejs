@@ -1,0 +1,119 @@
+
+  
+<!DOCTYPE html>
+<html>
+    <head>
+        <% include ../partials/head %>
+
+    </head>
+    <body>
+        <% include ../partials/header %>
+
+        <div class="container">
+            <hr>
+            <div class="row">
+                <div class="col-sm-8">
+                    <h2>AlgoFab Platform</h2>
+                    <p>The AlgoFab platform facilitates the use of complex algorithms for processing media (video, image, text and sound) or data.</p>
+                    <ul>
+                        <li>It allows users to test, validate and integrate complex processing algorithms into their own business chains.</li>
+                        <li>It also offers developers a way to get a maximum impact from their algorithms by making them available on the platform.</li>
+                    </ul>
+                    <br/>
+                </div>
+                <div class="col-sm-4">
+                    <h2>Contact Us</h2>
+                    <table>
+                        <tr>
+                            <td><img id="main_image" style="height:48px" src="img/Mail-icon.png"/></td>
+                            <td><a href="mailto:contact@algofab.fr">contact@algofab.fr</a></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><img id="main_image" style="height:150px" src="img/algofab_icon.png"/></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <!-- /.row -->
+        </div>
+        
+        <div class="container">
+        	<ul class="af-menu">
+        		<li class="af-menu-item">
+        			Level 1
+        		</li>
+        		<li class="af-menu-item">
+        			Level 1
+        		</li>
+        		<li class="af-menu-item">
+        			<ul class="af-menu">
+        				<li class="af-menu-item">
+        					Level 2
+        				</li>
+        				<li class="af-menu-item">
+        					Level 2
+        				</li>
+        			</ul>
+        		</li>
+        	</ul>
+        </div>
+        <div class="container">
+        	<% for(var i=0; i < algos.length; i++) {
+        		var algo = algos[i]; %>
+        	<algo m_id="<%= algo._id %>" m_title="<%= algo.title %>" m_logo="<%= algo.logo %>" m_description="<%= algo.description %>" m_author_email="<%= algo.author.email %>" m_author_company_name="<%= algo.author.company_name %>"></algo>
+        	<% } %>
+        </div>
+        
+
+
+
+        <div class="container">
+        	<% var algo = algos[0]; %>
+        	<algopage class="row" _id="<%= algo._id %>">
+                <section>
+                	<h2 id="title"><%= algo.title %> <button type="button" class="btn btn-primary" id="edit-algo-information"> Edit algorithm </button> <button type="button" class="btn btn-danger" id="remove-algo"> Remove algorithm </button></h2>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h3>Logo : </h3>
+                            <div id="logo">
+                                <div>
+                                    <% if(typeof algo.logo !== 'undefined') { %>
+                                        <img src="<%= algo.logo %>" width="100%" height="100%"/>
+                                    <% } else { %>
+                                        There's currently no logo.
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <h3> Tags :</h3>
+                            <div id="tags">
+                                <% for(var i=0; i < algo.keywords.length; i++) { %>
+                                    <pre style="display: inline-block;"> <%= algo.keywords[i] %> </pre>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <h3 id="description"> <%- algo.description %> </h3>
+                    <hr>
+                    <!--
+                    <div class="row">
+                        <button type="button" class="btn btn-primary" id="edit-algo-information"> Edit algorithm </button>
+                    </div>
+                    -->
+                </section>
+
+                <section>
+	                <h2> Versions : <button type="button" class="btn btn-primary" id="create-new-v"> Create new version </button></h2>
+	                <div id="versions"><%= JSON.stringify(algo.versions) %></div>
+                </section>
+            </algopage>
+        </div>
+
+
+
+        <% include ../partials/footer %>
+    </body>
+</html>

@@ -1,0 +1,1 @@
+{"spec":{"imagePullSecrets":[{"name":"skante-registry-secret"}],"containers":[{"ports":[{"containerPort":3000,"name":"http"}],"image":"skante/helloworld","name":"hello"}]},"metadata":{"namespace":"totot","labels":{"from":"Company","by":"John_Doe","app":"helloworld"},"name":"helloworld"},"kind":"Pod","apiVersion":"v1"}

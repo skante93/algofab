@@ -1,0 +1,2 @@
+Time ; Number of Requests ; Interval (ms) ; Errors client-RH (%) ; Errors RH-algo (%) ; RT client-RH min (ms) ; RT client-RH max (ms) ; RT client-RH avg (ms) ; RT RH-algo min (ms) ; RT RH-algo max (ms) ; RT RH-algo avg (ms) ; RAM min (MB) ; RAM max (MB) ; RAM avg (MB) ; CPU min (%) ; CPU max (%) ; CPU avg (%)
+Wed Jan 31 2018 13:27:55 GMT+0100 (CET) ; 1000 ; 500 ; 10.5 ; 0 ; 10088 ; 1044891 ; 483169.8189944134 ; 0.014 ; 33.033 ; 11.896399999999979 ; 0 ; 2665.546875 ; 2401.1359323854335 ; 6 ; 355 ; 347.7914210870989

@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html>
+  	<head>
+		<% include partials/head %>
+    
+  	</head>
+  	<body>
+    	<% include partials/header %>
+
+
+		<div class="container">
+			<aside class="col-sm-2" id="side-nav">
+				<div id="side-nav-title" class="row"> Summary </div>
+				<ul class="row">
+					<li id="intro"> <a href="/docs/getting-started/intro"> Introduction </a> </li>
+					<li id="algo"> <a href="/docs/getting-started/algo"> Creation of an algorithm </a> </li>
+					<li id="api"> <a href="/docs/getting-started/api"> REST API </a> </li>
+					<li id="docker"> <a href="/docs/getting-started/docker"> Dockerization </a> </li>
+					<li id="json"> <a href="/docs/getting-started/json"> JSON Manifest </a> </li>
+					<li id="upload"> <a href="/docs/getting-started/upload_tests"> Tests </a> </li>
+					<!--<li id="tests"> <a href="/docs/getting-started/tests"> Tests </a> </li>-->
+				</ul>
+			</aside>
+			<% if(typeof err_page !== 'undefined') { %>
+			<div style="text-align: center">
+				<h2> ERROR 404 : </h2><p> The requested page "/docs/getting-started/<%= err_page %>" does not exist.</p>
+			</div>
+			<% } else if( page == "algo" ) { %>
+				<div class="col-sm-10" id="current-content">
+					<!-- Code here -->
+					<% include docs/gettingstarted/algo %>
+
+					<!-- DONE WITH PAGE, NOW PUTTING NAV -->
+					<div class="row" id="change-nav">
+						<div class="col-sm-3"><a href="/docs/getting-started/intro"><button class="btn btn-primary"> <span class="a-span">&lt;</span> <span>Back to "Introduction"</span> </button></a></div>
+						<div class="col-sm-offset-6 col-sm-3"><a href="/docs/getting-started/api"><button class="btn btn-primary"> <span>Continue to "REST API"<span> <span class="a-span">&gt;</span> </button></a></div>
+					</div>
+				</div>
+			<% } else if ( page == "api" ) { %>
+				<div class="col-sm-10" id="current-content">
+					<!-- Code here -->
+					<% include docs/gettingstarted/api %>
+
+
+		            <!-- DONE WITH PAGE, NOW PUTTING NAV -->				
+					<div class="row" id="change-nav">
+						<div class="col-sm-3"><a href="/docs/getting-started/algo"><button class="btn btn-primary"> <span class="a-span">&lt;</span> Back to "Creation of an algorithm" </button></a></div>
+						<div class="col-sm-offset-6 col-sm-3"><a href="/docs/getting-started/docker"><button class="btn btn-primary"> <span>Continue to "Dockerization"<span> <span class="a-span">&gt;</span> </button></a></div>
+					</div>
+				</div>
+			<% } else if ( page == "docker") { %>
+				<div class="col-sm-10" id="current-content">
+					<!-- Code here -->
+					<% include docs/gettingstarted/docker %>
+
+
+					<!-- DONE WITH PAGE, NOW PUTTING NAV -->								
+					<div class="row" id="change-nav">
+						<div class="col-sm-3"><a href="/docs/getting-started/api"><button class="btn btn-primary"> <span class="a-span">&lt;</span> <span>Back to "REST API"</span> </button></a></div>
+						<div class="col-sm-offset-6 col-sm-3"><a href="/docs/getting-started/json"><button class="btn btn-primary"> <span>Continue to "JSON Manifest"<span> <span class="a-span">&gt;</span> </button></a></div>
+					</div>
+				</div>
+			<% } else if ( page == "json") { %>
+				<div class="col-sm-10" id="current-content">
+					<!-- Code here -->
+					<% include docs/gettingstarted/json %>
+
+
+					<!-- DONE WITH PAGE, NOW PUTTING NAV -->				
+					<div class="row" id="change-nav">
+						<div class="col-sm-3"><a href="/docs/getting-started/docker"><button class="btn btn-primary"> <span class="a-span">&lt;</span> <span>Back to "Dockerization"</span> </button></a></div>
+						<div class="col-sm-offset-6 col-sm-3"><a href="/docs/getting-started/upload_tests"><button class="btn btn-primary"> <span>Continue to "Tests"</span> <span class="a-span">&gt;</span> </button></a></div>
+					</div>
+				</div>
+			<% } else if ( page == "upload_tests") { %>
+				<div class="col-sm-10" id="current-content">
+					<!-- Code here -->
+					<% include docs/gettingstarted/upload_tests %>
+					
+
+					<!-- DONE WITH PAGE, NOW PUTTING NAV -->				
+					<div class="row" id="change-nav">
+						<div class="col-sm-3"><a href="/docs/getting-started/json"><button class="btn btn-primary"> <span class="a-span">&lt;</span> Back to "JSON Manifest" </button></a></div>
+						<!--<div class="col-sm-offset-6 col-sm-3"><a href="/docs/getting-started/tests"><button class="btn btn-primary"> <span>Continue to "Tests"</span> <span class="a-span">&gt;</span> </button></a></div>-->
+					</div>
+				</div>
+			<% } else { %>
+				<div class="col-sm-10" id="current-content">
+					<% include docs/gettingstarted/intro %>
+
+
+					<!-- DONE WITH PAGE, NOW PUTTING NAV -->				
+					<div class="row" id="change-nav">
+						<!--<div class="pull-left"><a href="/docs/getting-started/">Back to ""</a></div>-->
+						<div class="col-sm-offset-9 col-sm-3"><a href="/docs/getting-started/algo"><button class="btn btn-primary"> <span>Continue to "Creation of an algorithm"</span> <span class="a-span">&gt;</span></button></a></div>
+					</div>
+				</div>
+			<% } %>
+		</div>
+
+    	<% include partials/footer %>
+    	
+    	<% include docs/script %>
+	</body>
+</html>

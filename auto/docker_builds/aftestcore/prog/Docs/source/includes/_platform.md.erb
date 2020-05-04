@@ -1,0 +1,99 @@
+
+# Overview of Algofab Platform
+
+**What is algofab**
+
+AlgoFab is a project issued by the efforts of five companies with the objective to allow algorithm creators (companies and developers alike) to promote their algorithms.
+
+**Who are we**
+
+The companies initiating the project (and still maintaining it) are [Institut Mines Télécom (IMT)](#), [Cloudwatt](#), [Global Sensing Technologies (GST)](#), [Globe VIP](#), and [LIRIS](#).
+
+**For whom is AlgoFab created**
+
+The platform is for anyone (lone developers, companies or researchers alike) who has an efficient algorithm he wants to let other users profit from while making some profit for himself throughout the utilization.
+
+Here we give an overall description of the platform to give a better understanding of it to the [Contributors](#). The contributors need also to know about the existence of some of the end servers working in coordination to allow for the existence of AlgoFab.
+
+Throughout this page here are the points we will go over : 
+
+* The user roles
+* AlgoFab's nodes
+  * The portal
+  * The Infrastructure manager
+  * The Request handler
+
+## User roles
+
+There are several roles currently within the AlgoFab platform and terminologies associated to them according to the need of the users (Contributors and Users) or their duties.
+
+Here are the different roles we have on the platform : 
+
+* Contributors : Those who create algorithms on the platform enriching the catalog of algorithms.
+* Clients : Those who subscribe to, then use the algorithms created by the contributors.
+* Admin : those who maintain the platform at the background and bring support to Users and Contributors alike.
+
+You can think of Contributors like producers and Client like consummers. Note however that any user can be both at the same time. 
+
+The user roles are more related to a user's action at a particular time and not just his status. We mean while the user queries another user's algorithm, he is a Client and when he creates an algorithm on the platform, he becomes also a contributor.
+
+
+## The AlgoFab's nodes
+
+In this section we will talk about the different machines working with each in order to form the platform as a whole.
+
+Before we give a proper explanation about the end nodes, have a look at this picture below : 
+
+![Algofab architecture](https://ws37-portal.tl.teralab-datascience.fr/docs/images/Algofab-architecture.PNG)
+
+In this picture, the most important machines are three : the Portal, the Request Handler (RH) and the Infrastructure Manager (IM).
+
+What we see is at the left are external clients accessing the algorithms, some using a browser are served by the portal and others using an external application (by REST requests) are served by the Request Handler. In both cases the node (Portal or RH) serve as a proxy to access the algorithms managed infrastructure-wise by the IM. 
+
+The two other machines, Node1 and Node2 are AalgoFab's nodes used exclusively in the Kubernetes cluster (number two is not a rule, there will likely be more in the future).
+
+We saw earlier that there are two ways of accessing an algorithm : either through the Portal or the IM. 
+The difference is as follow : 
+
+* **Demonstration mode** : The Portal gives access to the demo of the algorithm. It is an html code interpreted by the web browser so the users can test your algorithm. It is sort of an introduction (or a pitch if you prefer) to convince other users of the originality of your algorithm (compared other algorithms providing a solution to eventually the same kind of need). 
+
+* **API mode** : The Request handler manages API calls form the authorized users (with enough credits to call your algorithm) and relays them onto the API Servers previously created as microservices by the IM.
+
+Let’s details the functions of each node. 
+
+### Portal
+
+The Portal is one of the entities in AlgoFab and certainly the one you will have the most interactions with. This webserver allows you to operate on your algorithms performing updates, management or even deletes. Once you demand the creation of an algorithm, it records some data about your algorithm (data used by the portal to present your algorithm and offer services like searching on your algorithm) and triggers the creation of its infrastructure on the IM.  
+
+Given that you are already an AlgoFab user, these are some of the functionalities of the portal : 
+
+* Create / delete an algorithm
+* Create / delete version(s) of an algorithm
+* Hide version(s) of an algorithm so no one can use it apart from you
+* Pass ownership of the algorithm to another (<span style="color: green;">not yet implemented</span>)
+* Update data about your algorithm (description, tags …)
+* Update data about a version of an algorithm (version number, comment, API, … See manifest for more detail)
+* Update the infrastructure of your algorithm (<span style="color: green;">not yet implemented</span>)
+* Create / Delete “free" Kubernetes objects, meaning not related to any algorithm, which can be used later on by next algorithms (<span style="color: green;">not yet implemented</span>). The advantage of such objects woulld be that they can serve many other algorithms and are not deleted when the Contributor deletes one of the said algorithms. 
+
+### Request Handler
+
+The RH is the server that handle incoming REST API calls in order to allow external application to access the algorithm. The kind of response returned by such a call is typically (the Contributor / developer has to make sure of it) formatted in well-known formats so that the user can parse them and use them in an external application.
+
+There are some tricks to remember described [in this dedicated](#) page when sending requests in API mode. 
+
+### Infrastructure Manager
+
+The IM is the server that creates and manage our infrastructure using [Kubernetes](#). 
+
+Kubernetes is container orchestration tool created by [Google](#) that facilitate building up micro-services. 
+You should start by reading their interactive tutorial if you are not familiar with at all. At AlgoFab we decided to make it a requirement because its numerous functionalities and the ease of management of the infrastructure. 
+
+On the machine where the IM is running is the master of the Kubernetes cluster.
+
+It is important to remember that as of today, this is the information about the version of Kubernetes used on the master : 
+
+`
+Client Version: version.Info{Major:"1", Minor:"6", GitVersion:"v1.6.3", GitCommit:"0480917b552be33e2dba47386e51decb1a211df6", GitTreeState:"clean", BuildDate:"2017-05-10T15:48:59Z", GoVersion:"go1.7.5", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"7", GitVersion:"v1.7.3", GitCommit:"2c2fe6e8278a5db2d15a013987b53968c743f2a1", GitTreeState:"clean", BuildDate:"2017-08-03T06:43:48Z", GoVersion:"go1.8.3", Compiler:"gc", Platform:"linux/amd64"}
+`

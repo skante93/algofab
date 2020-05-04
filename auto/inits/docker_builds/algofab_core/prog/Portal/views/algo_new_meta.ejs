@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include partials/head %>
+
+  </head>
+  <body>
+    <% include partials/header %>
+    <!--
+    <% if (typeof received !== 'undefined') { %>
+    <div class="container">Received : <%= received %></div>
+    <% } %>
+    <div class="container">
+      <form method="post" id="form" enctype="multipart/form-data">
+        <div class="alert alert-danger" id="err-messages"></div>
+        <div class="form-group row">
+          <label for="title" class="col-sm-3 col-form-label col-form-label-lg"> Title : </label>
+          <div class="col-sm-9">
+            <input type="text" class="form-control form-control-lg" name="title" id="title" required/>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="description" class="col-sm-3 col-form-label col-form-label-lg"> Description : <span id="info-description" title="You can use HTML code in the description and, as long as you don't use <script>, it it shall work without a problem.">?</span></label>
+          <div class="col-sm-9">
+            <textarea class="form-control" rows="5" id="description" name="description" required></textarea>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="logo" class="col-sm-3 col-form-label col-form-label-lg"> Logo : </label>
+          <div class="col-sm-9">
+            <input type="file" class="form-control" id="logo" name="logo">
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="kwds" class="col-sm-3 col-form-label col-form-label-lg"> Keywords : </label>
+          <div class="col-sm-3">
+            <input type="text" class="form-control form-control-lg" name="kwds[]" id="kwds" />
+          </div>
+          <div class="col-sm-2">
+            <button type="button" id="addkwds" class="btn">Add Keyword</button>
+          </div>
+        </div>
+        <div class="form-group row" id="givenkwds">
+          
+        </div>
+        <div class="row">
+          <div class="col-sm-2 pull-right">
+            <input type="button" value="Submit" class="btn btn-primary pull-right" onclick="arrangeAndSubmit()"/>
+          </div>
+        </div>
+      </form>
+    </div>
+    -->
+
+    <div class="container">
+      <form method="post" enctype="multipart/form-data">
+          <div class="form-group row">
+              <label for="title" class="col-sm-3 col-form-label col-form-label-lg"> Title : </label>
+              <div class="col-sm-9">
+                  <input type="text" class="form-control form-control-lg" name="title" id="title" required/>
+              </div>
+          </div>
+          <div class="form-group row">
+              <label for="logo_upload" class="col-sm-3 col-form-label col-form-label-lg"> Logo : </label>
+              <div class="col-sm-9">
+                <div>
+                  <button type="button" class="btn btn-primary" id="logo_launch_upload">Upload an image</button>
+                    <input type="file" name="logo_upload" id="logo_upload" accept="image/*" style="display : none;"/>
+                </div>
+                <div id="logo_preview">
+                  </div>
+              </div>
+          </div>
+          <div class="form-group row">
+              <label for="description" class="col-sm-3 col-form-label col-form-label-lg"> Description : <span id="info-description" title="You can use HTML code in the description and, as long as you don't use <script>, it it shall work without a problem.">?</span></label>
+              <div class="col-sm-9">
+                  <textarea class="form-control" rows="20" id="description" name="description" required></textarea>
+              </div>
+          </div>
+          <div class="form-group row">
+              <label for="kwds" class="col-sm-3 col-form-label col-form-label-lg"> Keywords : </label>
+              <div class="col-sm-3">
+                  <input type="text" class="form-control form-control-lg" name="kwds[]" id="kwds" />
+              </div>
+              <div class="col-sm-2">
+                  <button type="button" id="addkwds" class="btn">Add Keyword</button>
+              </div>
+          </div>
+
+          <div class="form-group row" id="givenkwds"></div>
+
+          <div class="row">
+              <div class="col-sm-2 pull-right">
+                  <input type="button" value="Submit" id="submit" class="btn btn-primary pull-right"/>
+              </div>
+          </div>
+      </form>
+    </div>
+
+
+    <% include partials/footer %>
+    <script type="text/javascript">
+      /*$('#err-messages').hide()
+      $('*').tooltip();
+      $('#info-description').css({
+        "background-color" : "orange",
+        "border-radius" : "5px"
+      });
+      var keywords = [];
+
+      var addKWDS = function(){
+        if( $('#kwds').val() && keywords.indexOf($('#kwds').val()) ==-1 ){
+          keywords.push( $('#kwds').val() );
+          $('#givenkwds').html(redrawKWDS());
+          $('#kwds').val('');
+          $('#kwds').focus()
+        }
+      }
+
+      $('#kwds').on('keydown', function(e) {
+          if (e.which == 13) {
+              e.preventDefault();
+              addKWDS();
+          }
+      });
+      $("#addkwds").click(addKWDS);
+      var redrawKWDS = function(){
+        var cont = $('<div class="col-sm-9"></div>');
+        for (var i=0; i < keywords.length; i++){
+          const MEM = i; 
+          var kwd = $('<div class="kwd" title="Remove from Keywords"><span> &nbsp'+keywords[MEM]+'&nbsp </span><input type="hidden" name="kwds" value="'+keywords[MEM]+'"/></div>');
+          kwd.find('span').click(function(){
+            console.log('MEM : '+MEM);
+            keywords.splice(MEM, 1);
+            $('#givenkwds').html(redrawKWDS());
+          });
+
+          kwd.find('span').css({
+            "background-color" : "#DCDCDC",
+            "cursor" : "pointer",
+            "border-radius" : "3px",
+            "font-size" : "1.5em"
+          });
+          cont.append(kwd);
+        }
+        var r = $('<div class="row"><div class="col-sm-3"></div></div>')
+        r.append(cont);
+        return r;
+      }
+      function arrangeAndSubmit(){
+        var tv = $('#title').val(), dv = $('#description').val()
+        if( ! tv){
+          $('#err-messages').html('Field <em>Title</em> is required');
+          $('#err-messages').show()
+          return;
+        }
+
+        if(! dv){
+          $('#err-messages').html('Field <em>Description</em> is required');
+          $('#err-messages').show()
+          return;
+        }
+        
+        $('#form').submit();
+      }
+      */
+      var form = $('form');
+
+      var tags = [], logo_file = null;
+      form.find('#submit').click(function(){
+        var title = form.find('input#title').val();
+        var description = form.find('textarea#description').val();
+
+        //console.log('ID : '+id);
+        console.log('Title : '+title);
+        console.log('Description : '+description);
+        console.log('Keywords : '+tags);
+        //emitUpdate(title, description, keywords);
+        socket.emit('create algo',title, description, tags, logo_file);
+        var tuas = traceCreateOrUpdateAlgoSocket("create");
+        setTimeout(function(){
+            form.modal('toggle');
+        }, 1500)
+      });
+    
+      form.find('textarea').keydown(function(e) {
+        if(e.keyCode === 9) { // tab was pressed
+          // get caret position/selection
+          var start = this.selectionStart;
+          var end = this.selectionEnd;
+
+          var $this = $(this);
+          var value = $this.val();
+
+          // set textarea value to: text before caret + tab + text after caret
+          $this.val(value.substring(0, start)
+                      + "\t"
+                      + value.substring(end));
+
+          // put caret at right position again (add one for the tab)
+          this.selectionStart = this.selectionEnd = start + 1;
+
+          // prevent the focus lose
+          e.preventDefault();
+        }
+      });
+
+      form.find('.modal-dialog').css('width', '80%');
+      
+      console.log("keywords : "+tags);
+      var addKWDS = function(){
+        if( form.find('#kwds').val() && tags.indexOf(form.find('#kwds').val()) ==-1 ){
+          tags.push( form.find('#kwds').val() );
+          form.find('#givenkwds').html(redrawKWDS());
+          form.find('#kwds').val('');
+          form.find('#kwds').focus()
+        }
+      }
+
+      form.find('#kwds').on('keydown', function(e) {
+        if (e.which == 13) {
+          e.preventDefault();
+          addKWDS();
+        }
+      });
+
+      form.find("#addkwds").click(addKWDS);
+
+      var redrawKWDS = function(){
+        console.log("redraw started");
+        var cont = $('<div class="col-sm-9"></div>');
+        tags.forEach(function(tag, index){
+            
+          var kwd = $('<pre style="display: inline-block">'+tag+'</pre>').css({"margin-right" : "1em", "cursor" : "pointer"});
+          kwd.click(function(){
+            console.log('index : '+index);
+            tags.splice(index, 1);
+            form.find('#givenkwds').html(redrawKWDS());
+          });
+
+          kwd.find('span').css({
+            "background-color" : "#DCDCDC",
+            "cursor" : "pointer",
+            "border-radius" : "3px",
+            "font-size" : "1.5em"
+          });
+          cont.append(kwd);
+        });
+
+        var r = $('<div class="row"><div class="col-sm-3"></div></div>');
+        r.append(cont);
+        console.log("redraw ended");
+        return r;
+      }
+
+      form.find('#givenkwds').html(redrawKWDS());
+
+      form.find('#logo_launch_upload').click(function(e){
+        //
+        form.find('input#logo_upload').click();
+      });
+
+      form.find('#logo_upload').change(function(evt) {
+        //console.log("This is readFile");
+        var files = evt.target.files;
+        var file = files[0];           
+        var reader = new FileReader();
+        console.log("File : "+JSON.stringify(file));
+
+        var img = document.createElement("img");// $("img");//.css({ "max-width" : "200", "max-height" : "200"});
+      
+        img.file = file;
+      
+        form.find("#logo_preview").html(img);
+        form.find("#logo_preview img").css({ "max-width" : "200px", "max-height" : "200px", "margin-top" : "1em"});
+        reader.onload = function(event) {
+          logo_file = event.target.result;
+          img.src = logo_file;
+
+          //console.log("event.target.result : "+logo_file);
+        }
+        reader.readAsDataURL(file);
+      });
+    </script>
+  </body>
+</html>

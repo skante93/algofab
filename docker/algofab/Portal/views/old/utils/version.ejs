@@ -1,0 +1,65 @@
+            <div class="row">  
+              <ul class="nav nav-tabs" style="margin-bottom: 2em">
+                <li role="presentation" class="active" id="ctrl_gen_inf-<%= version.version.replace(/\./g, '-') %>"><a href="#"> General Information </a></li>
+                <li role="presentation" id="ctrl_how_to_use-<%= version.version.replace(/\./g, '-') %>"><a href="#"> API </a></li>
+                <li role="presentation" id="ctrl_use-<%= version.version.replace(/\./g, '-') %>"><a href="#"> Experience demo </a></li>
+                <li role="presentation" id="ctrl_report_bug-<%= version.version.replace(/\./g, '-') %>"><a href="#"> Report a bug </a></li>
+                <!--
+                  <% if(algo.author.username == user.username) { %>
+                    <a href="/algo/<%= algo._id %>/version/<%= algo.versions[0].version %>/edit"><span class="glyphicon glyphicon-cog pull-right" aria-hidden="true" style="position: relative; top:20px;"></span></a>
+                  <% } %>
+                -->
+              </ul>
+            </div>
+            
+            <div class="row">
+              <div id="current_selected_item_display-<%= version.version.replace(/\./g, '-') %>"> 
+                <div id="gen_inf-<%= version.version.replace(/\./g, '-') %>" class="col-sm-12">
+                  <div> <%- version.comment %> </div>
+                  <hr/>
+                </div>
+                <div id="how_to_use-<%= version.version.replace(/\./g, '-') %>" class="col-sm-12">
+                  <p>By the following you will find the explanations about the usage of the algorithm "<%= algo['title'] %>".</p><br/>
+                  <p>If you need a reminder about the what the algorithm do, open the tab "General Information.</p><br/>
+                  <p><em>Note that unless you subscribe to it you can't use it.</em></p><br/>
+                  <hr />
+                  <p>Here are the HTTP methods you can use to run the algorithm</p>
+                  <div class="container">
+                    <div class="panel-group" id="accordion-<%= version.version.replace(/\./g, '-') %>">
+                      <% var verb = "GET" %>
+                      <% include renderAPI2 %>
+                      
+                      <% var verb = "POST" %>
+                      <% include renderAPI2 %>
+                      
+                      <% var verb = "PUT" %>
+                      <% include renderAPI2 %>
+
+                      <% var verb = "DELETE" %>
+                      <% include renderAPI2 %>
+                    </div>
+
+                    <hr/>
+                  </div>
+                </div>
+                <div id="use-<%= version.version.replace(/\./g, '-') %>" class="col-sm-12"> 
+                  <button type="button" class="btn btn-primary" id="show-demo-<%= version._id %>">Show demo</button> (You might have to allow pop up windows first).
+                </div>
+                <div id="report_bug-<%= version.version.replace(/\./g, '-') %>" class="col-sm-12">
+                  <form method="post">
+                  
+                    <div class="form-group row ">
+                      <textarea name="bug_report" class="form-control" rows="3" placeholder="Describe the bug here" required></textarea>
+                    </div>
+                    
+                    <div class="form-group row col-sm-2 pull-right" >
+                        <button type="submit" class="btn btn-primary pull-right"> Submit </button>
+                    </div>
+                    <div>
+                      Submit by <%= user.username %>  
+                    </div>
+                    
+                  </form>
+                </div>
+              </div>
+            </div>

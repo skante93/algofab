@@ -1,0 +1,1 @@
+{"apiVersion":"v1","kind":"Service","metadata":{"namespace":"jdoe","name":"yolo-web"},"spec":{"selector":{"app":"yolo-web","version":"1.0.2","by":"vizionr"},"type":"NodePort","ports":[{"protocol":"TCP","targetPort":80,"port":80}]}}

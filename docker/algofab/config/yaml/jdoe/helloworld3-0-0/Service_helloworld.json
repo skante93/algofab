@@ -1,0 +1,1 @@
+{"spec":{"ports":[{"targetPort":3000,"port":80,"name":"http"}],"type":"NodePort","selector":{"from":"company","app":"helloworld"}},"metadata":{"namespace":"jdoe","name":"helloworld"},"kind":"Service","apiVersion":"v1"}

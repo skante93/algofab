@@ -1,0 +1,40 @@
+
+<script type="text/javascript">
+	<% if (typeof user !== 'undefined') {%>
+		var some_var = "Var from myJS";
+
+		console.log("ROOM : "+"<%= user.username %>");
+		console.log(window.location.protocol+'//'+window.location.hostname);
+		var socket = io(window.location.protocol+'//'+window.location.hostname);
+		var SOCKET_GOOD_TO_GO = false;
+		socket.on('connect', function(){
+			//socket.emit("room", "<%= user.username %>");
+			socket.on("Hello", function(mid){
+				console.log("MID : "+mid);
+				SOCKET_GOOD_TO_GO = true;
+			});
+		});
+		/*
+		socket.on('disconnect', function(){
+			alert("ON DISCONNECT");
+			window.location.replace('/');
+		});
+		*/
+		/*
+		socket.on('error', function(){
+			alert("ON ERROR");
+			window.location.replace('/');
+		});
+		*/
+		socket.on('logout', function(){
+			//alert("LOGGED OUT");
+			socket.emit('disconnect');
+		});
+		
+		window.onbeforeunload = function(){
+            socket.emit('disconnect');
+        }
+	<% } else { %>
+		console.log("SOCKET ROOM NOT SPECIFIED");
+	<% }%>
+</script>

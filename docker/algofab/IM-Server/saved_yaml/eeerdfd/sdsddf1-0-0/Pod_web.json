@@ -1,0 +1,1 @@
+{"spec":{"imagePullSecrets":[{"name":"skante-registry-secret"}],"containers":[{"ports":[{"containerPort":80,"protocol":"TCP","name":"http"}],"image":"lirisl2im/web","name":"web"}]},"metadata":{"namespace":"eeerdfd","labels":{"by":"LIRIS","role":"web"},"name":"web"},"kind":"Pod","apiVersion":"v1"}

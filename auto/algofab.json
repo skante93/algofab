@@ -1,0 +1,56 @@
+{
+	"domain": "tl.teralab-datascience.fr",
+	"user": {
+		"login": "admin", 
+		"uid": 1001
+	},
+	"storage": {
+		"type" : "nfs",
+		"address": "10.200.209.30",
+		"folder": "/home/skante/kube_algofab"
+	},
+	"docker": {
+		"registry": "docker.io",
+		"login": "skante",
+		"images": {
+			"algofab_core": "aftestcore",
+			"ldap": "aftestldap",
+			"docs": "aftestdocs"
+		}
+	}, 
+	"ingress": {
+		"nodePorts": {
+			"http": 30088,
+			"https": 30089
+		},
+		"fqdns": {
+			"portal": {
+				"name": "ws67-af-portal"
+			},
+			"proxy": {
+				"name": "ws67-af-proxy"
+			},
+			"rh" : {
+				"name": "ws67-af-rh"
+			},
+			"ldap": {
+				"name": "ws67-af-ldap"
+			},
+			"docs" : {
+				"name": "ws67-af-docs"
+			}
+		}
+	},
+	"settings": {
+		"access_protocol": "https",
+		"ldap": {
+			"server_name": "Algofab LDAP Server",
+			"base_dn": "dc=ldap,dc=algofab,dc=fr",
+			"domain": "ldap.algofab.fr",
+			"organization": "TeraLab IMT",
+			"password" : "password",
+			"backup_frequency": 300
+		}
+	}
+}
+

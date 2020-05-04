@@ -1,0 +1,1 @@
+{"spec":{"ports":[{"targetPort":3000,"port":80,"name":"http"}],"type":"NodePort","selector":{"from":"teralab","app":"lilpanda"}},"metadata":{"namespace":"jdoe","name":"lilpanda"},"kind":"Service","apiVersion":"v1"}
