@@ -1,4 +1,14 @@
-					<h3> Tests </h3>
+<!DOCTYPE html>
+<html>
+  	<head>
+		<% include ../../partials/head %>
+    
+  	</head>
+  	<body>
+    	<% include ../../partials/header %>
+
+    	<div class="container">
+   					<h3> Tests </h3>
 					<p>
 						At this point in the tutorial you already created an algorithm <a href="">online</a> and created one version of it after designing an application, creating a REST API to go along with it, Dockerizing them and then creating its manifest. After those steps we now have to check that our algorithm work as expected. 
 					</p>
@@ -93,36 +103,8 @@
 						</p>
 
 					</p>
-					<!--
-					<p>
-						If the intructions of the previous paragraph are sucessfull you can now move to algofab/user/myalgos to see all the algorithms you deployed on the platform. <br/>
-						
-					</p>
-					<p>
-						As long as your manifest conforms to the constraints noted in the <a href="#"> manifest reference </a> (required fields specified at the correct format), even if you don't get errors, chances are the algorithm is already recorded in the database. In other words despite the kubernetes-side problems you might have (field deployment of the manifest), as long as the rest is good the algo is considered created (it is however considered <b> not ready</b> if the infrastructure fails to create). The reason is to allow users to query informations about the kubernetes objects they created in hope for them to pinpoint the reason behind the error and correct it if possible (if error related to the given package).
-					</p>
-					<p>
-						Let's close this parenthesis and resume our tutorial. From algofab/user/myalgos you can click on "See for yourself" corresponding to your algorithm (Hello World) : you end up on the page of the algorithm. <br/> 
-						On this page you have four tabs : the first introduces the algorithms using fields "title", "version" and "description" of the manifest; the second presents the REST API using the field API, the third shows the demo of the algorithm (obtained by "GET /" on the REST API) and the last one allows users to report bugs or disfunctions to you (the author of the algorithm). <br/>
-						Take your time to explore all of those tab.
-					</p>
-					<p>
-						You can remark a gearing all the way to the right on the same line than the tabs, click on it and you will access the administration page of your algorithm. You can see the gearing because you are author of the algorithm, if weren't not only would you not be able to see it and if you tried manually (typing the adress in your browser) you would be redirected towards home. <br/>
-						On this page you have many sections among which 
-						<ul>
-							<li>
-								The Simple operations section allowing you to either remove or change the property "hidden" of you algorithm. Remove the algorihtm not only removes the algorithm from the database but also the kubernetes objects we created and then clean the files associated with them
-							</li>
-							<li>
-								The update section where you can upload a new JSON file corresponding to the field deployment of ou manifest. This section allows you to update the infrastructure of your algorithm, the new file replaces the old deployment.
-							</li>
-							<li>
-								the Kubernetes objects you tried to create. You can see their states and can access thier descriptions (equivalent to <code>kubectl describe</code>) (usefull to watch the events and eventually detect the error if creation failed) or the full description (equivalent to <code>kubectl get ... -o json</code>).
-							</li>
-						</ul>
-						
-					</p>
-					<p>
-						
-					</p>
-					-->
+		</div>
+
+		<% include ../../partials/footer %>
+	</body>
+</html>

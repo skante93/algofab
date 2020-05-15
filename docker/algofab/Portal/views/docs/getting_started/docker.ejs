@@ -1,4 +1,20 @@
-					<h3> Dockerization </h3>
+
+<!DOCTYPE html>
+<html>
+  	<head>
+		<% include ../../partials/head %>
+    
+  	</head>
+  	<body>
+    	<% include ../../partials/header %>
+
+    	<div class="container">
+    		<div class="row">
+    			<aside class="docs-menu col-sm-3">
+		    		<%- generateMenu( docs ) %>
+		    	</aside>
+		    	<div class="col-sm-9">
+   					<h3> Dockerization </h3>
 					<p>
 						Now that we built our Algorithm and our API Server, let’s package the result into an image.
 					</p>
@@ -64,3 +80,10 @@
 						</p> <br/>
 						Now you are ready to create an algorithm on the platform and create a manifest for a version of it.
 					</p>
+				</div>
+			</div>
+		</div>
+
+		<% include ../../partials/footer %>
+	</body>
+</html>

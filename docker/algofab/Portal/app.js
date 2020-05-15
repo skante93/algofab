@@ -161,6 +161,7 @@ app.use('/article', routes.article);
 app.use('/user', routes.user);
 app.use('/demo', routes.demo);
 app.use('/docs', routes.docs);
+app.use('/search', routes.search);
 //app.use('/partners', routes.partners);
 app.use('/upload', routes.upload);
 app.use('/recover', routes.recover);

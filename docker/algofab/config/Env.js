@@ -110,7 +110,109 @@ exports.settings = {
                 { id: 6, name: "Library", icon: "/img/library.svg"}
             ]
         },
+        DOCS: [
+            {
+                id: "create_resources",
+                title: "Create Resources",
+                name: "Create Resources",
+                template: "docs/resources/create",
+                
+            },
+            {
+                id: "manage_resources",
+                title: "Manage Resources",
+                name: "Manage Resources",
+                template: "docs/resources/manage",
+                
+            },
+            {
+                id: "delete_resources",
+                title: "Delete Resources",
+                name: "Delete Resources",
+                template: "docs/resources/delete",
+                
+            },
+            
+            {
+                id: "manage_user_account",
+                title: "Manage User Account",
+                name: "Manage User Account",
+                template: "docs/account/intro",
+                sub: [
+                    {
+                        id: "create_user_account",
+                        title: "Create User Account",
+                        name: "Create User Account",
+                        template: "docs/account/create",
+                    },
+                    {
+                        id: "edit_user_account",
+                        title: "Edit User Account",
+                        name: "Edit User Account",
+                        template: "docs/account/edit",
+                    } ,
 
+                    {
+                        id: "delelte_user_account",
+                        title: "Delete User Account",
+                        name: "Delete User Account",
+                        template: "docs/account/delete",
+                    } 
+
+                ]
+            },
+            {
+                id: "algorithms",
+                title: "Old Archives",
+                name: "Old Archives",
+                template: "docs/getting_started/intro",
+                sub: [
+                    {
+                        id: "getting_started",
+                        title: "Getting Started", 
+                        name: "Getting Started", 
+                        template: "docs/getting_started/intro",
+                        sub: [
+                            {
+                                id: "getting_started_intro",
+                                title: "Getting Started | Introduction",
+                                name: "Introduction",
+                                template: "docs/getting_started/intro"
+                            },
+
+                            {
+                                id: "getting_started_algo",
+                                title: "Getting Started | Algorithm",
+                                name: " Algorithm",
+                                template: "docs/getting_started/algo"
+                            },
+
+                            {
+                                id: "getting_started_docker",
+                                title: "Getting Started | Docker",
+                                name: "Docker",
+                                template: "docs/getting_started/docker"
+                            },
+
+                            {
+                                id: "getting_started_api",
+                                title: "Getting Started | API",
+                                name: "API",
+                                template: "docs/getting_started/algo"
+                            },
+
+                        ]
+                    }
+                ]
+            },
+            {
+                id: "glossary",
+                title: "Glossary",
+                name: "Glossary",
+                template: "docs/account/intro",
+                
+            }
+        ],
         PORTAL_EXT_PROTOCOL : 'https://',
         //PORTAL_EXT_ADDR : 'ws37-kube-dev-portal.tl.teralab-datascience.fr',
         PORTAL_EXT_ADDR : 'ws67-af-portal.tl.teralab-datascience.fr',

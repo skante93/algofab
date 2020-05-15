@@ -98,6 +98,8 @@ var articleSchema = new Schema (
 	}
 );
 
+articleSchema.index( { name: "text", description: "text", tags: "text" } ); 
+
 var articleVersionSchema = new Schema({
 	version: { type : String, default : "1.0.0"},
 	articleID: { type: Schema.Types.ObjectId, ref: 'Article' },

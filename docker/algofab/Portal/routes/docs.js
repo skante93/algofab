@@ -10,17 +10,39 @@ var request = require('request');
 
 var router = express.Router();
 
+var getDocWithID = function(id, parent){
+	if (typeof parent === 'undefined' || parent == null){
+		parent = settings.DOCS;
+	}
 
-module.exports = function(SG){
-	router.all('*', function(req, res){
-		//
-		console.log("url : "+req.originalUrl);
-		var url = req.originalUrl.replace(/^.*docs\//, "");
-		console.log("url : "+url);
+	for(var i=0;i<parent.length; i++){
+		if (parent[i].id == id){
+			return parent[i];
+		}
+		if ("sub" in parent[i]){
+			var s = getDocWithID(id, parent[i].sub);
+			if (s != null){
+				return s;
+			}
+		}
+	}
+	return null;
+}
 
-		var rqst = request('http://docs'+url);
+router.all('*', function(req, res){
+	//
 
-		req.pipe(rqst).pipe(res);
+	var docs = getDocWithID(req.query.id);
+	if (docs == null){
+		return res.redirect('/docs?id=getting_started');
+	}
+	
+	console.log("docs:", docs);
+	res.render(docs.template, { 
+		user: req.session.user, 
+		title: docs.title, 
+		docs: settings.DOCS 
 	});
-	return router;
-};
+});
+
+module.exports = router;

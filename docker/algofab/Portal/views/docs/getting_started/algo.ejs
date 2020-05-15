@@ -1,3 +1,20 @@
+
+
+<!DOCTYPE html>
+<html>
+  	<head>
+		<% include ../../partials/head %>
+    
+  	</head>
+  	<body>
+    	<% include ../../partials/header %>
+
+    	<div class="container">
+    		<div class="row">
+    			<aside class="docs-menu col-sm-3">
+		    		<%- generateMenu( docs ) %>
+		    	</aside>
+		    	<div class="col-sm-9">
 					<h3> Creation of an algorithm </h3>
 					<p>
 						The very first step to using AlgoFab platform is to make sure you have an algorithm at your disposal ready to be deployed at any time. In this section we’ll cover the creation of a simple algorithm and base the rest of the walkthrough on it.
@@ -82,3 +99,11 @@
 					<p>
 						The next step is to create a REST API that will encapsulate this algorithm and allow distant users to call for it. 
 					</p>
+
+				</div>
+			</div>
+		</div>
+
+		<% include ../../partials/footer %>
+	</body>
+</html>

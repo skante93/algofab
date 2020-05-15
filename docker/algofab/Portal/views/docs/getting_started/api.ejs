@@ -1,3 +1,19 @@
+
+<!DOCTYPE html>
+<html>
+  	<head>
+		<% include ../../partials/head %>
+    
+  	</head>
+  	<body>
+    	<% include ../../partials/header %>
+
+    	<div class="container">
+    		<div class="row">
+    			<aside class="docs-menu col-sm-3">
+		    		<%- generateMenu( docs ) %>
+		    	</aside>
+		    	<div class="col-sm-9">
 					<h3> REST API </h3>
 					<p>
 						In this section we will use NodeJS with its powerful module “Express” to create an HTTP Server wrapped around “hello.sh” script to handle all incoming execution requests. <br>
@@ -201,3 +217,9 @@
 						To test the server, extract the archive change directory to "Hello-World-Package/Hello-World" and run <code>npm install</code>, then <code>node app.js</code>. <br>
 						Have fun testing :)
 					</p>
+				</div>
+			</div>
+		</div>
+		<% include ../../partials/footer %>
+	</body>
+</html>
