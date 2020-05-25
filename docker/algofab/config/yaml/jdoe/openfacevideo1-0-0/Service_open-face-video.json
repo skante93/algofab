@@ -1,1 +1,0 @@
-{"spec":{"ports":[{"targetPort":8002,"port":80,"name":"http"}],"type":"NodePort","selector":{"from":"Company","by":"Artemis","app":"OpenFace_Video"}},"metadata":{"namespace":"jdoe","name":"open-face-video"},"kind":"Service","apiVersion":"v1"}

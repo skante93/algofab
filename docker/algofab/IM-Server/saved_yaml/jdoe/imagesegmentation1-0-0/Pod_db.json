@@ -1,1 +1,0 @@
-{"spec":{"imagePullSecrets":[{"name":"skante-registry-secret"}],"containers":[{"ports":[{"containerPort":3306,"protocol":"TCP","name":"db"}],"image":"lirisl2im/db","name":"db"}]},"metadata":{"namespace":"jdoe","labels":{"by":"LIRIS","role":"db"},"name":"db"},"kind":"Pod","apiVersion":"v1"}

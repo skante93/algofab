@@ -1,1 +1,0 @@
-{"spec":{"imagePullSecrets":[{"name":"skante-registry-secret"},{"name":"admin-private-secret"}],"containers":[{"ports":[{"containerPort":3000,"name":"http"}],"image":"skante/simplekmeans","name":"kmeans"}]},"metadata":{"namespace":"jdoe","labels":{"from":"TeraLab","by":"TeraLab","app":"kmeans"},"name":"kmeans"},"kind":"Pod","apiVersion":"v1"}

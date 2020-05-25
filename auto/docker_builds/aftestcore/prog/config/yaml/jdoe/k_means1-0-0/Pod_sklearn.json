@@ -1,1 +1,0 @@
-{"spec":{"imagePullSecrets":[{"name":"skante-registry-secret"},{"name":"admin-private-secret"}],"containers":[{"ports":[{"containerPort":3000,"name":"http"}],"image":"skante/algorun","name":"algorun"}]},"metadata":{"namespace":"jdoe","labels":{"from":"TeraLab","by":"TeraLab","app":"sklearn"},"name":"sklearn"},"kind":"Pod","apiVersion":"v1"}

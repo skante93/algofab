@@ -1,1 +1,0 @@
-{"spec":{"ports":[{"port":6098},{"port":80}],"type":"NodePort","selector":{"by":"GST","version":"1.0.0","app":"api-cla-web"}},"metadata":{"namespace":"jdoe","name":"shoes-shape-finder"},"kind":"Service","apiVersion":"v1"}

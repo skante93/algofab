@@ -1,1 +1,0 @@
-{"spec":{"ports":[{"port":8000,"protocol":"TCP"}],"type":"NodePort","selector":{"by":"ARTEMIS","version":"0.2.0","app":"face"}},"metadata":{"name":"django"},"kind":"Service","apiVersion":"v1"}

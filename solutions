@@ -1,4 +1,0 @@
-
-# Problème nodePort
-
-sudo iptables --policy FORWARD ACCEPT

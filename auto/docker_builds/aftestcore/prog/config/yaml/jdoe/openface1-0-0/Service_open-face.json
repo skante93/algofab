@@ -1,1 +1,0 @@
-{"spec":{"ports":[{"port":8000,"name":"http"}],"type":"NodePort","selector":{"from":"Company","by":"Artemis","app":"Open_Face"}},"metadata":{"namespace":"jdoe","name":"open-face"},"kind":"Service","apiVersion":"v1"}

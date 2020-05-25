@@ -1,1 +1,0 @@
-{"spec":{"ports":[{"port":3000}],"type":"NodePort","selector":{"from":"Company","by":"John_Doe","app":"helloworld"}},"metadata":{"namespace":"skante","name":"helloworld"},"kind":"Service","apiVersion":"v1"}

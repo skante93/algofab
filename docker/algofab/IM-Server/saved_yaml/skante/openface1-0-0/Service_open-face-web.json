@@ -1,1 +1,0 @@
-{"spec":{"ports":[{"port":8000,"name":"http"},{"port":9000,"name":"ws"}],"type":"NodePort","selector":{"from":"Company","by":"John_Doe","app":"Open_Face"}},"metadata":{"namespace":"skante","name":"open-face-web"},"kind":"Service","apiVersion":"v1"}

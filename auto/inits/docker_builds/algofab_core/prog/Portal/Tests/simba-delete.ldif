@@ -1,5 +1,0 @@
-
-
-dn: uid=simba,ou=users,dc=ldap,dc=algofab,dc=fr
-changetype: delete
-
