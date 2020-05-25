@@ -1,0 +1,1155 @@
+#!/usr/bin/env python3
+
+
+import os, sys, json, shutil
+
+DOCKER_IMAGES_DIR = 'docker_builds'
+K8S_SPECS_DIR = 'k8s_specs'
+INITS_DIR = "inits"
+
+if os.path.exists(DOCKER_IMAGES_DIR):
+	shutil.rmtree(DOCKER_IMAGES_DIR) 
+if os.path.exists(K8S_SPECS_DIR):
+	shutil.rmtree(K8S_SPECS_DIR) 
+os.makedirs(DOCKER_IMAGES_DIR, exist_ok=True)
+os.makedirs(K8S_SPECS_DIR, exist_ok=True)
+
+
+STEPS = ["docker", "dockerLogin", "dockerBuild", "dockerPush"]
+ARGS = {}
+
+def log(message, isError=False, level=1):
+	CRED    = '\33[31m'
+	CGREEN  = '\33[32m'
+	CEND      = '\33[0m'
+
+	tabs = "\t"*level
+	lines = list( map(lambda x: tabs+"* "+x, message.split("\n")) )
+	msg = '\n'.join(lines)
+	if isError:
+		sys.stderr.write(CRED+msg+CEND+'\n')
+		exit(1)
+	else:
+		print(CGREEN+msg+CEND)
+
+	print()
+
+def help():
+	return
+
+
+
+def parseArgs():
+	argv = sys.argv
+	
+	for i in range(1, len(argv)) :
+		arg = sys.argv[i]
+
+		if arg == "-f" or arg == "--config":
+			#print ("i : %d, arg : %s, len(argv) : %d" %(i, arg, len(argv)))
+			if i+1 > len(argv[1:]) or argv[i+1].startswith('-'):
+				log("Argument %s require a path to the configuration file." % arg, True)
+			i += 1
+
+			if not os.path.isfile(argv[i]):
+				log("Argument %s expects a file but %s is not." % (arg, argv[i]), True)
+			file = open(argv[i], 'r')
+			try:
+				ARGS["conf"] = json.load(file)
+			except Exception as e:
+				log("config file parsing Error: "+str(e), True)
+			file.close()
+		
+		if arg == "-s" or arg == "--skip":
+			#print ("i : %d, arg : %s, len(argv) : %d" %(i, arg, len(argv)))
+			if i+1 > len(argv[1:]) or argv[i+1].startswith('-'):
+				log("Argument %s a setp to skip. Try %s -h to find more." % (arg, argv[0]), True)
+			i += 1
+
+			if argv[i] not in STEPS:
+				log("Argument %s must be one of the following : %s." % (arg, ', '.join(STEPS)), True)
+
+			if "skip" in ARGS:
+				ARGS["skip"].append(argv[i])
+			else:
+				ARGS["skip"] = [argv[i]]
+
+	if "conf" not in ARGS:
+		log("Argument -f (or --config) is required.", True)
+
+
+
+
+def docker_builds():
+	docker = ARGS["conf"]['docker']
+	user = ARGS["conf"]['user']
+	settings = ARGS["conf"]['settings']
+
+	if "skip" in ARGS and ("docker" in ARGS["skip"] or "dockerLogin" in ARGS["skip"]):
+		log("Skipping Login to docker")
+	else:
+		log("Log into your docker account \n\t username: %s\n\t registry: %s" % (docker['login'],docker['registry']))
+		os.system("sudo docker login -u %s %s" % (docker['login'],docker['registry']))
+	
+	for item in docker['images']:
+		build_dir = DOCKER_IMAGES_DIR + "/" + docker['images'][item]
+		
+		os.system("cp -r {} {}".format(INITS_DIR + "/" + DOCKER_IMAGES_DIR + "/" + item, build_dir)) 
+		
+		with open(build_dir+'/Dockerfile', 'w') as dockerfile:
+			if item == "algofab_core":
+				dockerfile.write(
+					"""
+					FROM ubuntu
+
+					ENV DEBIAN_FRONTEND='non-interactive'
+					RUN apt-get update && \\
+							apt-get upgrade -y && \\
+								apt-get install -y nodejs npm node-express-generator sudo slapd ldap-utils
+
+					RUN useradd -u {0} -m -s /bin/bash {1} && echo "{1}:{1}" | chpasswd
+					RUN echo "{1}	ALL=(root)	NOPASSWD:ALL" > /etc/sudoers.d/{1} 
+
+					USER {1}
+
+					RUN sudo npm install -g supervisor
+
+					# COPY prog/ /home/{1}/algofab
+					# RUN chown -R $USER:$USER /home/{1}/algofab 
+					# WORKDIR /home/{1}/algofab
+
+					# RUN sudo npm install
+
+					COPY run.sh /home/{1}/
+					WORKDIR /home/{1}
+					ENTRYPOINT ["./run.sh"]
+					""".format(user["uid"], user["login"]).replace("\n"+"\t"*5, "\n", 1000)
+				);
+
+			if item == "ldap":
+				ldap_confs = "ENV LDAP_SERVER_NAME=\"%s\"\n" % settings["ldap"]["server_name"] 
+				ldap_confs += "ENV LDAP_BASE_DN=\"%s\" \n" % settings["ldap"]["base_dn"]
+				ldap_confs += "ENV LDAP_DEBCONF_DOMAIN=\"%s\" \n" % settings["ldap"]["domain"]
+				ldap_confs += "ENV LDAP_DEBCONF_ORG=\"%s\" \n" % settings["ldap"]["organization"]
+				ldap_confs += "ENV LDAP_PASSWORD=\"%s\" \n" % settings["ldap"]["password"]
+				ldap_confs += "ENV LDAP_BACKUP_FREQ=%d \n" % settings["ldap"]["backup_frequency"]
+				
+				dockerfile.write(
+					"""
+					FROM ubuntu:16.04
+
+					{0}
+
+					RUN apt-get update && apt-get install -y rsyslog sudo
+
+					RUN echo "slapd slapd/internal/adminpw password $LDAP_PASSWORD" | debconf-set-selections 
+					RUN echo "slapd slapd/internal/generated_adminpw password $LDAP_PASSWORD" | debconf-set-selections
+					RUN echo "slapd slapd/password2 password $LDAP_PASSWORD" | debconf-set-selections
+					RUN echo "slapd slapd/password1 password $LDAP_PASSWORD" | debconf-set-selections
+					RUN echo "slapd slapd/dump_database_destdir string /var/backups/slapd-VERSION" | debconf-set-selections
+					RUN echo "slapd slapd/domain string $LDAP_DEBCONF_DOMAIN" | debconf-set-selections
+					RUN echo "slapd shared/organization string $LDAP_DEBCONF_ORG" | debconf-set-selections
+					RUN echo "slapd slapd/backend string HDB" | debconf-set-selections
+					RUN echo "slapd slapd/purge_database boolean true" | debconf-set-selections
+					RUN echo "slapd slapd/move_old_database boolean true" | debconf-set-selections
+					RUN echo "slapd slapd/allow_ldap_v2 boolean false" | debconf-set-selections
+					RUN echo "slapd slapd/no_configuration boolean false" | debconf-set-selections
+					RUN echo "slapd slapd/dump_database string when needed" | debconf-set-selections
+
+					RUN apt-get install -y slapd ldap-utils
+
+					# RUN echo "base    $LDAP_BASE_DN" > /etc/ldap/ldap.conf
+					# RUN echo "uri     ldap://" >> /etc/ldap/ldap.conf
+					# RUN echo "ssl     no" >> /etc/ldap/ldap.conf
+					# RUN echo "pam_password    md5" >> /etc/ldap/ldap.conf
+					# RUN echo "#TLS_CACERT      /etc/ssl/certs/ca-certificates.crt" >> /etc/ldap/ldap.conf
+					# RUN echo "nss_initgroups_ignoreusers root,ldap,named,avahi,haldaemon,dbus,radvd,tomcat,radiusd,news,mailman,nscd,gdm" >> /etc/ldap/ldap.conf
+
+					# RUN dpkg-reconfigure -f noninteractive slapd
+
+					ENV DEBIAN_FRONTEND='non-interactive'
+					RUN apt-get install -y phpldapadmin
+
+					RUN echo "ServerName ldap" >> /etc/apache2/apache2.conf
+
+					RUN echo "<?php" > /etc/phpldapadmin/config.php
+					RUN echo "	\\$config->custom->appearance['hide_template_warning'] = true;" >> /etc/phpldapadmin/config.php
+
+					RUN echo "	\\$config->custom->appearance['friendly_attrs'] = array(" >> /etc/phpldapadmin/config.php
+					RUN echo "		'facsimileTelephoneNumber' => 'Fax'," >> /etc/phpldapadmin/config.php
+					RUN echo "		'gid'                      => 'Group'," >> /etc/phpldapadmin/config.php
+					RUN echo "		'mail'                     => 'Email'," >> /etc/phpldapadmin/config.php
+					RUN echo "		'telephoneNumber'          => 'Telephone'," >> /etc/phpldapadmin/config.php
+					RUN echo "		'uid'                      => 'User Name'," >> /etc/phpldapadmin/config.php
+					RUN echo "		'userPassword'             => 'Password'" >> /etc/phpldapadmin/config.php
+					RUN echo "	);" >> /etc/phpldapadmin/config.php
+					RUN echo "	\\$servers = new Datastore();" >> /etc/phpldapadmin/config.php
+					RUN echo "	\\$servers->newServer('ldap_pla');" >> /etc/phpldapadmin/config.php
+					RUN echo "	\\$servers->setValue('server','name','$LDAP_SERVER_NAME');" >> /etc/phpldapadmin/config.php
+					RUN echo "	\\$servers->setValue('server','host','ldap://');" >> /etc/phpldapadmin/config.php
+					RUN echo "	\\$servers->setValue('server','base',array('$LDAP_BASE_DN'));" >> /etc/phpldapadmin/config.php
+					RUN echo "	\\$servers->setValue('login','auth_type','session');" >> /etc/phpldapadmin/config.php
+					RUN echo "?>" >> /etc/phpldapadmin/config.php
+
+
+					RUN useradd -u {1} -m -s /bin/bash {2}
+					RUN echo "{2}:{2}" | chpasswd
+					RUN echo "{2}	ALL=(root)	NOPASSWD:ALL" > /etc/sudoers.d/{2}
+
+					USER {2}
+					WORKDIR /home/{2}
+					COPY conf/functions.php /usr/share/phpldapadmin/lib/functions.php
+					COPY conf/entrypoint.sh ./
+
+					ENTRYPOINT ./entrypoint.sh
+
+					# COPY conf/* /setup/
+
+					# WORKDIR /setup
+
+					# ENTRYPOINT ./start.sh
+
+					# VOLUME ["/etc/ldap", "/var/lib/ldap"]
+
+					# #RUN echo "*/1 *	* * *	root	echo \\"test \\`date\\`\\" >> /root/test_cron.txt" >> /var/spool/cron/crontabs/root
+
+					# EXPOSE 389 
+
+					# EXPOSE 80
+
+					""".format(ldap_confs, user["uid"], user["login"]).replace("\n"+"\t"*5, "\n", 1000)
+				);
+
+			if item == "docs":
+				dockerfile.write(
+					"""
+					FROM ruby:2.3-alpine
+
+					COPY . /usr/src/app
+
+					WORKDIR /usr/src/app
+
+					RUN apk add sudo
+
+					RUN adduser -u {0} -h /home/{1} -S {1} && echo "{1}:{1}" | chpasswd
+					RUN echo "{1}	ALL=(root)	NOPASSWD:ALL" > /etc/sudoers.d/{1} 
+
+					USER {1}
+
+					RUN sudo apk add --update nodejs g++ make
+					RUN bundle install
+
+					VOLUME /usr/src/app
+
+					EXPOSE 4567
+
+					CMD ["bundle", "exec", "middleman", "server", "--watcher-force-polling"]
+
+					""".format(user["uid"], user["login"]).replace("\n"+"\t"*5, "\n", 1000)
+				);
+
+			dockerfile.close()
+			image = docker['registry']+'/'+docker['login']+'/'+docker['images'][item]
+
+			if "skip" in ARGS and ("docker" in ARGS["skip"] or "dockerBuild" in ARGS["skip"]):
+				log("Skipping Building Docker image %s" % image)
+			else:
+				log("Building docker image %s" % image)
+				os.system("sudo docker build -t %s %s" % (image, build_dir))
+			
+			if "skip" in ARGS and ("docker" in ARGS["skip"] or "dockerPush" in ARGS["skip"]):
+				log("Skipping Pushing Docker image %s" % image)
+			else:
+				log("Pushing docker image %s" % image)
+				os.system("sudo docker push %s" % image)
+	
+def k8s_specs(): 
+	# nginx-ingress-controller.yaml kube-dns.yaml core.yaml services.yaml configmaps.yaml volumes.yaml pods.yaml
+
+	with open(K8S_SPECS_DIR+'/nginx-ingress-controller.yaml', 'w') as spec:
+		spec.write(
+			"""
+			apiVersion: v1
+			kind: Namespace
+			metadata:
+			  name: ingress-nginx
+			  labels:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+
+			---
+
+			kind: ConfigMap
+			apiVersion: v1
+			metadata:
+			  name: nginx-configuration
+			  namespace: ingress-nginx
+			  labels:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+
+			---
+			kind: ConfigMap
+			apiVersion: v1
+			metadata:
+			  name: tcp-services
+			  namespace: ingress-nginx
+			  labels:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+
+			---
+			kind: ConfigMap
+			apiVersion: v1
+			metadata:
+			  name: udp-services
+			  namespace: ingress-nginx
+			  labels:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+
+			---
+			apiVersion: v1
+			kind: ServiceAccount
+			metadata:
+			  name: nginx-ingress-serviceaccount
+			  namespace: ingress-nginx
+			  labels:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+
+			---
+			apiVersion: rbac.authorization.k8s.io/v1beta1
+			kind: ClusterRole
+			metadata:
+			  name: nginx-ingress-clusterrole
+			  labels:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+			rules:
+			  - apiGroups:
+			      - ""
+			    resources:
+			      - configmaps
+			      - endpoints
+			      - nodes
+			      - pods
+			      - secrets
+			    verbs:
+			      - list
+			      - watch
+			  - apiGroups:
+			      - ""
+			    resources:
+			      - nodes
+			    verbs:
+			      - get
+			  - apiGroups:
+			      - ""
+			    resources:
+			      - services
+			    verbs:
+			      - get
+			      - list
+			      - watch
+			  - apiGroups:
+			      - ""
+			    resources:
+			      - events
+			    verbs:
+			      - create
+			      - patch
+			  - apiGroups:
+			      - "extensions"
+			      - "networking.k8s.io"
+			    resources:
+			      - ingresses
+			    verbs:
+			      - get
+			      - list
+			      - watch
+			  - apiGroups:
+			      - "extensions"
+			      - "networking.k8s.io"
+			    resources:
+			      - ingresses/status
+			    verbs:
+			      - update
+
+			---
+			apiVersion: rbac.authorization.k8s.io/v1beta1
+			kind: Role
+			metadata:
+			  name: nginx-ingress-role
+			  namespace: ingress-nginx
+			  labels:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+			rules:
+			  - apiGroups:
+			      - ""
+			    resources:
+			      - configmaps
+			      - pods
+			      - secrets
+			      - namespaces
+			    verbs:
+			      - get
+			  - apiGroups:
+			      - ""
+			    resources:
+			      - configmaps
+			    resourceNames:
+			      # Defaults to "<election-id>-<ingress-class>"
+			      # Here: "<ingress-controller-leader>-<nginx>"
+			      # This has to be adapted if you change either parameter
+			      # when launching the nginx-ingress-controller.
+			      - "ingress-controller-leader-nginx"
+			    verbs:
+			      - get
+			      - update
+			  - apiGroups:
+			      - ""
+			    resources:
+			      - configmaps
+			    verbs:
+			      - create
+			  - apiGroups:
+			      - ""
+			    resources:
+			      - endpoints
+			    verbs:
+			      - get
+
+			---
+			apiVersion: rbac.authorization.k8s.io/v1beta1
+			kind: RoleBinding
+			metadata:
+			  name: nginx-ingress-role-nisa-binding
+			  namespace: ingress-nginx
+			  labels:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+			roleRef:
+			  apiGroup: rbac.authorization.k8s.io
+			  kind: Role
+			  name: nginx-ingress-role
+			subjects:
+			  - kind: ServiceAccount
+			    name: nginx-ingress-serviceaccount
+			    namespace: ingress-nginx
+
+			---
+			apiVersion: rbac.authorization.k8s.io/v1beta1
+			kind: ClusterRoleBinding
+			metadata:
+			  name: nginx-ingress-clusterrole-nisa-binding
+			  labels:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+			roleRef:
+			  apiGroup: rbac.authorization.k8s.io
+			  kind: ClusterRole
+			  name: nginx-ingress-clusterrole
+			subjects:
+			  - kind: ServiceAccount
+			    name: nginx-ingress-serviceaccount
+			    namespace: ingress-nginx
+
+			---
+
+			apiVersion: apps/v1
+			kind: Deployment
+			metadata:
+			  name: nginx-ingress-controller
+			  namespace: ingress-nginx
+			  labels:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+			spec:
+			  replicas: 1
+			  selector:
+			    matchLabels:
+			      app.kubernetes.io/name: ingress-nginx
+			      app.kubernetes.io/part-of: ingress-nginx
+			  template:
+			    metadata:
+			      labels:
+			        app.kubernetes.io/name: ingress-nginx
+			        app.kubernetes.io/part-of: ingress-nginx
+			      annotations:
+			        prometheus.io/port: "10254"
+			        prometheus.io/scrape: "true"
+			    spec:
+			      serviceAccountName: nginx-ingress-serviceaccount
+			      containers:
+			        - name: nginx-ingress-controller
+			          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.25.0
+			          args:
+			            - /nginx-ingress-controller
+			            - --configmap=$(POD_NAMESPACE)/nginx-configuration
+			            - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
+			            - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
+			            - --publish-service=$(POD_NAMESPACE)/ingress-nginx
+			            - --annotations-prefix=nginx.ingress.kubernetes.io
+			          securityContext:
+			            allowPrivilegeEscalation: true
+			            capabilities:
+			              drop:
+			                - ALL
+			              add:
+			                - NET_BIND_SERVICE
+			            # www-data -> 33
+			            runAsUser: 33
+			          env:
+			            - name: POD_NAME
+			              valueFrom:
+			                fieldRef:
+			                  fieldPath: metadata.name
+			            - name: POD_NAMESPACE
+			              valueFrom:
+			                fieldRef:
+			                  fieldPath: metadata.namespace
+			          ports:
+			            - name: http
+			              containerPort: 80
+			            - name: https
+			              containerPort: 443
+			          livenessProbe:
+			            failureThreshold: 3
+			            httpGet:
+			              path: /healthz
+			              port: 10254
+			              scheme: HTTP
+			            initialDelaySeconds: 10
+			            periodSeconds: 10
+			            successThreshold: 1
+			            timeoutSeconds: 10
+			          readinessProbe:
+			            failureThreshold: 3
+			            httpGet:
+			              path: /healthz
+			              port: 10254
+			              scheme: HTTP
+			            periodSeconds: 10
+			            successThreshold: 1
+			            timeoutSeconds: 10
+
+			---
+
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: ingress-nginx
+			  namespace: ingress-nginx
+			  labels:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+			spec:
+			  type: NodePort
+			  ports:
+			    - name: http
+			      port: 80
+			      targetPort: 80
+			      protocol: TCP
+			      nodePort: {}
+			    - name: https
+			      port: 443
+			      targetPort: 443
+			      protocol: TCP
+			      nodePort: {}
+			  selector:
+			    app.kubernetes.io/name: ingress-nginx
+			    app.kubernetes.io/part-of: ingress-nginx
+
+			---
+
+			""".format(ARGS['conf']["ingress"]["nodePorts"]["http"], ARGS['conf']["ingress"]["nodePorts"]["https"]).replace("\n"+"\t"*3, "\n", 1000)
+		)
+		
+		spec.close()
+	
+	with open(K8S_SPECS_DIR+'/kube-dns.yaml', 'w') as spec:
+		spec.write(
+			"""
+			apiVersion: v1
+			kind: ConfigMap
+			metadata:
+			  name: kube-dns
+			  namespace: kube-system
+			data:
+			  # stubDomains: |
+			  #   {"tera-mkpl.fr": ["10.96.0.10"]}
+			  upstreamNameservers: |
+			    ["8.8.8.8", "8.8.4.4"]
+			""".replace("\n"+"\t"*3, "\n", 1000)
+		)
+		spec.close()
+
+	with open(K8S_SPECS_DIR+'/core.yaml', 'w') as spec:
+		spec.write(
+			"""
+			apiVersion: rbac.authorization.k8s.io/v1
+			kind: ClusterRole
+			metadata:
+			  annotations:
+			    rbac.authorization.kubernetes.io/autoupdate: "true"
+			  labels:
+			    kubernetes.io/bootstrapping: rbac-defaults
+			  name: algofab-admin-role
+			rules:
+			  - apiGroups:
+			      - '*'
+			    resources:
+			      - '*'
+			    verbs:
+			      - '*'
+			  - nonResourceURLs:
+			      - '*'
+			    verbs:
+			      - '*'
+
+			---
+
+			apiVersion: v1
+			kind: Namespace
+			metadata:
+			  name: algofab
+
+			---
+
+			apiVersion: v1
+			kind: ServiceAccount
+			metadata:
+			  name: algofab
+			  namespace: algofab
+
+			---
+
+			apiVersion: rbac.authorization.k8s.io/v1
+			kind: ClusterRoleBinding
+			metadata:
+			  name: algofab-role-binding
+			  namespace: algofab
+			roleRef:
+			  apiGroup: rbac.authorization.k8s.io
+			  kind: ClusterRole
+			  name: algofab-admin-role
+			subjects:
+			- kind: ServiceAccount
+			  name: algofab
+			  namespace: algofab
+			""".replace("\n"+"\t"*3, "\n", 1000)
+		)
+		spec.close()
+
+	with open(K8S_SPECS_DIR+'/services.yaml', 'w') as spec:
+		spec.write(
+			"""
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: ldap
+			  namespace: algofab
+			spec:
+			  selector:
+			    app: ldap
+			  ports:
+			    - targetPort: 80
+			      port: 80
+			      name: http
+			    - targetPort: 389
+			      port: 389
+			      name: ldap
+
+
+			---
+
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: mongo
+			  namespace: algofab
+			spec:
+			  selector:
+			    app: mongo
+			  ports:
+			    - targetPort: 27017
+			      port: 27017
+
+			---
+
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: im
+			  namespace: algofab
+			spec:
+			  selector:
+			    app: im
+			  ports:
+			    - targetPort: 32080
+			      port: 80
+
+			---
+
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: rh
+			  namespace: algofab
+			spec:
+			  selector:
+			    app: rh
+			  ports:
+			    - targetPort: 3000
+			      port: 80
+
+			---
+
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: portal
+			  namespace: algofab
+			spec:
+			  selector:
+			    app: portal
+			  ports:
+			    - targetPort: 8080
+			      port: 80
+
+			--- 
+
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: proxy
+			  namespace: algofab
+			spec:
+			  selector:
+			    app: proxy
+			  ports:
+			    - targetPort: 80
+			      port: 80
+
+			--- 
+
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: docs
+			  namespace: algofab
+			spec:
+			  selector:
+			    app: docs
+			  ports:
+			    - targetPort: 4567
+			      port: 80
+
+			--- 
+
+			apiVersion: extensions/v1beta1
+			kind: Ingress
+			metadata:
+			  name: main-access
+			  namespace: algofab
+			  annotations:
+			    nginx.ingress.kubernetes.io/rewrite-target: /
+			    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+			    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+			    nginx.ingress.kubernetes.io/send-timeout: "3600"
+			    nginx.org/websocket-services: "portal"
+			spec:
+			  rules:
+			  - host: {}
+			    http:
+			      paths:
+			      - path: /
+			        backend:
+			          serviceName: portal
+			          servicePort: 80
+
+			  - host: {}
+			    http:
+			      paths:
+			      - path: /
+			        backend:
+			          serviceName: ldap
+			          servicePort: 80
+
+			  - host: {}
+			    http:
+			      paths:
+			      - path: /
+			        backend:
+			          serviceName: rh
+			          servicePort: 80
+
+			  - host: {}
+			    http:
+			      paths:
+			      - path: /
+			        backend:
+			          serviceName: proxy
+			          servicePort: 80
+
+			  - host: {}
+			    http:
+			      paths:
+			      - path: /
+			        backend:
+			          serviceName: docs
+			          servicePort: 80
+
+			""".format(ARGS["conf"]["ingress"]["fqdns"]["portal"]["name"],
+					ARGS["conf"]["ingress"]["fqdns"]["portal"]["name"],
+					ARGS["conf"]["ingress"]["fqdns"]["ldap"]["name"],
+					ARGS["conf"]["ingress"]["fqdns"]["rh"]["name"],
+					ARGS["conf"]["ingress"]["fqdns"]["proxy"]["name"],
+					ARGS["conf"]["ingress"]["fqdns"]["docs"]["name"]).replace("\n"+"\t"*3, "\n", 1000)
+		)
+		spec.close()
+
+	with open(K8S_SPECS_DIR+'/configmaps.yaml', 'w') as spec:
+		spec.write(
+			"""
+			apiVersion: v1
+			kind: ConfigMap
+			metadata:
+			  name: app-configs
+			  namespace: algofab
+			data:
+			  LDAP_SERVER_NAME: "{0}"
+			  LDAP_BASE_DN: "{1}"
+			  LDAP_DEBCONF_DOMAIN: "{2}"
+			  LDAP_DEBCONF_ORG: "{3}"
+			  LDAP_PASSWORD: "{4}"
+			  
+			  PORTAL_EXT_PROTOCOL: "{5}"
+			  PORTAL_EXT_NAME: "ws67-af-portal.tl.teralab-datascience.fr"
+			  
+			  PROXY_EXT_PROTOCOL: "{5}"
+			  PROXY_EXT_NAME: "ws67-af-proxy.tl.teralab-datascience.fr"
+			  
+			  DOCS_EXT_PROTOCOL: "{5}"
+			  DOCS_EXT_NAME: "ws67-af-docs.tl.teralab-datascience.fr"
+			  
+			--- 
+
+			apiVersion: v1
+			kind: ConfigMap
+			metadata:
+			  name: common
+			  namespace: algofab
+			data:
+			  PV_DIR: {6}
+			  PV_HOST: {7}
+			""".format(
+				ARGS["conf"]["settings"]["ldap"]["server_name"],
+				ARGS["conf"]["settings"]["ldap"]["base_dn"],
+				ARGS["conf"]["settings"]["ldap"]["domain"],
+				ARGS["conf"]["settings"]["ldap"]["organization"],
+				ARGS["conf"]["settings"]["ldap"]["password"],
+				ARGS["conf"]["settings"]["ldap"]["backup_frequency"],
+				ARGS["conf"]["settings"]["access_protocol"],
+				ARGS["conf"]["ingress"]["fqdns"]["portal"]["name"],
+				ARGS["conf"]["ingress"]["fqdns"]["proxy"]["name"],
+				ARGS["conf"]["ingress"]["fqdns"]["docs"]["name"],
+				ARGS["conf"]["storage"]["folder"],
+				ARGS["conf"]["storage"]["address"]).replace("\n"+"\t"*3, "\n", 1000)
+		)
+		spec.close()
+
+	with open(K8S_SPECS_DIR+'/volumes.yaml', 'w') as spec:
+		spec.write(
+			"""
+			apiVersion: storage.k8s.io/v1
+			kind: StorageClass
+			metadata:
+			  name: nfs-sc
+			  namespace: algofab
+			provisioner: memorialhealth/nfs 
+
+			---
+
+			apiVersion: v1
+			kind: PersistentVolume
+			metadata:
+			  name: pv0001
+			  namespace: algofab
+			spec:
+			  capacity:
+			    storage: 10Gi
+			  accessModes:
+			    - ReadWriteMany
+			  volumeMode: Filesystem
+			  persistentVolumeReclaimPolicy: Recycle
+			  storageClassName: nfs-sc
+			  nfs:
+			    path: {}
+			    server: {}
+
+			---
+
+			kind: PersistentVolumeClaim
+			apiVersion: v1
+			metadata:
+			  name: pvc0001
+			  namespace: algofab
+			  annotations:
+			    volume.beta.kubernetes.io/storage-class: "nfs-sc"
+			spec:
+			  accessModes:
+			    - ReadWriteMany
+			  resources:
+			    requests:
+			      storage: 10Gi
+			  storageClassName: nfs-sc
+			  volumeName: "pv0001"
+			""".format(
+				ARGS["conf"]["storage"]["folder"],
+				ARGS["conf"]["storage"]["address"]).replace("\n"+"\t"*3, "\n", 1000)
+		)
+		spec.close()
+
+	with open(K8S_SPECS_DIR+'/pods.yaml', 'w') as spec:
+		spec.write(
+			"""
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: ldap
+				  namespace: algofab
+				  labels:
+				    app: ldap
+				spec:
+				  securityContext:
+				    runAsUser: {0}
+				  serviceAccountName: algofab
+				  containers:
+				    - name: ldap
+				      image: {1}
+				      imagePullPolicy: Always
+				      # envFrom:
+				      #   - configMapRef:
+				      #       name: ldap
+				      volumeMounts:
+				        - mountPath: /data
+				          name: nfs-pvc
+				          subPath: data/ldap
+				        
+				        # - mountPath: /setup
+				        #   name: nfs-pvc
+				        #   subPath: docker/ldap/conf
+				  volumes:
+				    - name: nfs-pvc
+				      persistentVolumeClaim:
+				        claimName: pvc0001
+
+				---
+
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: mongo
+				  namespace: algofab
+				  labels:
+				    app: mongo
+				spec:
+				  serviceAccountName: algofab
+				  securityContext:
+				    runAsUser: 999
+				  containers:
+				    - name: db
+				      image: mongo
+				      imagePullPolicy: Always
+				      #command: ["/bin/sh"]
+				      #args: ["-c", "while true; do echo hello; sleep 10;done"]
+				      volumeMounts:
+				        - mountPath: /data/db
+				          name: nfs-pvc
+				          subPath: data/mongo
+				  volumes:
+				    - name: nfs-pvc
+				      persistentVolumeClaim:
+				        claimName: pvc0001
+				---
+
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: im
+				  namespace: algofab
+				  labels:
+				    app: im
+				spec:
+				  securityContext:
+				    runAsUser: {0}
+				  # initContainers:
+				  #   - name: busybox
+				  #     image: busybox
+				  #     command:
+				  #       - chown
+				  #       - -R
+				  #       - 1000:1000
+				  #       - /accounts/*
+				  #     volumeMounts:
+				  #       - name: nfs-pvc
+				  #         mountPath: /accounts
+				  #         subPath: data/accounts
+				  serviceAccountName: algofab
+				  containers:
+				    - name: im
+				      image: {2}
+				      imagePullPolicy: Always
+				      command: ["./run.sh", "IM-Server"]
+				      
+				      volumeMounts:
+				        - mountPath: /home/admin/algofab/
+				          name: nfs-pvc
+				          subPath: docker/algofab/
+
+				        - mountPath: /accounts
+				          name: nfs-pvc
+				          subPath: data/accounts
+				  volumes:
+				    - name: nfs-pvc
+				      persistentVolumeClaim:
+				        claimName: pvc0001
+
+				---
+
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: rh
+				  namespace: algofab
+				  labels:
+				    app: rh
+				spec:
+				  serviceAccountName: algofab
+				  containers:
+				    - name: rh
+				      image: {2}
+				      imagePullPolicy: Always
+				      command: ["./run.sh", "RH-Server"]
+				      volumeMounts:
+				        - mountPath: /home/admin/algofab/
+				          name: nfs-pvc
+				          subPath: docker/algofab/
+				  volumes:
+				    - name: nfs-pvc
+				      persistentVolumeClaim:
+				        claimName: pvc0001
+				---
+
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: portal
+				  namespace: algofab
+				  labels:
+				    app: portal
+				spec:
+				  serviceAccountName: algofab
+				  securityContext:
+				    runAsUser: 1001
+				  containers:
+				    - name: portal
+				      image: {2}
+				      imagePullPolicy: Always
+				      command: ["./run.sh", "Portal"]
+				      envFrom:
+				        - configMapRef:
+				            name: app-configs
+				      volumeMounts:
+				        - mountPath: /home/admin/algofab/
+				          name: nfs-pvc
+				          subPath: docker/algofab/
+				  volumes:
+				    - name: nfs-pvc
+				      persistentVolumeClaim:
+				        claimName: pvc0001
+
+				---
+
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: proxy
+				  namespace: algofab
+				  labels:
+				    app: proxy
+				spec:
+				  securityContext:
+				    fsGroup: {0}
+				  serviceAccountName: algofab
+				  containers:
+				    - name: nginx
+				      image: nginx
+				      imagePullPolicy: Always
+				      # command: ["/bin/sh"]
+				      # args: ["-c", "while true; do echo hello; sleep 10;done"]
+				      # envFrom:
+				      #   - configMapRef:
+				      #       name: ldap
+				      volumeMounts:
+				        - mountPath: /etc/nginx/
+				          name: nfs-pvc
+				          subPath: data/proxy
+				  volumes:
+				    - name: nfs-pvc
+				      persistentVolumeClaim:
+				        claimName: pvc0001
+
+				---
+
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: docs
+				  namespace: algofab
+				  labels:
+				    app: docs
+				spec:
+				  serviceAccountName: algofab
+				  securityContext:
+				    runAsUser: 1001
+				  containers:
+				    - name: slate
+				      image: {3}
+				      imagePullPolicy: Always
+				      volumeMounts:
+				        - mountPath: /usr/src/app
+				          name: nfs-pvc
+				          subPath: docker/algofab/Docs
+				  volumes:
+				    - name: nfs-pvc
+				      persistentVolumeClaim:
+				        claimName: pvc0001
+			""".format(
+				ARGS["conf"]["user"]["uid"],
+				ARGS["conf"]["docker"]["registry"]+'/'+ARGS["conf"]["docker"]["login"]+'/'+ARGS["conf"]["docker"]["images"]["ldap"],
+				ARGS["conf"]["docker"]["registry"]+'/'+ARGS["conf"]["docker"]["login"]+'/'+ARGS["conf"]["docker"]["images"]["algofab_core"],
+				ARGS["conf"]["docker"]["registry"]+'/'+ARGS["conf"]["docker"]["login"]+'/'+ARGS["conf"]["docker"]["images"]["docs"]
+				).replace("\n"+"\t"*3, "\n", 1000)
+		)
+		spec.close()
+
+def validateConfig():
+	return True
+
+def main ():
+	
+	validateConfig()
+
+	#if not ("skip" in ARGS and "docker" in ARGS["skip"]):  
+	docker_builds()
+
+	k8s_specs()
+	
+
+if __name__ == '__main__' :
+	parseArgs()
+	main()
