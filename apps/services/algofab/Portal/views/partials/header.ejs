@@ -1,0 +1,196 @@
+  
+  
+  <nav class="navbar navbar-inverse">
+    <div class="container">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/"><img src="/img/teralab.jpeg" height="32px;"/></a> <!-- width="135%" height="150%"/></a> -->
+          <!--<img src="/img/algofab_new.png" width="50%" height="30%"/>-->
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li class="<%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'docs')? 'active':''%>" ><a href="<%= process.env.DOCS_EXT_PROTOCOL+'://'+process.env.DOCS_EXT_NAME %>"> Docs </a></li>
+            <!--li class="<%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'team')? 'active':''%>" ><a href="#"> Notre Équipe </a></li-->
+            <!-- <li class="<%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'partners')? 'active':''%>" ><a href="/partners"> Partners </a></li> -->
+            <% if( !(typeof user === 'undefined' || !user)) {%>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle <%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'algo')? 'active':''%>" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Resources <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/article/list">Catalog</a></li>
+                  <li><a href="/article/new">Create a resource</a></li>
+                </ul>
+              </li>
+            <% } %>
+            <!--
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#">Separated link</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>-->
+          </ul>
+          <form class="navbar-form navbar-left" action="/search" method="get">
+            <div class="form-group">
+              <input type="text" class="form-control" name="text" placeholder="Search">
+            </div>
+            <button type="submit" class="btn btn-default">Search</button>
+          </form>
+          <!--
+          <form class="navbar-form navbar-left">
+            <div class="form-group">
+              <input type="text" class="form-control" placeholder="Search">
+            </div>
+            <button type="submit" class="btn btn-default">Submit</button>
+          </form>
+          -->
+          <ul class="nav navbar-nav navbar-right">
+            <% if(typeof user === 'undefined' || !user) { %>
+            <li class="<%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'signin')? 'active':''%>" ><a href="/signin">Sign in</a></li>
+            <li class="<%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'signup')? 'active':''%>" ><a href="/signup">Sign up</a></li>
+            <% } else {%>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle <%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'user')? 'active':''%>" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Connected as <%= user.username %> <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/user/account">Account</a></li>
+                  <li><a href="/user/History">History</a></li>
+                  <li><a href="/user/myalgos">My contributions</a></li>
+                  <!-- <li><a href="/user/subscriptions">My subcriptions</a></li> -->
+                  <li><a href="/user/bugreports">Bug reports</a></li>
+                </ul>
+              </li>
+              <li><a href="/signout">Logout</a></li>
+            <% } %>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </div>
+  </nav>
+
+
+<% if( typeof user === 'undefined' ) {%>
+  <section class="jk-slider" style="margin-bottom: 2em">
+    <div id="carousel-example" class="carousel slide" data-ride="carousel">
+       <ol class="carousel-indicators">
+          <li data-target="#carousel-example" data-slide-to="0" class="active"></li>
+          <li data-target="#carousel-example" data-slide-to="1"></li>
+          <li data-target="#carousel-example" data-slide-to="2"></li>
+          <li data-target="#carousel-example" data-slide-to="3"></li>
+       </ol>
+       
+       <div class="carousel-inner">
+          <div class="item active">
+             <div class="hero">
+                <hgroup>
+                   <h2><b>ALGOFAB</b><img style="height:128px;float:right;" src="/img/investissements.png"/></h2>
+                   <p>The AlgoFab platform is developed by the AlgoFab consortium, whose project was awarded by the Programme Investissements d’Avenir - PIA under the Call "<b>Cloud Computing and Big Data</b>" of 2014</p>
+                </hgroup>
+             </div>
+             <div class="overlay"></div>
+             <a href="#"><img src="/img/carousel_support.png" /></a>
+          </div>
+          <div class="item">
+             <div class="hero">
+                <hgroup>
+                   <h2><b>The consortium</b></h2>
+                   <p>The AlgoFab consortium consists of the following partners: <b>Xilopix</b> (lead), <b>IMT</b> (Institut Mines-Télécom), <b>Orange</b> (CloudWatt), <b>Liris</b>, <b>GlobeVIP</b> and <b>Global Sensing Technologies</b>.</p>
+                </hgroup>
+             </div>
+             <div class="overlay"></div>
+             <a href="#"><img src="/img/carousel_support.png" /></a>
+          </div>
+          <div class="item">
+             <div class="hero">
+                <hgroup>
+                   <h2><b>Sign in</b></h2>
+                   <p>You already have an account, so sign in</p>
+                   <a class="btn btn-lg btn-primary" href="/signin" role="button">Sign into your account &raquo;</a>
+                </hgroup>
+             </div>
+             <div class="overlay"></div>
+             <a href="#"><img src="/img/carousel_support.png" /></a>
+          </div>
+          <div class="item">
+             <div class="hero">
+                <hgroup>
+                   <h2><b>Create your free account</b></h2>
+                   <p>Developing innovative algorithms or using innovative algorithms in your business chain, create your account for free</p>
+                   <a class="btn btn-lg btn-success" href="/signup" role="button">Create your free account &raquo;</a>
+                </hgroup>
+             </div>
+             <div class="overlay"></div>
+             <a href="#"><img src="/img/carousel_support.png" /></a>
+          </div>
+       </div>
+       
+       <!--
+       <div class="carousel-inner">
+          <div class="item active">
+             <div class="hero">
+                <hgroup>
+                   <h2><b>ALGOFAB</b><img style="height:128px;float:right;" src="/img/investissements.png"/></h2>
+                   <p>La plateforme AlgoFab est développée par le consortium AlgoFab dont le projet a été lauréat à l’appel à projet « <b>Informatique en nuage – Cloud Computing et Big Data</b> » du Programme d’Investissements d’Avenir (2014)</p>
+                </hgroup>
+             </div>
+             <div class="overlay"></div>
+             <a href="#"><img src="/img/carousel_support.png" /></a>
+          </div>
+          <div class="item">
+             <div class="hero">
+                <hgroup>
+                   <h2><b>Le consortium</b></h2>
+                   <p>Le consortium AlgoFab est constitué des partenaires suivants: <b>Xilopix</b> (chef de file), <b>Institut Mines Telecom</b>, <b>Orange (CloudWatt)</b>, <b>Liris</b>,  <b>GlobeVIP</b>, <b>Global Sensing Technologies</b></p>
+                </hgroup>
+             </div>
+             <div class="overlay"></div>
+             <a href="#"><img src="/img/carousel_support.png" /></a>
+          </div>
+          <div class="item">
+             <div class="hero">
+                <hgroup>
+                   <h2><b>Connectez-vous</b></h2>
+                   <p>Vous avez déjà un compte, alors connectez-vous</p>
+                   <a class="btn btn-lg btn-primary" href="/signin" role="button">Connectez-vous à votre compte &raquo;</a>
+                </hgroup>
+             </div>
+             <div class="overlay"></div>
+             <a href="#"><img src="/img/carousel_support.png" /></a>
+          </div>
+          <div class="item">
+             <div class="hero">
+                <hgroup>
+                   <h2><b>Créer votre compte gratuitement</b></h2>
+                   <p>Développeurs d’algorithmes innovants ou utilisateur d’algorithmes innovants dans votre chaîne métier, créer votre compte gratuitement</p>
+                   <a class="btn btn-lg btn-success" href="/signup" role="button">Créer votre compte gratuitement &raquo;</a>
+                </hgroup>
+             </div>
+             <div class="overlay"></div>
+             <a href="#"><img src="/img/carousel_support.png" /></a>
+          </div>
+       </div>
+       -->
+       <a class="left carousel-control" href="#carousel-example" data-slide="prev">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+       </a>
+       <a class="right carousel-control" href="#carousel-example" data-slide="next">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+       </a>
+    </div>
+  </section>
+<% } %>
+  <!--<h1 class="alert alert-danger">Site web en maintenane, veuillez attendre jusqu'au Jeudi 28/09 avant d'utiliser le site.</h1>-->
+

@@ -1,0 +1,23 @@
+<% 
+	var renderDocsList = function(list){
+		list = ( typeof list !== 'undefined' && list != null )? list : docs;
+		var r = '<ul>';
+		for (var i=0; i < list.length; i++){
+			r += `<li> <a href="/docs?id=${list[i].id}">${list[i].name}</a> ${ "sub" in list[i]? renderDocsList(list[i].sub) : '' } </li>`
+		}
+
+		r += '</ul>';
+		return r;
+	}
+	var content = `
+	
+		<h3>Wellcome to the documentation, below is the content of the documentation. </h3>
+		
+		<p>
+			${renderDocsList()}
+		</p>
+
+	`
+%>
+
+<% include ./base %>

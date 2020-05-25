@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html>
+  	<head>
+		<% include ./partials/head %>
+    
+  	</head>
+  	<body>
+    	<% include ./partials/header %>
+
+
+		<div class="container">
+			<aside class="col-sm-2" id="side-nav">
+				<div id="side-nav-title" class="row"> Contents </div>
+				<ul class="row">
+					<li id="id1"> <a href="#get-token"> Get a token </a> </li>
+					<li id="id2"> <a href="#formulate-request"> Formulate your requests </a> </li>
+				</ul>
+			</aside>
+			
+			<div class="col-sm-10" id="current-content">
+				<h3>Execution Mode</h3>
+				<p>
+					This post explains to users how to proceed in order to properly use the execution mode offered by the platform.<br> 
+					The figure down below shows the interactions between a user and the <a href="#">RH</a> : 
+				</p>
+				<p>
+					<figure>
+						<img src="/img/Exec-big-picture.PNG">
+						<figcaption style="text-align: center;">FIG 1 : Interactions between the user and the RH</figcaption>
+					</figure>
+				</p>
+				<p>
+					To epxplain FIG 1, there are two parts to cover : "Get a token" and "Formulate your requests", each part dealing with important conepts to keep mind if one wants to use the execution mode.
+				</p>
+				<p>
+					<h4 id="get-token">Get a token</h4>
+					<p>
+						When using the execution mode one has to first of get a token from the RH and include it in all his subsquent requests. The token serves to identifies the Context. We will elaborate more on the context later on, but for time being think of the context as a Server-side session that keeps track o the request of a user.<br>
+						To get a token from the RH, one must send POST his IDs to the RH on /_new_context. With <code>cURL</code> you can do it by typing : <br>
+						<pre><code>curl -d "username=&lt;Your Algofab username&gt;&amp;password=&lt;Your Algofab password&gt;" https://req-handler.hopto.org/_new_context</code></pre> <br>
+						Replace &lt;Your Algofab username&gt; by your algofab username and &lt;Your Algofab password&gt; with your algofab password.<br>
+						You should get a JSON a a reply from the server looking like this : <br>
+						<pre><code>{ "status" : "success", "token" : "&lt;Token&gt;" }</code></pre> <br>
+						The content of the field "token" is your actual token, mark it down for the next step.						
+					</p>
+					<p>
+						The process we just described is represented in FIG 1 above by the firs two arrows. The next arrow shows the user sending a treatment to the Algorithm. This request for treatment could be of any Verb (among GET, POST, PUT or DELETE), the Bearer token should be included, followed by an URL we are going to detail right away.
+					</p>
+				</p>
+				<p>
+					<h4 id="formulate-request">Formulate your requests</h4>
+					<p>
+						Remember that the request is sent to the RH which afterwords has to identfy which algorithm and which version of it the request is for. Part of the URL is used by the RH to achieve that and the rest is proxied to the API server of your algorithm. The following figure shows how to correctly format your requests :   
+					</p>
+					<p>
+						<figure>
+							<img src="/img/Exec-url.PNG" alt="">
+							<figcaption style="text-align: center;">FIG 2 : URL structure in Execution mode</figcaption>
+						</figure>
+					</p>
+					<p>
+						As you can see in FIG 2, the request comprises two major parties : 
+						<ul>
+							<li>
+								<b>RH Input Section</b> : This part of the request concerns the RH. Based on the information contained in that section the RH know how to proxy your request to the approriate Version of the approriate Algorithm. We can divide this section into three parts as well :
+								<ul>
+									<li>
+										Address of RH : Which is the Address of the RH. For obvious reasons this part has to be specified.
+									</li>
+									<li>
+										Name of the Algorithm : Which is the name of the algorithm. This part has also to be specified and must always follow the addres of RH. In the example shown in FIG 2 the name of the Algorithm woul be HelloWorld.
+									</li>
+									<li>
+										Version of the algorithm : Which is the version of the algorithm to handle your request. This part is not required, however if not given it is equal to the lastest version available for the algorithm. On the other hand if it is specified then it has to follow the Name of the algorithm.
+										<p class="alert alert-warning">
+											Be carefull not to create URLs to API server beginning with some /x.y.z, while x, y, and z are number (in other words homogeneous to version). If you do and the user didn't specify any version, the beginning will be interpreted by the RH as a version of your algorithm, not as being part of the Service URI.
+										</p>
+									</li>
+								</ul>
+							</li>
+							<li>
+								<b>Service Section</b> : This part of the request is what is proxied to the API server.
+							</li>
+						</ul>
+						
+					</p>
+					<p>
+						Now going back to FIG 1, when the RH receive a correctly formatted request, he splits the URL and keeps only service part after he establish which API Server to to proxy the request to (thanks to the early part of the initial URL) and proxies the request to the API Server (same Verb and same Body if any).
+					</p>
+					<p>
+						<u><b>Example</b></u> : Let's say you have an algorithm named "RoundRobin" implementing the Round-Robin Scheduling method for some tasks. Let's assume that you can change the value of the quantum for this algorithm by addressing a PUT request on the URI "/quantum" with a body parameter value (value being the new value of the quantum). To send this request with <code>cURL</code> type : 
+						<pre><code>curl -H "Authorization: Bearer &lt;Token&gt;" -X PUT -d "value=2ms" https://req-handler.hopto.org/RoundRobin/quantum</code></pre> <br>
+						It is then up to the algorithm to update the quantum to 2ms. 
+					</p>
+				</p>
+				
+			</div>
+		</div>
+
+    	<% include ./partials/footer %>
+    	
+    	<% include docs/script %>
+	</body>
+</html>

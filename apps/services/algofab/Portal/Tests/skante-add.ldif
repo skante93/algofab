@@ -1,0 +1,13 @@
+
+dn: uid=skante,ou=users,dc=ldap,dc=algofab,dc=fr
+changetype: add
+objectClass: inetOrgPerson
+description: Algofab user.
+cn: Souleymane Cheick KANTE
+givenname: Souleymane Cheick
+sn: KANTE
+mail: undefined
+uid: skante
+userpassword: {SSHA}2LsOqqihVpA+5LURdJbSjf9vvKzg4VWG
+
+

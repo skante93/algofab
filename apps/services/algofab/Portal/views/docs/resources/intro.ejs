@@ -1,0 +1,40 @@
+
+<% 
+	var findDocWithID = function(id, parent){
+		parent = ( typeof parent !== 'undefined' && parent != null )? parent : docs;
+
+		for (var i=0; i < parent.length; i++){
+			if (parent[i].id == id) 
+				return parent[i];
+			else if ("sub" in parent[i]){
+				var s = findDocWithID(id, parent[i].sub);
+				if (s != null)
+					return s;
+			}
+		}
+		return null;
+	}
+
+	var renderDocsList = function(list){
+		list = ( typeof list !== 'undefined' && list != null )? list : findDocWithID("manage_resources").sub;
+		var r = '<ul>';
+		for (var i=0; i < list.length; i++){
+			r += `<li> <a href="/docs?id=${list[i].id}">${list[i].name}</a> ${ "sub" in list[i]? renderDocsList(list[i].sub) : '' } </li>`
+		}
+
+		r += '</ul>';
+		//r += `<script type="text/javascript"> alert(" list : "+ JSON.stringify(${JSON.stringify(list)}) )</script>`
+		return r;
+	}
+
+	var content = `
+	
+		<h3>Wellcome to the part of the documentation dedicated to resource Management, below is the summary of the different subjects covered. </h3>
+		
+		<p>
+			${renderDocsList()}
+		</p>
+	`
+%>
+
+<% include ../base %>

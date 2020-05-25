@@ -1,0 +1,39 @@
+dn: dc=ldap,dc=algofab,dc=fr
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: TeraLab IMT
+dc: ldap
+
+dn: cn=admin,dc=ldap,dc=algofab,dc=fr
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: admin
+description: LDAP administrator
+userPassword:: e1NTSEF9bU5GWW9tMlYvR08wbXk4RmFDRDEvYXdGbkU2RThsR1k=
+
+dn: ou=users,dc=ldap,dc=algofab,dc=fr
+objectClass: organizationalUnit
+objectClass: top
+ou: users
+
+dn: cn=Homer Simpson,ou=users,dc=ldap,dc=algofab,dc=fr
+cn: Homer Simpson
+mail: me@default.com
+givenName: Homer
+sn: Simpson
+objectClass: inetOrgPerson
+objectClass: top
+userPassword:: e01ENX1HaDNKSEpCekpjYVNjZDN3eVVTOGNnPT0=
+uid: hsimpson
+
+dn: uid=skante2,ou=users,dc=ldap,dc=algofab,dc=fr
+objectClass: inetOrgPerson
+description: Algofab user.
+cn: Souleymane KANTE
+givenName: Souleymane
+sn: KANTE
+mail: skante@enst.fr
+uid: skante2
+userPassword:: e1NTSEF9cVlXSlNFeU00dFpvVVR6M2RyYVFOZ3JnRU54L2g1cnY=
+

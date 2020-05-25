@@ -1,0 +1,296 @@
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <% include partials/head %>
+      
+    </head>
+    <body>
+      <% include partials/header %>
+      
+      <div class="container">
+      	<p>
+          You are required to upload your JSON file <!--and your Dockrfile using the form bellow.-->    
+        </p>
+        
+        <form method="post" target="newAlgoFrame" enctype="multipart/form-data" id="new_upload_form">
+          <!--
+          <form method="post" enctype="multipart/form-data">
+          -->
+          <fieldset>
+            <legend>JSON : </legend>
+            <div class="form-group row">
+              <label for="jsonFile" class="col-sm-3 col-form-label">JSON File : </label>
+              <div class="col-sm-9">
+                <input type="file" id="jsonFile" name="newAlgoData" required/><br/><br/>
+              </div>
+            </div>
+            
+          </fieldset>
+          
+<!--          
+          <fieldset>
+            <legend>Infrastructure</legend>
+            <dir id="deployedBy">
+              
+              <div class="form-group row">
+                <label for="infra_choice" class="col-sm-3 col-form-label">Deployed By : </label>
+                <div class="col-sm-9">
+                  <select id="infra_choice" class="form-control">
+                    <option id="default" value="default" selected> -- Select one -- </option>
+                    <option id="infra_docker" value="infra_docker"> Docker </option>
+                    <option id="infra_docker_compose" value="infra_docker_compose"> Docker-Compose </option>
+                  </select> <br/>
+                </div>
+              </div>
+
+            </dir>
+            
+            <dir id="docker">
+              
+              <div class="form-group row">
+                <label for="method" class="col-sm-3 col-form-label">Method : </label>
+                <div class="col-sm-9">
+                  <select id="method" class="form-control">
+                    <option id="byDockerfile" value="byDockerfile"> By Dockerfile </option>
+                    <option id="byDockerHub" value="byDockerHub"> By Docker registry </option>
+                  </select> <br/>
+                </div>
+              </div>
+
+              
+            </dir>
+            
+            <div id="docker_pull_link" class="form-group row">
+              <!- Pull for Docker option ->
+              
+              <!- 
+                <label for="docker_pull_input" class="col-sm-3 col-form-label">DockeHub Image (Your_Login/ImageName[:version]): </label>
+                <div class="col-sm-9">
+                  <input type="text" id="docker_pull_input" name="docker_pull_link" class="form-control" required/> <br/>
+                </div>
+              ->
+            </div>
+            
+            <div id="dockerfile" class="form-group row">
+              <!- Dockerfile ->
+              
+              <!-
+                <label for="dockerfile_input" class="col-sm-3 col-form-label">Dockerfile Archive (*.tar.gz) : </label>
+                <div class="col-sm-9">
+                  <input type="file" id="dockerfile_input" name="dockerfile" class="form-control" required/> <br/>
+                </div>
+              ->
+            </div>
+
+            <dir id="docker_compose" class="form-group row">
+              <!- Pull for Docker option ->
+              <!-
+                <label for="dockercompose_input" class="col-sm-3 col-form-label">Docker Compose Archive (*.tar.gz) : </label>
+                <div class="col-sm-9">
+                  <input type="file" id="dockerfile_input" name="dockerfile" class="form-control" required/> <br/>
+                </div>
+              ->
+            </dir>
+          </fieldset>
+-->
+
+          <button type="submit" id="submit" class="btn btn-primary"> Upload </button>  <!-- WAS disabled--> 
+            
+        </form>
+        
+      </div>
+
+      
+      <iframe src="#" name="newAlgoFrame" id="newAlgoFrame" style="display: none;"></iframe>
+      
+      <% include partials/footer.ejs %>
+      <script type="text/javascript">
+        $(function(){
+          $('#docker').hide();
+          $('docker_pull_link').hide();
+          $('dockerfile').hide();
+          $('docker_compose').hide();
+
+          $('#deployedBy #infra_docker_compose').click(function(event){
+            $('#docker').hide();
+            $('#docker_pull_link').hide();
+            $('#docker_pull_link').html("");
+            $('#dockerfile').hide();
+            $('#dockerfile').html("");
+          
+            $('#docker_compose').html(`
+                <label for="dockercompose_input" class="col-sm-3 col-form-label">Docker Compose Archive (*.tar.gz) : </label>
+                <div class="col-sm-9">
+                  <input type="file" id="dockerfile_input" name="dockerfile" required/> <br/>
+                </div>`);
+            $('#docker_compose').show(); 
+            $('#submit').prop('disabled', false);         
+          });
+
+          $('#deployedBy #infra_docker').click(function(event){
+            $('#docker').show();
+
+            $('#docker_pull_link').hide();
+            $('#docker_pull_link').html("");
+            $('#dockerfile').hide();
+            $('#dockerfile').html("");
+            $('#docker_compose').hide();
+            $('#docker_compose').html("");
+
+          });
+
+          $('#docker #byDockerfile').click(function(event){
+            
+            $('#docker_pull_link').hide();
+            $('#docker_pull_link').html("");
+            $('#docker_compose').hide();
+            $('#docker_compose').html("");
+
+            $('#dockerfile').html(`
+                <label for="dockerfile_input" class="col-sm-3 col-form-label">Dockerfile Archive (*.tar.gz) : </label>
+                <div class="col-sm-9">
+                  <input type="file" id="dockerfile_input" name="dockerfile" required/> <br/>
+                </div>`);
+            $('#dockerfile').show();
+            $('#submit').prop('disabled', false);
+          });
+          
+          $('#docker #byDockerHub').click(function(event){
+            
+            $('#docker_compose').hide();
+            $('#docker_compose').html("");
+
+            $('#dockerfile').hide();
+            $('#dockerfile').html("");
+            
+            $('#docker_pull_link').html(`
+                <label for="docker_pull_input" class="col-sm-3 col-form-label">DockeHub Image (Your_Login/ImageName[:version]): </label>
+                <div class="col-sm-9">
+                  <input type="text" id="docker_pull_input" name="docker_pull_link" class="form-control" required/> <br/>
+                </div>`);
+            $('#docker_pull_link').show();
+            $('#submit').prop('disabled', false);
+          });
+
+
+
+        });
+
+      </script>
+      <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+      <script type="text/javascript">
+        $('#new_upload_form').css('border-radius', '5px');
+        $('#new_upload_form').css('border', '5px dotted blue');
+        $('#new_upload_form').css('padding', '5%');
+
+        function resultModal(newInfo, enableMove) {
+          var ref = this;
+          if(typeof this.isVisible === 'undefined'){
+            this.isVisible = false;
+          }
+          //193
+          if(typeof this.mod === 'undefined'){
+            this.moveToAlgos = $('<button type="button" class="btn btn-primary">Move to My Algos</button>');
+            this.moveToAlgos.click(function(event){
+              window.location.replace("/user/myalgos");
+            });
+            this.moveToAlgos.prop('disabled', true);
+            this.close = $('<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>');
+            
+            this.mod = $('<div class="modal fade" role="dialog">'+
+                            '<div class="modal-dialog">'+
+
+                              '<!-- Modal content-->'+
+                              '<div class="modal-content">'+
+                                '<div class="modal-header">'+
+                                  '<button type="button" class="close" data-dismiss="modal">&times;</button>'+
+                                  '<h2 class="modal-title">Submitting JSON file, Creation process of new Algorithm started</h2>'+
+                                '</div>'+
+                                '<div class="modal-body"></div>'+
+                                '<div class="modal-footer"></div>'+
+                              '</div>'+
+
+                            '</div>'+
+                         '</div>');
+            this.mod.find('div.modal-footer').append(this.moveToAlgos);
+            this.mod.find('div.modal-footer').append(this.close);
+            this.mod.on('hidden.bs.modal', function () {
+              ref.isVisible = false;
+              ref.mod = undefined;
+              console.log('closed the modal');
+            });
+
+          }
+
+          if(newInfo){
+            this.mod.find('div.modal-body').append(newInfo);
+            this.mod.animate({ scrollTop: this.mod.find('div.modal-body').height() }, 10);
+          }
+          if(!this.isVisible){
+            this.mod.find('.modal-dialog').css('width', '80%');
+            this.mod.modal('show');
+          }
+          if(typeof enableMove !== 'undefined' && enableMove){
+            this.moveToAlgos.prop('disabled', false);
+          }
+          return this.mod;
+        }
+        var socket = io(window.location.protocol+'//'+window.location.hostname+'/algos/new');
+        socket.on("user not connected", function(){
+          console.log("user not connected");
+        });
+        
+        socket.on("Error", function(err){
+          console.log("Error : "+err);
+          resultModal("<h3 style=\"color:red;\">&nbsp;&nbsp;&nbsp;Error : "+((typeof err === 'object')?JSON.stringify(err):err)+"<h3><br/>");
+        });
+        
+        socket.on("analysing json file", function(){
+          console.log("analysing json file");
+          resultModal("<h3>Analysing the JSON File ...<h3> <br/><hr/>");
+        });
+
+        socket.on("done with json", function(){
+          console.log("done with json");
+          resultModal("<h3>&nbsp;&nbsp;&nbsp; JSON File is correct <h3> <br/><hr/>");
+          resultModal("<h3>&nbsp;&nbsp;&nbsp; Algorithm recorded in the database <h3> <br/><hr/>");
+          resultModal("<h3>&nbsp;&nbsp;&nbsp; Now trying to build the Kubernetes infrastructure ... <h3> <br/><hr/>");
+        });
+        
+        socket.on("create image succeded", function(){
+          console.log("create image succeded");
+          resultModal("<h3>&nbsp;&nbsp;&nbsp; Kubernetes infrastructure successfully created <h3> <br/>", true);
+        });
+
+        socket.on("create image failed", function(err){
+          console.log("create image failed");
+          resultModal("<h4>&nbsp;&nbsp;&nbsp;The process failed : "+err+" <h4> <br/>");
+        });
+
+        /*
+        socket.on("data stdout build", function(data){
+          console.log("data stdout build");
+          var pre = resultModal().find('pre');
+          if(pre.html()){
+            pre.append(data);
+          }
+          else{
+            resultModal("<h4><pre>"+data+"</pre><h4>");
+          }
+        });
+        socket.on("data stderr build", function(data){
+          console.log("data stdout build");
+          var pre = resultModal().find('pre[style*="color:red"]');
+          if(pre.html()){
+            pre.append(data);
+          }
+          else{
+            resultModal("<h4><pre style=\"color:red;\">"+data+"</pre><h4>");
+          }
+        });
+        */
+        
+      </script>
+    </body>
+    
+  </html>

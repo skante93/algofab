@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include partials/head %>
+    
+  </head>
+  <body>
+    <% include partials/header %>
+    
+    <div class="container">
+      <div>
+        <div id="head-tab" style="margin-bottom: 1.5em">
+       	<ul class="nav nav-tabs" >
+            <li class="active" id="h-history"><a href="#">History</a></li>
+            <li id="h-tokens"><a href="#">Tokens</a></li>
+          </ul>
+        </div>
+        <div id="body-tab">
+          <div id="b-history">
+            <% if(typeof history !== 'undefined' && history.length > 0){ %>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th> Algo </th>
+                      <th> Date </th>
+                      <th> Duration (s) </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for(var i=0; i < history.length; i++) { %>
+		    <%   if (history[i].algo) { %>
+                      <tr>
+                        <td> <a href="/algo/<%= history[i].algo.meta._id %>/page"><h4><%= history[i].algo.meta.title %></h4> v<%= history[i].algo.version %> </a></td>
+                        <td> <%= history[i].date %> </td>
+                        <td> <%= history[i].duration %> </td>
+                      </tr>
+		    <%   } %>
+                    <% } %>
+                  </tbody>
+                </table>
+            <% } else { %>
+              <p>There is no history to show for this period.</p>
+            <% } %>
+          </div>
+          <div id="b-tokens">
+            <% if(typeof tkns_err !== 'undefined'){ %>
+              <div class="alert alert-danger"><%= tkns_err %></div>
+            <% } else { %>
+              <div class="row">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#new-token-modal" style="margin-bottom:1.5em;">Create new token </button>
+
+
+                <div class="modal fade" role="dialog" id="new-token-modal">
+                  <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal">&times;</button>
+                          <h4 class="modal-title">New Token Authorizations</b></h4>
+                      </div>
+                      <div class="modal-body">
+                        <form action="/user/tkn" method="post">
+                          <fieldset>
+                            <legend> Default </legend>
+                            <div class="form-group row">
+                              <label for="default-rule" class="col-sm-1 col-form-label">Default Rule :  </label>
+                              <div class="col-sm-3">
+                                <select class="custom-select form-control" id="default-rule" name="default-rule">
+                                  <option value="allow" selected>Allow all incoming requests</option>
+                                  <option value="deny">Block all incoming requests</option>
+                                </select>
+                              </div>
+                            </div>
+                          </fieldset>
+                          
+                          <fieldset>
+                            <legend> Except </legend>
+                            <div class="form-group row">
+                              <label class="col-sm-1 col-form-label"> Rule on : </label>
+                              <div id="except-rules" class="col-sm-8">
+                                <div id="except-rules-evolving">
+                                </div>
+                              </div>
+                              <div class="col-sm-1">
+                                <button type="button" class="btn" id="except-add">+</button>
+                              </div>
+                            </div>
+                          </fieldset>
+                          <div class="form-group row">
+                              <button type="submit" class="btn btn-primary pull-right">Submit</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                
+              </div>
+              <div class="row">
+                <% if(typeof tkns !== 'undefined' && tkns.length > 0 ) {%>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th> Value </th>
+                      <th> Creation Date </th>
+                      <th> Authorizations </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% for(var i=0; i < tkns.length; i++) { %>
+                    <tr>
+                      <td style="max-width: 20em; word-wrap: break-word;"> <%= tkns[i].token %> </td>
+                      <td> <%= tkns[i].creation_date %> </td>
+                      <td> <%= (tkns[i].authorizations)? tkns[i].authorizations : "default" %> </td>
+                      <td> <a href="/user/remove-tkn/<%= tkns[i]._id %>"><span class="glyphicon glyphicon-trash"></span></a> </td>
+                    </tr>
+                    <% } %>
+                  </tbody>
+                </table>
+                <% } else { %>
+                  <p>You currently don't have any token, feel free to create some.</p>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <% include partials/footer.ejs %>
+    <script type="text/javascript">
+      $('.modal-dialog').width("80%");
+
+      $("#b-tokens").hide();
+
+      $("#h-history").click(function(){
+        $("#h-history").addClass("active");
+        $("#h-tokens").removeClass("active");
+
+        $("#b-history").show();
+        $("#b-tokens").hide();
+      }) ;
+
+      $("#h-tokens").click(function(){
+        $("#h-history").removeClass("active");
+        $("#h-tokens").addClass("active");
+
+        $("#b-history").hide();
+        $("#b-tokens").show();
+      }) ;    
+
+      var except_code = `
+        <div class="except-rule row">
+
+          <div class="col-sm-3">
+            <select class="custom-select form-control" onchange="changeExceptRuleOn(this)" id="rule">
+              <option value="algo" selected>Algo name</option>
+              <option value="author">Algo author</option>
+            </select>
+          </div>
+          <div class="col-sm-6">
+            <input type="text" class="form-control" onkeyup="changeExceptRuleSpec(this)"/>
+          </div>
+          
+          <div class="col-sm-1">
+            <button type="button" class="btn" class="except-remove" onclick="removeItem(this)">-</button>
+          </div>
+          <input type="hidden" name="" value="">
+        </div>
+      `;
+
+      //
+      $("#except-add").click(function(){
+        var newItem = $(except_code);
+        newItem.find('input[type="hidden"]').attr("name", "algo");
+        $("#except-rules-evolving").prepend(newItem);
+      });
+      
+      function removeItem(elem){
+        console.log("Removing item");
+        $(elem).parent().parent().remove();
+      }
+
+      
+      function changeExceptRuleOn(elem) {
+        var hidden = $(elem).parent().parent().find('input[type="hidden"]');
+        var name = $(elem).find('option:selected').attr('value');
+        //console.log('hidden : '+hidden[0].outerHTML + ', name : '+name);
+        
+        console.log("- Before hidden name : "+hidden.attr('name'));
+        hidden.attr("name", name);
+        console.log("- After hidden name : "+hidden.attr('name'));
+        
+      }
+      function changeExceptRuleSpec(elem) {
+        var hidden = $(elem).parent().parent().find('input[type="hidden"]');
+        //var name = $(elem).find('option:selected').attr('value');
+        //console.log('hidden : '+hidden[0].outerHTML + ', name : '+name);
+        
+        console.log("- Before hidden value : "+hidden.attr('value'));
+        hidden.attr("value", $(elem).val());
+        console.log("- After hidden value : "+hidden.attr('value'));
+      }
+    </script>
+  </body>
+</html>

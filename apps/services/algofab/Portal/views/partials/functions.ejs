@@ -1,0 +1,62 @@
+
+<% 
+	my_alert = function(str){
+		return `<script type="text/javascript"> alert("${str}") </script>`
+	} 
+
+	generateMenu = function(menuData, id,  level){
+		level = level? level : 0;
+
+		var r = `<ul class="my-docs-menu ${ id && id.startsWith('f')? 'collapse': ''}" id="${ id ? 'collapse'+id.substring(1): ''}">`;
+		
+		for(var i=0; i < menuData.length; i++){
+			var active = (typeof currentDoc !== 'undefined' && currentDoc != null && menuData[i].id == currentDoc.parentIds[level])? true : false;
+			r += `<li class="my-docs-menu-item ${ active? 'active': '' }">`;
+			if ("sub" in menuData[i] ){
+				r += `
+
+					<a data-toggle="collapse" href="#collapse${menuData[i].id}" role="button" aria-expanded="false" aria-controls="collapse${menuData[i].id}"> 
+			  			${menuData[i].name} <span class="caret"></span>
+			  		</a>
+			  	</li>
+			  	<li class="my-docs-menu-item">
+					${ generateMenu(menuData[i].sub, (active? 't': 'f')+menuData[i].id, level+1) }
+				`;
+
+ 			}
+			else{
+				r += `<a href="/docs?id=${menuData[i].id}">${menuData[i].name}</a> `;
+			}
+			r += '</li>';
+		}
+		r += '</ul>';
+		return r;
+	} 
+    
+%>
+
+<!-- <ul class="my-docs-menu ">
+					  	<li class="my-docs-menu-item"><a href="#"> A </a></li>
+					  	<li class="my-docs-menu-item"><a href="#"> B </a></li>
+					  	<li class="my-docs-menu-item active">
+					  		<a data-toggle="collapse" href="#c-content" role="button" aria-expanded="false" aria-controls="c-content"> 
+					  			C <span class="caret"></span>
+					  		</a>
+					  	</li>
+					  	<li class="my-docs-menu-item">
+					  		<ul id="c-content" class="my-docs-menu collapse">
+					  			<li class="my-docs-menu-item"><a href="#"> C1 </a> </li>
+					  			<li class="my-docs-menu-item active">
+					  				<a data-toggle="collapse" href="#c-content1" role="button" aria-expanded="false" aria-controls="c-content1"> 
+					  					C2<span class="caret"></span>
+					  				</a>
+					  			</li>
+					  			<li class="my-docs-menu-item"> 
+							  		<ul id="c-content1" class="my-docs-menu collapse">
+							  			<li class="my-docs-menu-item active"><a href="#"> C21 </a></li>
+							  			<li class="my-docs-menu-item"><a href="#"> C22 </a></li>
+							  		</ul> 
+					  			</li>
+					  		</ul>
+					  	</li>
+					</ul>  -->

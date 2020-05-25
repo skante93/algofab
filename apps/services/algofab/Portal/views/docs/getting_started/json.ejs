@@ -1,0 +1,244 @@
+
+
+<% var content = `
+	
+		<h3> JSON Manifest </h3>
+		<p>
+			In this section we are going to create a manifest that entirely describe our algorithm. This manifest, in JSON format, must contain any information relative to your algorithm for not only its deployment but also its management on the platform. <br>
+		</p>
+		<p class="alert">
+			Before you continue reading you might want to visit the <a href="/docs/json-manifest">dedicated page </a> to the full explanation of the JSON Manifest, you will find a more exhaustive and hopefully satisfactory explanation. If you haven’t checked that page out yet, we highly recommend you to do so.
+		</p>
+		<p>
+			<h4>Algorithm creation</h4>
+			<p>
+				The manifest is not for building the algorithm itself, rather it is for building versions of your algorithms. That means each version has a manifest of its own, and all the versions of the same algorithm are linked to form the logical object Algorithm. <br>
+				Let's start by creating an algorithm, to do so visit <a href="/algo/new-algo">https://portail.algofab.org/algo/new-algo</a> and complete the form as shown below in FIG 1.
+			</p>
+			
+			<p>
+				<figure class="row">
+					<img src="/img/Algo-new.PNG" alt="new algo" class="col-sm-12">
+					<figcaption style="text-align: center">FIG 1 : Creating HelloWorld on the Portal</figcaption>
+				</figure>
+			</p>
+			Here are the information each field relates to :
+			<ul>
+				<li>
+					<b>Title</b> : This field should be the name of your algorithm in a String. Other than the format we have two other rules about the field title : the field has to have at least four characters and pass the Regular Expression “^[a-zA-Z0-9_\.]{4,}$”.
+				</li>
+				<li>
+					<b>Description</b> : This field which describes your algorithm will be used to promote it whenever users access to the Demo page of your algorithm. Specifying this field is also obligatory.<br>
+					You can put html code inside your description, <b>however &lt;script&gt; elements are automatically removed from your description</b>. You should then avoid putting &lt;script&gt; inside your description otherwise your result may be different from what you expected. <br>
+				</li>
+				<li>
+					<b>Keywords</b> : is a set tags associated with the algorithm and used to perform search tasks. Its format is an Array of String. Although it is higly recommended, this field is not required.
+				</li>
+			</ul>
+			<p>
+				After confirmation, you can see on <a href="/user/myalgos">https://portail.alogfab.org/user/myalgos</a> that ne new algorithm appeared. Click on the link "visit page" under the box representing the HelloWorld you should end up on the page of your algorithm HelloWorld. Now we will add a version to this newly created algorithm.
+			</p>
+		</p>
+
+		<p>
+			<h4>Version creation</h4>
+			<p>
+				To create version we will need JSON <a href="/docs/json-manifest">manifest</a> (follow that link to understand to different parts of that file).
+				<code class="open-close-content">
+					{
+						"version" : "1.0.0",
+						"comment" : [
+							"&lt;p&gt;This is the very first version. In the nex verison we plan",
+							" to fix the bugs to make more stable and also readapt the algorithm",
+							" to make it more performant&lt;/p&gt;"
+						],
+						"API" : {
+							"GET" : [
+								{
+									"uri" : "/",
+									"inputs" : [
+										{
+											"name" : "firstname",
+											"mime_types" : "text",
+											"required" : true
+										},
+										{
+											"name" : "lastname",
+											"mime_types" : "text",
+											"required" : false
+										},
+										{
+											"name" : "outformat",
+											"mime_types" : "text",
+											"required" : false
+										}
+									],
+									"outputs" : ["xml", "json", "html"],
+									"description" : ""
+								},
+								{
+									"uri" : "/:daytime",
+									"inputs" : [
+										{
+											"name" : "firstname",
+											"mime_types" : "text",
+											"required" : true
+										},
+										{
+											"name" : "lastname",
+											"mime_types" : "text",
+											"required" : false
+										},
+										{
+											"name" : "outformat",
+											"mime_types" : "text",
+											"required" : false
+										}
+									],
+									"outputs" : ["xml", "json", "html"],
+									"description" : ""
+								}
+							],
+							"POST" :[
+								{
+									"uri" : "/",
+									"inputs" : [
+										{
+											"name" : "firstname",
+											"mime_types" : "text",
+											"required" : true
+										},
+										{
+											"name" : "lastname",
+											"mime_types" : "text",
+											"required" : false
+										},
+										{
+											"name" : "outformat",
+											"mime_types" : "text",
+											"required" : false
+										}
+									],
+									"outputs" : ["xml", "json", "html"],
+									"description" : ""
+								},
+								{
+									"uri" : "/:daytime",
+									"inputs" : [
+										{
+											"name" : "firstname",
+											"mime_types" : "text",
+											"required" : true
+										},
+										{
+											"name" : "lastname",
+											"mime_types" : "text",
+											"required" : false
+										},
+										{
+											"name" : "outformat",
+											"mime_types" : "text",
+											"required" : false
+										}
+									],
+									"outputs" : ["xml", "json", "html"],
+									"description" : ""
+								}
+							]
+						},
+						"deployment" : {
+							"main_service" : "helloworld",
+							"kubernetes" : [
+								{
+									"apiVersion" : "v1",
+									"kind" : "Pod",
+									"metadata" : {
+										"name" : "helloworld",
+										"labels" : {
+											"app" : "helloworld",
+											"by" : "John_Doe",
+											"from" : "Company"
+										}
+									},
+									"spec" : {
+										"containers" : [
+											{
+												"name" : "hello",
+												"image" : "skante/helloworld",
+												"ports" : [
+													{
+														"name" : "http",
+														"containerPort" : 3000
+													}
+												]
+											}
+										]
+									}
+								},
+								{
+									"apiVersion" : "v1",
+									"kind" : "Service",
+									"metadata" : {
+										"name" : "helloworld"
+									},
+									"spec" : {
+										"selector" : {
+											"app" : "helloworld",
+											"by" : "John_Doe",
+											"from" : "Company"
+										},
+										"type" : "NodePort",
+										"ports" : [
+											{
+											 "port" : 3000
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				</code>
+			</p>
+			<p>
+				Now on your HelloWorld page look for the section "Add new version" and click on the button. You should see a form with a single upload field, that's where you need to upload your JSON manifest. Afterwards you see the trace operations (as shown below on FIG 2) happening on the platform and whenever there is an error, you will see it as well. 
+			</p>
+			<p>
+				<figure>
+					<img src="/img/Algo-version-submit.PNG" alt="" class="col-sm-12">
+					<figcaption style="text-align: center">FIG 2 : Trace of operation leading to the algorithms deployment.</figcaption>
+				</figure>
+			</p>
+			<p>
+				If that step succeeds, you can go ahead and test your algorithm.
+			</p>
+		</p>
+	`
+%>
+
+<% include ../base %>
+
+<!DOCTYPE html>
+<html>
+  	<head>
+		<% include ../../partials/head %>
+    
+  	</head>
+  	<body>
+    	<% include ../../partials/header %>
+
+    	<div class="container">
+    		<div class="row">
+    			<aside class="my-docs col-sm-3">
+		    		<%- generateMenu( docs ) %>
+		    	</aside>
+		    	<div class="col-sm-9">
+					
+
+				</div>
+			</div>
+		</div>
+
+		<% include ../../partials/footer %>
+	</body>
+</html>

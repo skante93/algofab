@@ -1,0 +1,28 @@
+<% var content = `
+	
+		<h3>Create account </h3>
+		<p>
+			To create an account you need to visit the <a href="/signup"> Signup page </a> and submit the form after filling in the required information. 
+		</p>
+		<p>
+			The account creation is done two steps: 
+			<ul>
+				<li> 
+					<b> Pre-subscription: </b> where you need to specify your email address and a username both unique to identify you on Algofab. After this step, an email is sent with the link allowing the user to validate his email address, which is necessary in order for the account to be granted the permission to login. By following the link you access the next step.
+				</li>
+				<li>
+					<b> Account completion: </b> during this step the user needs to provide further personal information as well as choose a password. Once this step is completed, he is automatically logged in and is redirected to the <a href="/article/catalog">catalog page</a>. 
+				</li>
+			</ul>
+		</p>
+
+		<h3> See also ...</h3>
+		<ul>
+			<li> <a href="#">How to recover lost password or username? </a></li>
+			<li> <a href="#">How to remove account? </a></li>
+		</ul>
+
+	`
+%>
+
+<% include ../base %>

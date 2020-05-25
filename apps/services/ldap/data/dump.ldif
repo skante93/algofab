@@ -1,0 +1,14 @@
+dn: dc=ldap,dc=algofab,dc=fr
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: TeraLab IMT
+dc: ldap
+
+dn: cn=admin,dc=ldap,dc=algofab,dc=fr
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: admin
+description: LDAP administrator
+userPassword:: e1NTSEF9R0NNTjFqSU1kZnNuaWJTaXdPUkJwL1p1Smp2U1JhWmE=
+

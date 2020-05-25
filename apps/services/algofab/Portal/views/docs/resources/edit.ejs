@@ -1,0 +1,47 @@
+
+<% var content = `
+	
+		<h3>Edit resource </h3>
+		<p> 
+			There are two objects on different level to adminstrate when it comes to resources : the rsources themselves and their versions. This section of the documentation shall explain how to proceed when editing either one of them. 
+		</p>
+		<h4> Pre steps: </h4>
+		<p>
+			In either cases, you first need to make sure:
+			<ul>
+				<li> Your are <a href="/signin">logged in to Algofab</a> </li>
+				<li> Then head to the   <a href="/search">search page</a> and search for the resource to be delete (or the resource whose version you wish to delete) </li>
+				<li> Once found, click on the resource to head to its presentation and management page.</li>
+				<li> Check you can find right below the name of the resourcen the two button "Edit Resource" and "Delete resource". If you can not find them, then that means you are not accesing the resource in the admin (full privileged) mode, hence you can not delete this resource nor a version of it. </li>
+			</ul>
+		</p>
+
+		<h4> Edit a resource </h4>
+		<p>
+			These possibilities you have when updating a resource are pretty much about all the fields needed to <a href="#">create a resource</a> (name, short introduction, logo ...), i.e you can updates each one of those "attributes" of the resource. <br>
+
+			To update the resource, on resource management page, click on the "Edit resource" button which will open a modal window containing the form used to update the information.
+		</p>
+
+		<h4> Edit a resource version </h4>
+		<p>
+			To manage a resource these are the steps to follow :
+			<ul>
+				<li> the pre-steps described above </li>
+				<li> Then check the Selection field "Choose a version to display" to access the version number you wish to delete and click on it. </li>
+				<li> Next, after you get to the page of the selected version, you can scrol till the section "Version &lt;x.y.z&gt;" (ver x.y.z is the version number). There click on the tab "Manage"</li>
+				<li> Finally you should see an "Edit version" button, click on it. </li>
+				<li> Afterwards you can update the resource version by filling in the form in modal windows that just opened.</li>
+			</ul>
+		</p>
+		
+
+		<h3> See also ...</h3>
+		<ul>
+			<li> <a href="#">How to recover lost password or username? </a></li>
+			<li> <a href="#">How to remove account? </a></li>
+		</ul>
+	`
+%>
+
+<% include ../base %>

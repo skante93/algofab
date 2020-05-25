@@ -1,0 +1,96 @@
+
+
+<% var content = `
+	
+		<h3>Create Resources</h3>
+
+		<p> 
+			There are two objects on different level to adminstrate when it comes to resources : the rsources themselves and their versions. This section of the documentation shall explain how to proceed when creating either one of them. 
+		</p>
+
+		<h4> Prerequisistes </h4>
+		<p>
+			Before you begin, make sure the following prerequisites are fullfilled : 
+			<ul>
+				<li> <b>Account Algofab:</b>  Make sure you have an Algofab account. If you don't have one, you can <a href="/signup"> Sign up here </a>.</li>
+			</ul> 
+		</p>
+
+		<h4> Create A Resource </h4>
+		<p>
+			Once the prerequisites are fullfilled, you can access the <a href="/article/new">resource creation page</a> where you can fill in the form to create a new resource. 
+		</p>
+		<p>
+			You will need to provide the following information by the "Creating new Resource" form.
+			<ul>
+				<li>
+					<b>Name: </b> Name of the resource to be created.
+				</li>
+
+				<li>
+					<b>Short Intro: </b> Short few sentences introducing the resource. The field is used to introduce resources appearing in a search or in a catalog.
+				</li>
+
+				<li>
+					<b>Logo: </b> The logo matching the resource (or the author). Accepted formats: jpeg & png.
+				</li>
+
+				<li>
+					<b>Categories: </b> Represent what type (Selection field "Asset type") and what fields of interest the resource belongs to, wether it be technically (Selection field "Technical category") or business-related (Selection field "Business category").  
+				</li>
+
+				<li>
+					<b>Description: </b> A text (in HTML format) describing in as much details as necessary what the resource is about. It all comes down to the information the author is willing to include in this section (he can use hyperlink to refenrece external documentation, his own website...)
+				</li>
+
+				<li>
+					<b>Tags: </b> A set of labels to be attached to this resource.
+				</li>
+			</ul>
+
+			After submitting the form you can see the resource in the <a href="/article/catalog">catalog</a>
+		</p>
+
+		<p class="alert alert-warning">
+			<h4> Warning </h4>
+			Here are some constraints you will need to pay more attention about...
+		</p>
+
+
+
+		<h4> Create A Resource Version</h4>
+		<p>
+			To create a new version for a resource, head to the management page of the resource (you can <a href="/search">search</a> for the resource if you don't know how to find). 
+		</p>
+		<p>
+			Click afterwards on the "Create new Version" button leading to a modal with the form you will need fill in to create the new version. Here are the fields you will nned provide:
+			<ul>
+				<li>
+					<b>Version number: </b> Version number of the version to be created. Format is "x.y.z" where <b>x, y and z</b> are all numbers.
+				</li>
+				<li>
+					<b>Documentation: </b> A text (in HTML format) describing in as much details as necessary what the resource version is about (inputs, outputs, APIs ...). It all comes down to the information the author is willing to include in this section (he can use hyperlink to refenrece external documentation, his own website...)
+				</li>
+
+				<li>
+					<b>Resource Data: </b> Allows you to uoplad up to xMB of files bit by bit (you wont be able to submit the form until you make the upload). The data (tar archive) contains all the files necessary for the resource to be exploitable by another user (provided a clear dcoumentation). 
+				</li>
+			</ul>
+
+			After submitting the form you can see the resource in the <a href="/article/catalog">catalog</a>
+		</p>
+			
+		<p class="alert alert-warning">
+			<h4> Warning </h4>
+			Here are some constraints you will need to pay more attention about...
+		</p>
+
+		<h3> See also ...</h3>
+		<ul>
+			<li> <a href="#">How to recover lost password or username? </a></li>
+			<li> <a href="#">How to remove account? </a></li>
+		</ul>
+	`
+%>
+
+<% include ../base %>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ../partials/head %>
+    
+  </head>
+  <body>
+    <% include ../partials/header %>
+      
+      <div class="container">
+        <% if(typeof search !== 'undefined' && search){ %>
+        <div class="row">
+          <form method="get" id="search-form">
+            <div class="form-group row">
+              <div class="col-sm-9">
+                  <input type="text" class="form-control form-control-lg" name="text" id="search-text" />
+              </div>
+              <input type="hidden" name="name" id="search-name" value="">
+              
+              <button class="col-sm-3 btn btn-primary" id="submit-search">Search</button>
+            </div>
+          </form> 
+        </div>
+        <% } %>
+        <div class="row">
+          <button class="col-sm-3 btn btn-primary" data-toggle="modal" data-target="#newVersionModal"> Filter results </button>
+          <div class="modal fade" id="newVersionModal" tabindex="-1" role="dialog" aria-labelledby="newVersionModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg" role="document">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <h2 class="modal-title" id="exampleModalLabel"> Filtering options </h2>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                          </button>
+                      </div>
+                      <div class="modal-body">
+                          <form method="get" action="/article/list" id="filter-options-form">
+
+                            <input type="hidden" name="text" value="">
+                            <div class="form-group row">
+                                <label for="title" class="col-sm-3 col-form-label col-form-label-lg"> Name : </label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control form-control-lg" name="name" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-2 pull-right">
+                                    <!-- <input type="button" value="Submit" id="submit" class="btn btn-primary pull-right"/> -->
+                                    <%if (typeof search !== 'undefined' && search) { %>
+                                    <input type="submit" value="Filter" id="submit" class="btn btn-primary pull-right" data-dismiss="modal" />
+                                    <% } else{ %>
+                                    <input type="submit" value="Filter" id="submit" class="btn btn-primary pull-right"/>
+                                    <% } %>
+                                </div>
+                            </div>
+
+                          </form>
+                      </div>
+                  </div>
+              </div>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <% if (articles.length == 0){ %>
+          <div class="row">
+            <h3 class="alert alert-warning">No resource found.</h3>
+          </div>
+        <% } else { %>
+          <% for(var i=0; i < articles.length; i++) { %>
+
+            <a href="/article/<%= articles[i]._id.toString() %>">
+            <div class="algo-list-item col-sm-3" data-toggle="tooltip" data-placement="left" title="<%= articles[i].short_intro %>">
+              <div class="article-name">
+                <div>
+                  <% if (categories.types.filter(e=> e.id == articles[i].asset_type).length != 0) { %>
+                    <img src="<%= categories.types.filter(e=> e.id == articles[i].asset_type)[0].icon %>" > 
+                  <% } %>
+                </div>
+                <%= articles[i].name %> 
+
+              </div>
+              <!-- <div class="article-logo" width="100%" height="100%" style="background-size: contain; background: url(\"<%= articles[i].logo %>\") no-repeat center;"></div> -->
+              <div class="article-logo" style="border: 1px solid black; height: 10em;">
+                <% if (articles[i].logo) { %>
+                <img src="<%= articles[i].logo %>" width="100%" height="100%">
+                <% } else {%>
+                <div style="text-align: center;">No logo available</div>
+                
+                <% } %>
+              </div>
+            </div>
+            </a>
+          <% } %>
+        <% } %>
+      </div>
+    
+    <% include ../partials/footer.ejs %>
+    <script type="text/javascript">
+      $(function(){
+        <% if(typeof search !== 'undefined' && search){ %>
+        var urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('text')){
+          console.log("we have text");
+          $('#filter-options-form [name="text"]').val( urlParams.get('text') );
+          $('#search-form [name="text"]').val( urlParams.get('text') );
+        }
+        if (urlParams.has('name')){
+          console.log("we have name");
+          $('#filter-options-form [name="name"]').val( urlParams.get('name') );
+          $('#search-form [name="name"]').val( urlParams.get('name') );
+        }
+
+        $('#search-text').change(function(){
+          $('#filter-options-form [name="text"]').val( $(this).val() );
+        });
+
+        $('#filter-options-form').change(function(){
+          console.log("Filter options just changed!!");
+          var name = $(this).find('[name="name"]').val();
+          console.log('name : ', name);
+
+          $('#search-name').val(name);
+
+        });
+
+        $('#filter-options-form').submit(function(){
+          console.log( "TEXT : ",  $('#filter-options-form [name="text"]').val());
+          
+        });
+        <% } %>
+        // $('#submit-search').click(function(){
+        //   $('#filter-options-form').submit();
+        // });
+      });
+    </script>
+  </body>
+</html>

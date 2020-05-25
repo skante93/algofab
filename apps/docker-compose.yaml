@@ -1,0 +1,57 @@
+
+version: '3'
+
+services:
+  ldap:
+    build: ./services/ldap
+    # entrypoint: /bin/sh -c 'while [ true ]; do echo "turn"; sleep 10; done'
+    volumes:
+      - ./services/ldap/conf/entrypoint.sh:/tmp/entrypoint.sh
+      - ./data/ldap/:/data
+    ports:
+      - 8081:80
+    env_file:
+      - .env
+    privileged: true
+  mongo:
+    image: mongo
+    volumes:
+      - ./data/mongo/:/data/db
+
+  portal:
+    build: ./services/algofab
+    command: Portal
+    ports:
+      - 8082:8080
+    env_file:
+      - .env
+    user: root
+    volumes:
+      - ./services/algofab:/home/admin/algofab
+      - ./data/accounts/:/accounts
+
+  im:
+    build: ./services/algofab
+    command: IM-Server
+    env_file:
+      - .env
+    volumes:
+      - ./services/algofab:/home/admin/algofab
+      - ./data/accounts/:/accounts
+
+  rh:
+    build: ./services/algofab
+    command: RH-Server
+    ports:
+      - 8083:3000
+    env_file:
+      - .env
+    volumes:
+      - ./services/algofab:/home/admin/algofab
+
+  # portal:
+  #   build: ./algofab
+  # im:
+  #   build: ./algofab
+  # rh:
+  #   build: ./algofab
