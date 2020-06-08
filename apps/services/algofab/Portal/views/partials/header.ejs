@@ -67,8 +67,8 @@
                 <a href="#" class="dropdown-toggle <%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'user')? 'active':''%>" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Connected as <%= user.username %> <span class="caret"></span></a>
                 <ul class="dropdown-menu">
                   <li><a href="/user/account">Account</a></li>
-                  <li><a href="/user/History">History</a></li>
-                  <li><a href="/user/myalgos">My contributions</a></li>
+                  <!-- <li><a href="/user/History">History</a></li> -->
+                  <li><a href="/article/list?autorID=<%= user._id.toString() %>">My contributions</a></li>
                   <!-- <li><a href="/user/subscriptions">My subcriptions</a></li> -->
                   <li><a href="/user/bugreports">Bug reports</a></li>
                 </ul>

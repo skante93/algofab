@@ -51,7 +51,7 @@
                             <h2 id="title" style="text-align: center;"><%= article.name %></h2> 
                             <hr>
                             <div style="text-align: center;">
-                                By <a href="mailto:<%= article.author.email %>"> <%= article.author.firstname %> <%= article.author.lastname %> </a>
+                                By <a href="mailto:<%= article.author.email %>"> <%= article.author.firstname %> <%= article.author.lastname %> </a>, on <%= article.date.toLocaleDateString() %>
                             </div>
                         </div>
                         <div class="col-sm-4">

@@ -18,185 +18,10 @@ module.exports = function(SG) {
 	var BugReports = SG.mongo.model('BugReports');
 	var AVReports = SG.mongo.model('AVReports');
 	
+	var Article = mongo.model('Article');
+
 	var current_user;
-	/*
-	var collections = {
-		User : User,
-		Algos : Algos,
-		AlgosMeta : AlgosMeta,
-		Subscriptions : Subscriptions
-	}*/
-	/*
-	var socketcopy = null;
-	SG.io.of('/algo-page/').on('connection', function(socket){
-		socketcopy = socket;
-    	socket.on('room', function(room){
-    		var msg = '/algo-page/'+" <<< ROOM >>> | CLIENT ADMITTED IN ROOM : "+room;
-			console.log(msg);
-			
-			socket.join(room);
-		});
-    	
-		socket.on('updateAlgo', function(algoID, title, description, keywords){
-			AlgosMeta.update({ _id : algoID }, { $set : { title : title, description : description, keywords : keywords } }).exec(function(err){
-				if (err)
-					return socket.emit('updateAlgo', "failure", err);
-				socket.emit('updateAlgo', 'success');
-			});
-		});
-
-		socket.on('toggleHidden', function(algoID, version, username){
-			AlgosMeta.findById(algoID).populate([ 'author',
-			{
-				path : "versions",
-				match : {
-					version : version
-				}
-			}]).exec(function(err, algo){
-				if (err)
-					return socket.emit('toggleHidden', "failure", version, err);
-				if(!algo)
-					return socket.emit('toggleHidden', "failure", version, "This algorithm does not exist");
-				if (algo.versions.length == 0)
-					return socket.emit('toggleHidden', "failure", version, 'The version "'+version+'" was not found.');
-
-				if (algo.author.username != username)
-					return socket.emit('toggleHidden', "failure", 'The algorithm doe not belong to you, you can\'t take such a decision');
-				Algos.update({ meta : algoID, version : version }, { $set : { hidden : !algo.versions[0].hidden } }).exec(function(err){
-					if(err){
-						return socket.emit('toggleHidden', "failure", 'DB error');
-					}
-					socket.emit('toggleHidden', 'success', version, algo.versions[0].hidden);
-				});
-				
-			});
-		});
-
-		socket.on('remove-version', function(algoID, version, username){
-			AlgosMeta.findById(algoID).populate([ 'author',
-			{
-				path : "versions",
-				match : {
-					version : version
-				}
-			}]).exec(function(err, algo){
-				if (err)
-					return socket.emit('remove-version', "failure", version, err);
-				if(!algo)
-					return socket.emit('remove-version', "failure", version, "This algorithm does not exist");
-				if (algo.versions.length == 0)
-					return socket.emit('remove-version', "failure", version, 'The version "'+version+'" was not found.');
-
-				if (algo.author.username != username)
-					return socket.emit('remove-version', "failure", version, 'The algorithm doe not belong to you, you can\'t take such a decision');
-				
-				restler.post(SG.params.IM_PROTOCOL + SG.params.IM_ADDR +':'+ SG.params.IM_PORT+ "/remove-algo-version", 
-                	{ data : {_id : algo.versions[0]._id.toString() } }
-                ).on('complete', function(body, http_response){
-                	console.log("body : "+body+", body.status : "+body.status);
-					if(body instanceof Error){
-						return socket.emit('remove-version', "failure", version, "Internal Network error.");
-					}
-					if(body.status == 'failure'){
-						console.log(body.message);
-						return socket.emit('remove-version', "failure", version, body.message);
-					}
-					Algos.remove({ meta : algoID, version : version }).exec(function(err){
-						if(err) {
-							return console.log("Remove algo from DB error :"+err);
-						}
-						socket.emit('remove-version', 'success', version, body.message);
-						
-					});
-				});
-				
-			});
-		});
-
-		socket.on('edit-version', function(algoID, version, username, contents){
-			restler.post(SG.params.IM_PROTOCOL + SG.params.IM_ADDR +':'+ SG.params.IM_PORT+ "/edit-algo-version-number", 
-            	{ data : {_id : algoID, version : version, username : username, contents : contents } }
-            ).on('complete', function(body, http_response){
-            	console.log("body : "+body+", body.status : "+body.status);
-				if(body instanceof Error){
-					return socket.emit('edit-version', "failure", version, "Internal Network error.");
-				}
-				if(body.status == 'failure'){
-					console.log(body.message);
-					return socket.emit('edit-version', "failure", version, "Internal coordination error.");
-				}
-				socket.emit('edit-version', 'success', version, body.message);
-				
-			});
-			/*
-			AlgosMeta.findById(algoID).populate([ 'author',
-			{
-				path : "versions",
-				match : {
-					version : version
-				}
-			}]).exec(function(err, algo){
-				if (err)
-					return socket.emit('edit-version', "failure", version, err);
-				if(!algo)
-					return socket.emit('edit-version', "failure", version, "This algorithm does not exist");
-				if (algo.versions.length == 0)
-					return socket.emit('edit-version', "failure", version, 'The version "'+version+'" was not found.');
-
-				if (algo.author.username != username)
-					return socket.emit('edit-version', "failure", version, 'The algorithm doe not belong to you, you can\'t take such a decision');
-				
-
-				console.log("contents : "+util.inspect(contents))
-				var unscript_mask = /<(( )*|(\t)*)*script(.)*<(( )*|(\t)*)*\/(( )*|(\t)*)*script(( )*|(\t)*)*>/;
-				contents.comment = contents.comment.replace(unscript_mask, '');
-				
-				if(contents.version != version){
-					if(!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(contents.version)){
-						return socket.emit('edit-version', "failure", version, 'version is in tha wrong format');
-					}
-					Algos.findOne({ meta : algoID, version : contents.version }).exec(function(err, v){
-						if (err){
-							return socket.emit('edit-version', "failure", version, err);
-						}
-						if (v){
-							console.log("edit-version : v : "+util.inspect(v));
-							return socket.emit('edit-version', "failure", version, "The requested version already exist.");
-						}
-
-						Algos.update({ meta : algoID, version : version }, { $set : contents }).exec(function(err){
-							if(err){
-								return socket.emit('edit-version', "failure", 'DB error');
-							}
-							socket.emit('edit-version', 'success', version, contents);
-						});
-					});
-				}
-				else {
-					Algos.update({ meta : algoID, version : version }, { $set : contents }).exec(function(err){
-						if(err){
-							return socket.emit('edit-version', "failure", 'DB error');
-						}
-						socket.emit('edit-version', 'success', version, contents);
-					});
-				}
-			});
-			* /-----------------
-		});
-
-		socket.on('error', function(error){
-        	console.log('/algo-page/'+' <ERROR> | MESSAGE : '+error);
-		});
-
-		socket.on('disconnect', function(reason){
-			console.log('/algo-page/'+' <DISCONNECT> | MESSAGE : '+reason);
-		});
-
-		socket.on('clean', function(){
-			socket.disconnect();
-		});
-    });
-	*/
+	
 
 	router.use(function(req, res, next){
 		console.log("----------------------------------------------------------");
@@ -237,7 +62,7 @@ module.exports = function(SG) {
 		if(!req.session.user)
 			res.redirect('/');
 		else {
-			res.render('users_account', {pop_message : pop_message, title : req.session.user.username+ ' : Account', activeHeadersComp : 'user', user : req.session.user});
+			res.render('user/account', {pop_message : pop_message, title : req.session.user.username+ ' : Account', activeHeadersComp : 'user', user : req.session.user});
 		}
 	});
 
@@ -365,6 +190,7 @@ module.exports = function(SG) {
 		}
 	});
 
+	/*
 	router.post('/tkn', function(req, res) {
 		console.log("----------------------------------------------------------");
 	    console.log("\t\t USER : MIDDLEWARE 4");
@@ -479,6 +305,7 @@ module.exports = function(SG) {
 			});
 		}
 	});
+	*/
 
 	router.post('/credits', function(req, res) {
 		//
@@ -512,6 +339,7 @@ module.exports = function(SG) {
 		});
 	});
 
+	/*
 	router.get('/myalgos/:id', function(req, res){
 		console.log("----------------------------------------------------------");
 	    console.log("\t\t ALGO : MIDDLEWARE 8");
@@ -555,143 +383,143 @@ module.exports = function(SG) {
 	            		redirectTo : '/article/list'
 	            	});
 	            }
-	            /*
-	            var clasifiedKubeObjects = {};
-	            for(var i=0; i < data.versions.length; i++){
-		            var pods = [], rcs = [], svc = []; const infra = data.versions[i].deployment.kubernetes;
-		            for(var j=0; j<infra.length; j++){
-		            	console.log("J = "+j+" Kind = "+infra[j].kind+", name = "+infra[j].metadata.name);
-		            	if(infra[j].kind == "Pod"){
-		            		console.log("J = "+j+" added to pods");
-		            		pods.push(infra[j].metadata.name);
-		            	}
-		            	else if(infra[j].kind == "ReplicationController"){
-		            		console.log("J = "+j+" added to rcs");
-		            		rcs.push(infra[j].metadata.name);
-		            	}
-		            	else if (infra[j].kind == "Service"){
-		            		console.log("J = "+j+" added to svc");
-		            		svc.push(infra[j].metadata.name);
-		            	}
-		            }
+	            
+	         	//    var clasifiedKubeObjects = {};
+	         	//    for(var i=0; i < data.versions.length; i++){
+		        //     var pods = [], rcs = [], svc = []; const infra = data.versions[i].deployment.kubernetes;
+		        //     for(var j=0; j<infra.length; j++){
+		        //     	console.log("J = "+j+" Kind = "+infra[j].kind+", name = "+infra[j].metadata.name);
+		        //     	if(infra[j].kind == "Pod"){
+		        //     		console.log("J = "+j+" added to pods");
+		        //     		pods.push(infra[j].metadata.name);
+		        //     	}
+		        //     	else if(infra[j].kind == "ReplicationController"){
+		        //     		console.log("J = "+j+" added to rcs");
+		        //     		rcs.push(infra[j].metadata.name);
+		        //     	}
+		        //     	else if (infra[j].kind == "Service"){
+		        //     		console.log("J = "+j+" added to svc");
+		        //     		svc.push(infra[j].metadata.name);
+		        //     	}
+		        //     }
 
-		            console.log('\n');
-		            clasifiedKubeObjects[data.versions[i].version] = { 
-		            	pods : (pods.legnth == 0)? undefined : pods, 
-		            	rcs : (rcs.legnth == 0)? undefined : rcs, 
-		            	svc : (svc.legnth == 0)? undefined : svc 
-		            };
-		        }
-				*/
-		        //console.log("clasifiedKubeObjects : "+util.inspect(clasifiedKubeObjects));
+		        //     console.log('\n');
+		        //     clasifiedKubeObjects[data.versions[i].version] = { 
+		        //     	pods : (pods.legnth == 0)? undefined : pods, 
+		        //     	rcs : (rcs.legnth == 0)? undefined : rcs, 
+		        //     	svc : (svc.legnth == 0)? undefined : svc 
+		        //     };
+		        // }
+				
+		        // //console.log("clasifiedKubeObjects : "+util.inspect(clasifiedKubeObjects));
 	            res.render('algo_meta_page', {
                 	pop_message : pop_message, 
                 	title : 'Page : algorithm ' + data.title, 
                 	activeHeadersComp : 'algo', 
                 	user : req.session.user, 
                 	algo : data,
-                	initiator : "myalgos"/*,
-                	clasifiedKubeObjects : clasifiedKubeObjects*/
+                	initiator : "myalgos",
+                	//clasifiedKubeObjects : clasifiedKubeObjects
                 });
-	            /*
-                var sock = require('socket.io-client')(SG.params.IM_PROTOCOL + SG.params.IM_ADDR +':'+ '32081'+"/new-kubernetes-objects");
-				var cmpt = 0;
-				var sockConnected = false;
-				sock.on('connect', function(){
-					if(sockConnected)
-						return;
-					const room = SG.mongo.Types.ObjectId().toString();
-					sock.emit('room', room);
-					sockConnected = true;
-					console.log('\n\n\nSOCKET.IO-CLIENT : CONNECTED TO IM-SERVER SOCKET OF /kubernetes-objects\n\n\n');
+	            
+    			//             var sock = require('socket.io-client')(SG.params.IM_PROTOCOL + SG.params.IM_ADDR +':'+ '32081'+"/new-kubernetes-objects");
+				// var cmpt = 0;
+				// var sockConnected = false;
+				// sock.on('connect', function(){
+				// 	if(sockConnected)
+				// 		return;
+				// 	const room = SG.mongo.Types.ObjectId().toString();
+				// 	sock.emit('room', room);
+				// 	sockConnected = true;
+				// 	console.log('\n\n\nSOCKET.IO-CLIENT : CONNECTED TO IM-SERVER SOCKET OF /kubernetes-objects\n\n\n');
 					
-					/*if(res.headersSent){
-						console.log("HEADERS ALREADY SENT");
-						sock.disconnect();
-						return;
-					}* /-------------
+				// 	if(res.headersSent){
+				// 		console.log("HEADERS ALREADY SENT");
+				// 		sock.disconnect();
+				// 		return;
+				// 	}* /-------------
 					
-					sock.on('error', function(error){
-		            	console.log(' <<< ROOM : '+room+' >>> | <ERROR> | MESSAGE : '+error);
-					});
+				// 	sock.on('error', function(error){
+		  		//           	console.log(' <<< ROOM : '+room+' >>> | <ERROR> | MESSAGE : '+error);
+				// 	});
 
-					sock.on('disconnect', function(reason){
-						console.log(' <<< ROOM : '+room+' >>> | <DISCONNECT> | MESSAGE : '+reason);
-					});
+				// 	sock.on('disconnect', function(reason){
+				// 		console.log(' <<< ROOM : '+room+' >>> | <DISCONNECT> | MESSAGE : '+reason);
+				// 	});
 
-					console.log(' <<< ROOM >>> | ID : '+room);
+				// 	console.log(' <<< ROOM >>> | ID : '+room);
 					
 		            
-		            var io_edit = SG.io.of('/algo/edit/');
-		            var connected = false;
-					io_edit.on('connection', function(secondSocket){
-						if(connected)
-							return;
-						connected = true;
-						console.log('SG SOCKET OF /algo/edit : CONNECTION ESTABLISHED');
-						secondSocket.on('room', function(r){
-							//console.log('io_edit.in(r).clients : '+util.inspect(io_edit.clients().adapter.rooms[r] ));
-							if(io_edit.clients().adapter.rooms[r] != undefined)
-								return;
-							secondSocket.join(r);
+		  		//           var io_edit = SG.io.of('/algo/edit/');
+		  		//           var connected = false;
+				// 	io_edit.on('connection', function(secondSocket){
+				// 		if(connected)
+				// 			return;
+				// 		connected = true;
+				// 		console.log('SG SOCKET OF /algo/edit : CONNECTION ESTABLISHED');
+				// 		secondSocket.on('room', function(r){
+				// 			//console.log('io_edit.in(r).clients : '+util.inspect(io_edit.clients().adapter.rooms[r] ));
+				// 			if(io_edit.clients().adapter.rooms[r] != undefined)
+				// 				return;
+				// 			secondSocket.join(r);
 							
-							console.log("Client joined room : "+r);
+				// 			console.log("Client joined room : "+r);
 							
 							
 							
-							for(var i=0; i < data.versions.length; i++){
-								const ind = i, waitFor = 1000*ind;
-								setTimeout(function(){
-									sock.emit('states', room, data.versions[ind]._id);
-								}, waitFor);
-							}
-							sock.on('states', function(version, kind, name, result){
-								console.log(' PORTAL <<< IM | ROOM : '+room+' | <STATES> | VERSION : '+version+', KIND : '+kind+', NAME : '+name);
-								io_edit.to(r).emit('state', kind, name, result);
-							});
+				// 			for(var i=0; i < data.versions.length; i++){
+				// 				const ind = i, waitFor = 1000*ind;
+				// 				setTimeout(function(){
+				// 					sock.emit('states', room, data.versions[ind]._id);
+				// 				}, waitFor);
+				// 			}
+				// 			sock.on('states', function(version, kind, name, result){
+				// 				console.log(' PORTAL <<< IM | ROOM : '+room+' | <STATES> | VERSION : '+version+', KIND : '+kind+', NAME : '+name);
+				// 				io_edit.to(r).emit('state', kind, name, result);
+				// 			});
 								
-							secondSocket.on('describe', function(kind, name){
-								console.log(' PORTAL >>> IM | ROOM : '+room+' | <DESCRIBE> | KIND : '+kind+', NAME : '+name);
-								sock.emit('describe', room, kind, name, data.author.username);
-							});
-							sock.on('describe', function(kind, name, result){
-								console.log(' PORTAL <<< IM | ROOM : '+room+' | <DESCRIBE> | KIND : '+kind+', NAME : '+name);
-								io_edit.to(r).emit('describe', kind, name, result);
-							});
+				// 			secondSocket.on('describe', function(kind, name){
+				// 				console.log(' PORTAL >>> IM | ROOM : '+room+' | <DESCRIBE> | KIND : '+kind+', NAME : '+name);
+				// 				sock.emit('describe', room, kind, name, data.author.username);
+				// 			});
+				// 			sock.on('describe', function(kind, name, result){
+				// 				console.log(' PORTAL <<< IM | ROOM : '+room+' | <DESCRIBE> | KIND : '+kind+', NAME : '+name);
+				// 				io_edit.to(r).emit('describe', kind, name, result);
+				// 			});
 							
-							secondSocket.on('full description', function(kind, name){
-								console.log(' PORTAL >>> IM | ROOM : '+room+' | <FULL DESCRIPTION> | KIND : '+kind+', NAME : '+name);
-								console.log('\nSG SOCKET ON full description : "'+kind+'" '+name);
-								sock.emit('full description', room, kind, name, data.author.username);
-							});
-							sock.on('full description', function(kind, name, result){
-								console.log(' PORTAL <<< IM | ROOM : '+room+' | <FULL DESCRIPTION> | KIND : '+kind+', NAME : '+name);
-								io_edit.to(r).emit('full description', kind, name, result);
-							});
+				// 			secondSocket.on('full description', function(kind, name){
+				// 				console.log(' PORTAL >>> IM | ROOM : '+room+' | <FULL DESCRIPTION> | KIND : '+kind+', NAME : '+name);
+				// 				console.log('\nSG SOCKET ON full description : "'+kind+'" '+name);
+				// 				sock.emit('full description', room, kind, name, data.author.username);
+				// 			});
+				// 			sock.on('full description', function(kind, name, result){
+				// 				console.log(' PORTAL <<< IM | ROOM : '+room+' | <FULL DESCRIPTION> | KIND : '+kind+', NAME : '+name);
+				// 				io_edit.to(r).emit('full description', kind, name, result);
+				// 			});
 							
-							secondSocket.on('new spec', function(id, kind, name, spec){
-								console.log(' PORTAL >>> IM | ROOM : '+room+' | <NEW SPEC> | KIND : '+kind+', NAME : '+name);
-								console.log('\nSG SOCKET ON new spec : "'+kind+'" '+name);
-								sock.emit('new spec', room, id, kind, name, spec, data.author.username);
-							});
-							sock.on('new spec', function(kind, name, result){
-								console.log(' PORTAL <<< IM | ROOM : '+room+' | <NEW SPEC> | KIND : '+kind+', NAME : '+name);
-								io_edit.to(r).emit('new spec', kind, name, result);
-							});
+				// 			secondSocket.on('new spec', function(id, kind, name, spec){
+				// 				console.log(' PORTAL >>> IM | ROOM : '+room+' | <NEW SPEC> | KIND : '+kind+', NAME : '+name);
+				// 				console.log('\nSG SOCKET ON new spec : "'+kind+'" '+name);
+				// 				sock.emit('new spec', room, id, kind, name, spec, data.author.username);
+				// 			});
+				// 			sock.on('new spec', function(kind, name, result){
+				// 				console.log(' PORTAL <<< IM | ROOM : '+room+' | <NEW SPEC> | KIND : '+kind+', NAME : '+name);
+				// 				io_edit.to(r).emit('new spec', kind, name, result);
+				// 			});
 							
-							secondSocket.on('clean', function(){
-								console.log(' PORTAL >>> IM | ROOM : '+room+' | <CLEAN>');
-								if (sock){
-									sock.emit('clean', room);
-									sock.disconnect();
-								}
-							});
+				// 			secondSocket.on('clean', function(){
+				// 				console.log(' PORTAL >>> IM | ROOM : '+room+' | <CLEAN>');
+				// 				if (sock){
+				// 					sock.emit('clean', room);
+				// 					sock.disconnect();
+				// 				}
+				// 			});
 							
-						});
-					});
+				// 		});
+				// 	});
 						
-				});
-				*/
+				// });
+				
 			}); 
 		}
 	});
@@ -734,33 +562,33 @@ module.exports = function(SG) {
 					}
 				);
 			});
-			/*
-			paginatingAlgoList(collections, req.session.user.username, "myalgos", {page : req.query.page, number : req.query.number}, function(err, data, real_pagination){
-				//
-				if (err){
-					//
-					res.end('Error : '+error+', come back <a href="/"> home </a>');
-				}
-				else{
-					console.log("DATA : "+data);
-					res.render('algo_list2', 
-						{
-							pop_message : pop_message, 
-							title : 'My Algorithms', 
-							activeHeadersComp : 'user', 
-							user : req.session.user, 
-							algos : data, 
-							initiator : "myalgos",
-							page : real_pagination.page,
-							number : real_pagination.number
-						}
-					);
-				}
-			});
-			*/
+			
+			// paginatingAlgoList(collections, req.session.user.username, "myalgos", {page : req.query.page, number : req.query.number}, function(err, data, real_pagination){
+			// 	//
+			// 	if (err){
+			// 		//
+			// 		res.end('Error : '+error+', come back <a href="/"> home </a>');
+			// 	}
+			// 	else{
+			// 		console.log("DATA : "+data);
+			// 		res.render('algo_list2', 
+			// 			{
+			// 				pop_message : pop_message, 
+			// 				title : 'My Algorithms', 
+			// 				activeHeadersComp : 'user', 
+			// 				user : req.session.user, 
+			// 				algos : data, 
+			// 				initiator : "myalgos",
+			// 				page : real_pagination.page,
+			// 				number : real_pagination.number
+			// 			}
+			// 		);
+			// 	}
+			// });
+			
 		}
 	});
-
+	
 	router.get('/algos', function(req, res) {
 		console.log("----------------------------------------------------------");
 	    console.log("\t\t USER : MIDDLEWARE 6");
@@ -843,7 +671,7 @@ module.exports = function(SG) {
 			
 		}
 	});
-
+	
 	router.post('/subscriptions', function(req, res) {
 		console.log("----------------------------------------------------------");
 	    console.log("\t\t USER : MIDDLEWARE 8");
@@ -962,6 +790,7 @@ module.exports = function(SG) {
 			});
 		}
 	});
+	*/
 
 	router.get('/bugreports', function(req, res){
 		//
@@ -1007,17 +836,21 @@ module.exports = function(SG) {
 
 				return res.end(`
 					<html>
-						<head><title>Deleting User acoint</title></head>
+						<head>
+							<meta charset="UTF-8">
+							<title>Deleting User acoint</title>
+						</head>
 						<body>
-							<h2> Account successfully deleted, redirection in <span id="countDown"></span> seconds</h2>
+							<h2> Account successfully deleted, redirection in <span id="countDown">5</span> seconds</h2>
 							<script>
 								var c = 5;
-								setTimeout(function(){
-									if (c == 0){
-										return window.location.url = "/";
+								var intervID = setInterval(function(){
+									//console.log("c = ", c);
+									if (--c == 0){
+										clearInterval(intervID);
+										window.location.href = "/signup";
 									}
-									document.getElementById("countDown").text = c;
-									c--;
+									document.getElementById('countDown').textContent = String(c);
 								}, 1000)
 							</script>
 						</body>

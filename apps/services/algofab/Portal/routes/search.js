@@ -26,6 +26,15 @@ router.get('/', function(req, res){
 		query.push(  { $text: { $search: req.query.text } } );
 	//	query.push( {$or: [{ short_intro: new RegExp(req.query.text) }, { description: new RegExp(req.query.text) }] } );
 	} 
+	if (req.query.asset_type){
+		query.push( { asset_type: req.query.asset_type} );
+	}
+	if (req.query.technical_category){
+		query.push( { technical_category: req.query.technical_category} );
+	}
+	if (req.query.business_category){
+		query.push( { business_category: req.query.business_category} );
+	} 
 	if (req.query.date){
 		query.push( {date: new Date(req.query.date)} );
 	} 

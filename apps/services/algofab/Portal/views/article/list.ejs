@@ -16,6 +16,9 @@
                   <input type="text" class="form-control form-control-lg" name="text" id="search-text" />
               </div>
               <input type="hidden" name="name" id="search-name" value="">
+              <input type="hidden" name="technical_category" id="search-tech-cat" value="">
+              <input type="hidden" name="business_category" id="search-busi-cat" value="">
+              <input type="hidden" name="asset_type" id="search-asset" value="">
               
               <button class="col-sm-3 btn btn-primary" id="submit-search">Search</button>
             </div>
@@ -43,17 +46,50 @@
                                     <input type="text" class="form-control form-control-lg" name="name" />
                                 </div>
                             </div>
-                            <div class="row">
+                            
+
+                            <div class="form-group row">
+                              <label for="" class="col-sm-3 col-form-label col-form-label-lg"> Categories : </label>
+                              <div class="col-sm-9">
+                                  <div class="row">
+                                      <div class="col-sm-4">
+                                          <select id="tech-category" name="technical_category" class="form-control">
+                                              <option value="_none" disabled="" selected="">Technical categories*</option>
+                                              <% for (var i=0; i < categories.technical.length; i++) { %>
+                                                  <option value="<%= categories.technical[i].id %>"><%= categories.technical[i].name %></option>
+                                              <% } %>
+                                          </select>
+                                      </div>
+                                      <div class="col-sm-4">
+                                          <select id="bus-category" name="business_category" class="form-control">
+                                              <option value="_none" disabled="" selected="">Business categories*</option>
+                                              <% for (var i=0; i < categories.business.length; i++) { %>
+                                                  <option value="<%= categories.business[i].id %>"><%= categories.business[i].name %></option>
+                                              <% } %>
+                                          </select>
+                                      </div>
+                                      <div class="col-sm-4">
+                                          <select id="asset-type" name="asset_type" class="form-control">
+                                              <option value="_none" disabled="" selected="">Asset type*</option>
+                                              <% for (var i=0; i < categories.types.length; i++) { %>
+                                                  <option value="<%= categories.types[i].id %>"><%= categories.types[i].name %></option>
+                                              <% } %>
+                                          </select>
+                                      </div>
+                                  </div>
+                              </div>
+                            </div>
+
+                            <div class="form-group row">
                                 <div class="col-sm-2 pull-right">
                                     <!-- <input type="button" value="Submit" id="submit" class="btn btn-primary pull-right"/> -->
                                     <%if (typeof search !== 'undefined' && search) { %>
-                                    <input type="submit" value="Filter" id="submit" class="btn btn-primary pull-right" data-dismiss="modal" />
+                                    <input type="submit" value="Save Options" id="submit" class="btn btn-success pull-right" data-dismiss="modal" />
                                     <% } else{ %>
                                     <input type="submit" value="Filter" id="submit" class="btn btn-primary pull-right"/>
                                     <% } %>
                                 </div>
                             </div>
-
                           </form>
                       </div>
                   </div>
@@ -119,9 +155,19 @@
           console.log("Filter options just changed!!");
           var name = $(this).find('[name="name"]').val();
           console.log('name : ', name);
-
           $('#search-name').val(name);
 
+          var technical_category = $(this).find('[name="technical_category"]').val();
+          console.log('technical_category : ', technical_category);
+          $('#search-tech-cat').val(technical_category);
+
+          var business_category = $(this).find('[name="business_category"]').val();
+          console.log('business_category : ', business_category);
+          $('#search-busi-cat').val(business_category);
+
+          var asset_type = $(this).find('[name="asset_type"]').val();
+          console.log('asset_type : ', asset_type);
+          $('#search-asset').val(asset_type);
         });
 
         $('#filter-options-form').submit(function(){

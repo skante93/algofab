@@ -51,7 +51,7 @@ router.all('*', function(req, res){
 
 	var currentDoc = getDocWithID(req.query.id);
 	if (currentDoc == null){
-		return res.redirect('/docs?id=docs_index');
+		return res.redirect('/docs');
 	}
 	
 	console.log("currentDoc:", currentDoc);

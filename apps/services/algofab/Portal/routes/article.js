@@ -53,7 +53,7 @@ router.get('/:articleID/version/:versionID/download', function(req, res){
     }
 
 	if (!fs.existsSync(process.cwd()+'/resourceData/'+req.params.versionID+'.tar')){
-		return res.end("Resource data does not exist");
+		return res.status(404).end("Resource data does not exist");
 	}
 	else{
 		res.sendFile(process.cwd()+'/resourceData/'+req.params.versionID+'.tar');
@@ -192,7 +192,7 @@ router.post('/:id/version', function(req, res){
 
 	
 	if (!req.body.version){
-		return res.end('Field "username" is required.')
+		return res.end('Field "version" is required.')
 	}if (!req.body.versionNumber){
 		return res.end('Field "versionNumber" is required.')
 	}
@@ -273,6 +273,7 @@ router.get('/list', function(req, res){
 	if (pop_message)
 		req.session.pop_message = undefined;
 
+	console.log("req.query : ", req.query)
 	var query = [];
 	if (req.query.name){
 		query.push( {name: new RegExp(req.query.name)} );
@@ -283,7 +284,17 @@ router.get('/list', function(req, res){
 	if (req.query.text){
 		query.push(  { $text: { $search: req.query.text } } );
 	//	query.push( {$or: [{ short_intro: new RegExp(req.query.text) }, { description: new RegExp(req.query.text) }] } );
+	}
+	if (req.query.asset_type){
+		query.push( { asset_type: req.query.asset_type} );
+	}
+	if (req.query.technical_category){
+		query.push( { technical_category: req.query.technical_category} );
+	}
+	if (req.query.business_category){
+		query.push( { business_category: req.query.business_category} );
 	} 
+
 	if (req.query.date){
 		query.push( {date: new Date(req.query.date)} );
 	} 
@@ -292,6 +303,10 @@ router.get('/list', function(req, res){
 	} 
 	if (req.query.after_date){
 		query.push( {date: {$lt : new Date(req.query.after_date)} } );
+	}
+
+	if (req.query.authorID){
+		query.push( { author : req.query.authorID } );
 	} 
 
 	query = (query.length == 0)? {} : { $and: query };
@@ -307,12 +322,12 @@ router.get('/list', function(req, res){
 			}
 		}
 	];
-
+	console.log("query :", query);
 	Article.find(query).populate(pop_Query).exec(function(err, data){
 		//
 		if (err){
 			//
-			res.end('Error : '+error+', come back <a href="/"> home </a>');
+			return res.end('Error : '+err+', come back <a href="/"> home </a>');
 		}
 
 		else{
@@ -368,12 +383,12 @@ router.get('/:id', function(req, res){
 		var exec = Article.findById(req.params.id).populate(['author',{path: 'versions', sort: { version: 'asc' } }]).exec(function(err, data){
 			if( err ) {
 				console.log("err");
-				res.end('Some database error occured, come back <a href="/"> home </a>.');
+				return res.end('Some database error occured, come back <a href="/"> home </a>.');
 	            //return res.redirect('/article/list');
 			}
 			if(!data) {
                 
-                res.end("This algorithm doesn't exist (or not anymore), come back <a href=\"/\"> home </a>.");
+                return res.end("This resource doesn't exist (or not anymore), come back <a href=\"/\"> home </a>.");
             	// return res.redirect('/article/list');
             }
             console.log("Found article : ", data);

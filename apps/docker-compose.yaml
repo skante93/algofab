@@ -3,6 +3,7 @@ version: '3'
 
 services:
   ldap:
+    image: algofab2018/ldap
     build: ./services/ldap
     # entrypoint: /bin/sh -c 'while [ true ]; do echo "turn"; sleep 10; done'
     volumes:
@@ -13,12 +14,28 @@ services:
     env_file:
       - .env
     privileged: true
+
   mongo:
     image: mongo
     volumes:
       - ./data/mongo/:/data/db
 
+  api:
+    image: algofab2018/marketplace
+    build: ./services/algofab
+    command: API
+    ports:
+      - 8084:3000
+    env_file:
+      - .env
+    user: root
+    volumes:
+      - ./services/algofab:/home/admin/algofab
+    depends_on: 
+      - mongo
+      
   portal:
+    image: algofab2018/marketplace
     build: ./services/algofab
     command: Portal
     ports:
@@ -29,8 +46,11 @@ services:
     volumes:
       - ./services/algofab:/home/admin/algofab
       - ./data/accounts/:/accounts
+    depends_on: 
+      - mongo
 
   im:
+    image: algofab2018/marketplace
     build: ./services/algofab
     command: IM-Server
     env_file:
@@ -38,8 +58,11 @@ services:
     volumes:
       - ./services/algofab:/home/admin/algofab
       - ./data/accounts/:/accounts
+    depends_on: 
+      - mongo
 
   rh:
+    image: algofab2018/marketplace
     build: ./services/algofab
     command: RH-Server
     ports:
@@ -48,6 +71,9 @@ services:
       - .env
     volumes:
       - ./services/algofab:/home/admin/algofab
+    depends_on: 
+      - mongo
+
 
   # portal:
   #   build: ./algofab
