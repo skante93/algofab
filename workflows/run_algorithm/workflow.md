@@ -3,12 +3,12 @@
 
 ## Table of contents
 
-* [Objectives](#)
-* [Pre-requisites](#)
-* [Outcome](#)
-* [Workflow Components](#)
-* [Conclusion](#)
-* [Automatic script](#)
+* [Objectives](#objectives)
+* [Pre-requisites](#pre-requisites)
+* [Outcome](#outcome)
+* [Workflow Components](#workflow-components)
+* [Conclusion](#conclusion)
+* [Automatic script](#automatic-script)
 
 ## Objectives
 
@@ -61,7 +61,7 @@ Where _**@APIServer**_ is the base address of the API Server, _**@Giffer**_ is t
 Therefore, we download the algoritm using the following command:
 
 ```bash
-	$ curl -L --output giffer.tar https://https://ws67-af-portal.tl.teralab-datascience.fr/resource/5eddbccc3f6820007595308f/version/5ecbd0069e260407edd6ebd1/download?agreement&licence
+$ curl -L --output giffer.tar https://https://ws67-af-portal.tl.teralab-datascience.fr/resource/5eddbccc3f6820007595308f/version/5ecbd0069e260407edd6ebd1/download?agreement&licence
 ```
 
 _**Note**: This might change in the future when the fields "agreement" and "licence" are properly handled._
@@ -69,7 +69,7 @@ _**Note**: This might change in the future when the fields "agreement" and "lice
 After runing the previous command you should see a file name giffer.tar, to extract it type:
 
 ```bash
-	$ tar -xvf giffer.tar
+$ tar -xvf giffer.tar
 ```
 
 Next let us use the Algorithm.
@@ -81,11 +81,11 @@ Here we just need to run a single command on the default images available in the
 The command is the following: 
 
 ```bash
-	# Folder to put the generated gif images
-	mkdir gifs
+# Folder to put the generated gif images
+$ mkdir output
 
-	# rune the algorithm
-	docker run -it -v $(pwd)/gifs:/mtp/outputs algofab2018/giffer defaults demo.gif
+# run the algorithm
+$ docker run -it -v $(pwd)/output:/outputs algofab2018/giffer default demo.gif
 ```
 
 After run this command, you should see a new folder "gifs" containing the generated gif file called demo.gif.
@@ -107,4 +107,41 @@ You should pay attention to the parameters part of the script to make it adaptab
 
 ```bash
 
+###############################
+###### DEFINE PARAMETERS ######
+###############################
+
+API_SERVER="https://ws67-af-api.tl.teralab-datascience.fr"
+
+RESOURCE_ID="5eddbccc3f6820007595308f"
+RESOURCE_NAME="Giffer"
+VERSION_ID="5eddbccc3f6820007595308f"
+
+AGREEMENT=""
+LICENCE=""
+
+OUTPUT_FILENAME="demo.gif"
+
+
+
+###############################
+###### DOWNLOAD RESOURCE ######
+###############################
+
+curl -L --output $RESOURCE_NAME.tar $API_SERVER/resource/$RESOURCE_ID/version/$VERSION_ID/download?agreement=$AGREEMENT\&licence=$LICENCE
+
+tar -xvf $RESOURCE_NAME.tar
+
+
+
+###############################
+######## RUN RESOURCE #########
+###############################
+
+
+# Folder to put the generated gif images
+mkdir output
+
+# run the algorithm
+docker run -it -v $(pwd)/output:/outputs algofab2018/giffer default demo.gif
 ```

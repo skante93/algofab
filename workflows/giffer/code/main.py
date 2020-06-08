@@ -8,6 +8,8 @@ from PIL import Image
 INPUT_FOLDER = "inputs"
 OUTPUT_FOLDER = "/outputs"
 
+print ("sys.argv: ", sys.argv)
+
 if len(sys.argv) < 3 :
 	raise Exception("The script is launch according to the following structure :\n\t./main.py <input> <outputs> [<duration>]")
 
@@ -20,9 +22,9 @@ if len(sys.argv) > 3 :
 	duration = int(sys.argv[3])
 	
 
-# print("input_src: ", input_src)
-# print("output_src: ", output_src)
-# print("duration: ", duration)
+print("input_src: ", input_src)
+print("output_src: ", output_src)
+print("duration: ", duration)
 
 
 images = [ Image.open(input_src+'/'+im) for im in os.listdir(input_src) ]

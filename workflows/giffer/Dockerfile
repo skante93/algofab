@@ -9,4 +9,4 @@ WORKDIR /app
 
 RUN mkdir /outputs
 
-ENTRYPOINT ./main.py
+ENTRYPOINT [ "python3", "main.py" ]
