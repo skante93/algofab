@@ -1,0 +1,93 @@
+#!/usr/bin/nodejs
+
+
+const cluster = require('cluster');
+const numCPUs = 1;
+
+algofab_server = "API";
+
+//utils = require('../utils');
+
+var all_params = require('../../config');
+
+//socket = require('../socket');
+
+console.log('----- settings.MONGO : '+settings.MONGO);
+
+
+console.log("##### utils : "+utils+" ######");
+
+
+var debug = require('debug')('my-application');
+
+//var SUPERGLOBALS = require("../config");
+
+
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
+
+//console.log("MONGO >>> "+settings.MONGO);
+
+store = MongoStore = new MongoStore({
+    url : settings.MONGO,
+    collection : 'session'
+});
+
+var launchServer = function(){
+  var http = require('http'), https = require('https');
+
+  var app = require('../app'); //(global, MongoStore);
+
+  var port = settings.API_PORT ? settings.API_PORT : 3000, onListen = function(){
+        debug('Express server listening on port ' + port);
+    };
+
+    var server = (!settings.CLOUD.startsWith('TERALAB'))? 
+                    https.createServer(certs, app).listen(port, onListen) :
+                        require('http').createServer(app).listen(port, onListen);
+
+  /*var server = (!SUPERGLOBALS.params.CLOUD.startsWith('TERALAB'))? 
+                https.createServer(SUPERGLOBALS.certs, main.app).listen(port, onListen) :
+                    require('http').createServer(main.app).listen(port, onListen);
+  */
+
+  //var s = socket(server, MongoStore);
+
+  server.timeout = settings.SERVERS_TIMEOUT;
+
+  //var s = SUPERGLOBALS.socket(server, main.store);
+  //SUPERGLOBALS.io = require('socket.io')(server);
+
+  
+  console.log(`Worker ${process.pid} started`);
+}
+
+if (cluster.isMaster) {
+  console.log(`Master ${process.pid} is running`);
+
+  // Fork workers.
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+  
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`worker ${worker.process.pid} died`);
+    cluster.fork();
+  });
+
+  console.log(String.raw`
+        ___     __        ______   ______   ______    ___     ______    
+       / _ \    | |      |  ____| |  __  | | _____|  / _ \    |  _  \   ${CLOUD}
+      / / \ \   | |      | | ____ | |  | | | |__    / / \ \   | |_/ /   
+     / /---\ \  | |____  | |__| | | |__| | |  __|  / /---\ \  | |_\ \   
+    /_/     \_\ |______| |______| |______| |_|    /_/     \_\ |_____/   ${algofab_server}
+
+  `);
+} else {
+  // Workers can share any TCP connection
+  // In this case it is an HTTP server
+  launchServer();
+}
+
+
+

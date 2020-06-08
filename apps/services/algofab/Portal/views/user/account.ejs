@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <% include ../partials/head %>
+
+    </head>
+    <body>
+        <header class="business-header">
+            <% include ../partials/header %>
+        </header>
+
+        <div class="container">
+        	<h2>Wellcome to your account management page, <%= user.username %></h2>
+        </div>
+        <hr>
+        <div class="container">
+            <h3>You currently have <b><%= parseFloat(user.credits).toFixed(2) %></b> credits</h3>
+            <br>    
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#buy-credits-modal" style="vertical-align: center">Buy credits</button>
+
+            <div class="modal fade" role="dialog" id="buy-credits-modal">
+                <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Buy credits</b></h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="container-fluid" style="border: 1px black solid">
+                                <div class="col-sm-12">
+                                    <div class="row" id="buy-packages" style="text-align: center;">
+                                        <div class="col-sm-offset-1 col-sm-2" id="buy-package-2000">
+                                            2000 cr - 2$
+                                        </div>
+                                        <div class="col-sm-offset-1 col-sm-2" id="buy-package-5000">
+                                            5000 cr - 5$
+                                        </div>
+                                        <div class="col-sm-offset-1 col-sm-2" id="buy-package-10000">
+                                            10000 cr - 8$
+                                        </div>
+                                        <div class="col-sm-offset-1 col-sm-2" id="buy-package-50000">
+                                            50000 cr - 40$
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" id="buy-form">
+                                    <form action="/user/credits" method="post" autocomplete="off" class="col-sm-offset-1 col-sm-10" style="margin-top: 2em">
+                                        <input type="hidden" name="credits" id="item-to-buy-credits" value="0">
+                                        <input type="hidden" name="price" id="item-to-buy-price" value="0">
+                                        <fieldset>
+                                            <legend> Paypal </legend>
+                                            <div class="form-group row">
+                                                <label for="pp_email" class="col-sm-3 col-form-label col-form-label-lg">Email</label>
+                                                <div class="col-sm-9">
+                                                    <input type="email" autocomplete="off" class="form-control form-control-lg" name="pp_email" id="pp_email" required placeholder="<%= user.email %>" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="pp_password" autocomplete="off" class="col-sm-3 col-form-label col-form-label-lg">Password</label>
+                                                <div class="col-sm-9">
+                                                    <input type="password" class="form-control form-control-lg" name="pp_password" id="pp_password"  required/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <div class="col-sm-offset-3 col-sm-9">
+                                                    <button class="btn btn-primary pull-right"> Submit </button>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <hr>
+
+        <div class="container">
+			<div class="btn btn-primary" data-toggle="modal" data-target="#updatePasswordModal">
+                Update Password
+            </div>
+            <div class="modal fade" id="updatePasswordModal" tabindex="-1" role="dialog" aria-labelledby="updatePasswordModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title" id="exampleModalLabel"> Update password form: </h2>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                        	<div class="container">
+                        		<div class="row">
+                        			<form method="post" class="col-sm-offset-2 col-sm-8">
+					                    <input type="hidden" name="op" value="password">
+					                    <div class="form-group row">
+					                        <label for="current" class="col-sm-3 col-form-label col-form-label-lg"> Current password : </label>
+					                        <div class="col-sm-9">
+					                            <input type="password" class="form-control form-control-lg" name="current" id="current" required/>
+					                        </div>
+
+					                    </div>
+					                    <div class="form-group row">
+					                        <label for="new" class="col-sm-3 col-form-label col-form-label-lg"> New password : </label>
+					                        <div class="col-sm-9">
+					                            <input type="password" class="form-control form-control-lg" name="new" id="new" required/>
+					                        </div>
+					                    </div>
+					                    <div class="pull-right">
+					                        <button type="submit" class="btn btn-primary"> Update Your Password</button> <br/><br/>
+					                    </div>
+					                </form>  
+					            </div>
+                        	</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <hr/>
+
+        <div class="container">
+            <h4>Account Informations : </h4>
+            <div class="row col-sm-offset-2">
+                <div class="col-sm-2" id="view_mode" >
+                    <input type="radio" name="mode" id="vm" checked/> &nbsp<label for="vm">View Mode</label>
+                </div>
+                <div class="col-sm-2" id="edit_mode">
+                    <input type="radio" name="mode" id="em"/> &nbsp<label for="em">Edit Mode</label>
+                </div>
+            </div>
+
+            <div id="view_content">
+                <div class="row" id="view-box">
+                    <div class="col-sm-offset-2 col-sm-8">
+                        <div class="row">
+                            <div class="col-sm-3"> <span> <b> Company Name :</b></span> </div>
+                            <div class="col-sm-9"> <span> <%= user.company_name %> </span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3"> <span> <b>Email :</b> </span> </div>
+                            <div class="col-sm-9"> <span> <%= user.email %> </span> </div>
+                        </div>
+                        <% if(user.logo && user.logo != '') { %>
+                            <div class="row">
+                                <div class="col-sm-3"> <span> <b>Logo :</b> </span> </div>
+                                <div class="col-sm-9"> <img src="<%= user.logo %>"> </div>
+                            </div>
+                        <% } %>
+                        <div class="row">
+                            <div class="col-sm-3"> <span> <b>Username :</b> </span> </div>
+                            <div class="col-sm-9"> <span> <%= user.username %></span> </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="edit_form">
+                <h3>Update Your Informations</h3>
+                <div class="row" id="update-box">
+                    <form method="post" enctype="multipart/form-data" class="col-sm-offset-2 col-sm-8">
+                        <input type="hidden" name="op" value="infos">
+                        <div class="form-group row">
+                            <label for="name" class="col-sm-3 col-form-label col-form-label-lg"> Company Name : </label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control form-control-lg" name="name" id="name" value="<%= user.company_name %>"/>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="email" class="col-sm-3 col-form-label col-form-label-lg"> Email : </label>
+                            <div class="col-sm-9">
+                                <input type="email" class="form-control form-control-lg" name="email" id="email" value="<%= user.email %>" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="logo" class="col-sm-3 col-form-label col-form-label-lg"> Logo : </label>
+                            <div class="col-sm-9">
+                                <input type="file" name="logo" id="logo"/>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="username" class="col-sm-3 col-form-label col-form-label-lg"> Username : </label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control form-control-lg" name="username" id="username" value="<%= user.username %>" />
+                            </div>
+                        </div>
+
+                        <div class="pull-right">
+                            <button type="submit" class="btn btn-primary"> Update Your Account </button> 
+                            <a href="/user/<%= user._id.toString() %>/delete" class="btn btn-danger"> Delete Account </a>  <br/><br/>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <% include ../partials/footer.ejs %>
+        <script type="text/javascript">
+            $(function(){
+                $('.modal-dialog').width("80%");
+                //$('.modal-dialog div').css("margin", "1em");
+                $('[id^=buy-package-]').css({
+                    "padding" : "1em",
+                    "background-color" : "Gainsboro",
+                    "border-radius" : "5px",
+                    "cursor" : "pointer"
+                });
+                var price_tab = {
+                    '2000' : 2,
+                    '5000' : 5,
+                    '10000' : 8,
+                    '50000' : 40
+                }
+                $('[id^=buy-package-]').click(function(){
+                    $('[id^=buy-package-]').css({"background-color" : "Gainsboro", "color" : ""});
+                    $(this).css({"background-color" : "LightSkyBlue", "color" : "white"});
+                    var item = $(this).attr('id').toString().replace('buy-package-', '');
+                    
+                    $('#item-to-buy-price').attr('value', price_tab[item]);
+                    $('#item-to-buy-credits').attr('value', item)
+                });
+                
+                $('#view-box, #update-box').css('margin-top', "1.5em");
+                $('#view-box .row').css('margin-bottom', "1.5em");
+                $('#username').prop('disabled', true);
+
+                if($('#vm').is(':checked'))
+                    $('#edit_form').hide();
+                else
+                    $('#view_content').hide();
+
+                $('#view_content').css('margin', '2em');
+                $('#edit_form').css('margin', '2em');
+
+                $('#view_mode').click(function(){
+                    $('#view_content').show();
+                    $('#edit_form').hide();
+                    $('#vm').prop('checked', true);
+                });
+
+                $('#edit_mode').click(function(){
+                    $('#view_content').hide();
+                    $('#edit_form').show();
+                    $('#em').prop('checked', true);
+                });
+            });
+        </script>
+    </body>
+</html>
