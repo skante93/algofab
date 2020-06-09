@@ -1,6 +1,6 @@
   
   
-  <nav class="navbar navbar-inverse">
+  <nav class="navbar">
     <div class="container">
       <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
@@ -11,14 +11,15 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/"><img src="/img/teralab.jpeg" height="32px;"/></a> <!-- width="135%" height="150%"/></a> -->
+          <a class="navbar-brand" href="/"><img src="/img/teralab-marine-transparent.png" height="32px;"/></a> 
+          <a class="navbar-brand" href="/"><img src="/img/IMT-logo.png " height="32px;"/></a> 
           <!--<img src="/img/algofab_new.png" width="50%" height="30%"/>-->
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
-            <li class="<%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'docs')? 'active':''%>" ><a href="<%= process.env.DOCS_EXT_PROTOCOL+'://'+process.env.DOCS_EXT_NAME %>"> Docs </a></li>
+            <li class="<%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'docs')? 'active':''%>" ><a href="/docs"> Docs </a></li>
             <!--li class="<%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'team')? 'active':''%>" ><a href="#"> Notre Équipe </a></li-->
             <!-- <li class="<%= (typeof activeHeadersComp !== 'undefined' && activeHeadersComp == 'partners')? 'active':''%>" ><a href="/partners"> Partners </a></li> -->
             <% if( !(typeof user === 'undefined' || !user)) {%>
@@ -46,9 +47,11 @@
           </ul>
           <form class="navbar-form navbar-left" action="/search" method="get">
             <div class="form-group">
-              <input type="text" class="form-control" name="text" placeholder="Search">
+              <div class="input-group">
+                <span class="input-group-addon" id="basic-addon1"> <i class="fa fa-search"></i> </span>
+                <input type="text" class="form-control" name="text" placeholder="Search">
+              </div>
             </div>
-            <button type="submit" class="btn btn-default">Search</button>
           </form>
           <!--
           <form class="navbar-form navbar-left">

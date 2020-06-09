@@ -61,18 +61,18 @@ services:
     depends_on: 
       - mongo
 
-  rh:
-    image: algofab2018/marketplace
-    build: ./services/algofab
-    command: RH-Server
-    ports:
-      - 8083:3000
-    env_file:
-      - .env
-    volumes:
-      - ./services/algofab:/home/admin/algofab
-    depends_on: 
-      - mongo
+  # rh:
+  #   image: algofab2018/marketplace
+  #   build: ./services/algofab
+  #   command: RH-Server
+  #   ports:
+  #     - 8083:3000
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./services/algofab:/home/admin/algofab
+  #   depends_on: 
+  #     - mongo
 
 
   # portal:

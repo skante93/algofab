@@ -13,6 +13,13 @@ a {
   color: #00B7FF;
 }
 
+.navbar li {
+	font-size: 1.3em;
+	
+	/*display: table-cell;
+	vertical-align: middle;*/
+}
+
 #social_footer ul {
 	list-style: none;
 }

@@ -10,7 +10,7 @@ objectClass: simpleSecurityObject
 objectClass: organizationalRole
 cn: admin
 description: LDAP administrator
-userPassword:: e1NTSEF9OXFvcGNFeWw0eFJOU3NsWkVpa0hPM3lCS2drbHVJMGs=
+userPassword:: e1NTSEF9YnErYnVaQUw1THhLdnVwUWxjT0x5Uml0MCtSQUxMN2k=
 
 dn: ou=users,dc=ldap,dc=algofab,dc=fr
 objectClass: organizationalUnit

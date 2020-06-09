@@ -45,13 +45,11 @@ Having an alforithm locally available to run experiments.
 
 
 ## Workflow Components
-
-There is only one workflow component described below.
-
+																																					
 ### WFC 1: Download the Algorithm
 
 This algorithm is in actual fact an Algofab resource and, in order to download one of its versions, you need and HTTP request in the following format :
-
+																																																																																																																																																								
 <pre>
 	GET <@APIServer>/resource/<@GifferID>/version/<@versionID>/download?agreement=agreementVersion&licence=licenceVersion
 </pre>
