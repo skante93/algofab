@@ -10,30 +10,80 @@ objectClass: simpleSecurityObject
 objectClass: organizationalRole
 cn: admin
 description: LDAP administrator
-userPassword:: e1NTSEF9YnErYnVaQUw1THhLdnVwUWxjT0x5Uml0MCtSQUxMN2k=
+userPassword:: e1NTSEF9MkNKWU5yamkwTUxPa1JmMmh6aGJxUmxkUVArTUdaZWM=
 
 dn: ou=users,dc=ldap,dc=algofab,dc=fr
 objectClass: organizationalUnit
 objectClass: top
 ou: users
 
-dn: cn=Homer Simpson,ou=users,dc=ldap,dc=algofab,dc=fr
-cn: Homer Simpson
-mail: me@default.com
-givenName: Homer
-sn: Simpson
+dn: uid=toto,ou=users,dc=ldap,dc=algofab,dc=fr
 objectClass: inetOrgPerson
-objectClass: top
-userPassword:: e01ENX1HaDNKSEpCekpjYVNjZDN3eVVTOGNnPT0=
-uid: hsimpson
+description: Algofab user.
+cn: Toto Tata
+givenName: Toto
+sn: Tata
+mail: souleymanecheickkante@yahoo.fr
+uid: toto
+userPassword:: e1NTSEF9TUgrWEE1K2szcldWZVN2NmpWUDhBQXU1MktNVmRzQjM=
 
-dn: uid=skante2,ou=users,dc=ldap,dc=algofab,dc=fr
+dn: uid=jdoe,ou=users,dc=ldap,dc=algofab,dc=fr
 objectClass: inetOrgPerson
 description: Algofab user.
 cn: Souleymane KANTE
 givenName: Souleymane
 sn: KANTE
-mail: skante@enst.fr
+mail: souleymane.kante@imt.fr
+uid: jdoe
+userPassword:: e1NTSEF9cHlLOWxQVEc0UHBieVM5OWN5TVN1eGgwM294d0ZDVEo=
+
+dn: uid=olivier,ou=users,dc=ldap,dc=algofab,dc=fr
+objectClass: inetOrgPerson
+description: Algofab user.
+cn: Olivier Dehoux
+givenName: Olivier
+sn: Dehoux
+mail: olivier.dehoux@netcourrier.com
+uid: olivier
+userPassword:: e1NTSEF9K0ppeHZmSzJ6c3IwNi9tNXRtRnhqTkxiUGxBTWJOK0I=
+
+dn: uid=astaillandier,ou=users,dc=ldap,dc=algofab,dc=fr
+objectClass: inetOrgPerson
+description: Algofab user.
+cn: Anne-Sophie Taillandier
+givenName: Anne-Sophie
+sn: Taillandier
+mail: taillandier@imt.fr
+uid: astaillandier
+userPassword:: e1NTSEF9a3hybCtrUXc3NEF6TndIem04M1ZiUlZRQmVJV1lQM2s=
+
+dn: uid=gpolart,ou=users,dc=ldap,dc=algofab,dc=fr
+objectClass: inetOrgPerson
+description: Algofab user.
+cn: Gilles Polart-Donat
+givenName: Gilles
+sn: Polart-Donat
+mail: gilles.polart-donat@imt.fr
+uid: gpolart
+userPassword:: e1NTSEF9ZFY3RWltQTZLWjVpNWQ1dUZ6ZmFEVGszNEc1azNPSjU=
+
+dn: uid=nataliec,ou=users,dc=ldap,dc=algofab,dc=fr
+objectClass: inetOrgPerson
+description: Algofab user.
+cn: Natalie CERNECKA
+givenName: Natalie
+sn: CERNECKA
+mail: natalie.cernecka@imt.fr
+uid: nataliec
+userPassword:: e1NTSEF9Tm1SdHV1ZHFINmt1V09QWUdBTEVYeXdoYjdzTVZRb0U=
+
+dn: uid=skante2,ou=users,dc=ldap,dc=algofab,dc=fr
+objectClass: inetOrgPerson
+description: Algofab user.
+cn: Souleymane\ Cheick KANTE
+givenName: Souleymane\ Cheick
+sn: KANTE
+mail: souleymanecheickkante@yahoo.fr
 uid: skante2
-userPassword:: e1NTSEF9cVlXSlNFeU00dFpvVVR6M2RyYVFOZ3JnRU54L2g1cnY=
+userPassword:: e1NTSEF9SXlvZGg4cHZ6aC95NnpvUTJ1RFB0TFRYb3VTc2VrK3U=
 
