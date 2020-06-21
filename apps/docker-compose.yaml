@@ -4,13 +4,12 @@ version: '3'
 services:
   ldap:
     image: algofab2018/ldap
-    build: ./services/ldap
-    # entrypoint: /bin/sh -c 'while [ true ]; do echo "turn"; sleep 10; done'
+    #build: ./services/ldap
     volumes:
       - ./services/ldap/conf/entrypoint.sh:/tmp/entrypoint.sh
       - ./data/ldap/:/data
     ports:
-      - 8081:80
+      - ${LDAP_COMPOSE_PORT}:80
     env_file:
       - .env
     privileged: true
@@ -22,10 +21,10 @@ services:
 
   api:
     image: algofab2018/marketplace
-    build: ./services/algofab
+    #build: ./services/algofab
     command: API
     ports:
-      - 8084:3000
+      - ${API_COMPOSE_PORT}:3000
     env_file:
       - .env
     user: root
@@ -36,10 +35,10 @@ services:
       
   portal:
     image: algofab2018/marketplace
-    build: ./services/algofab
+    #build: ./services/algofab
     command: Portal
     ports:
-      - 8082:8080
+      - ${PORTAL_COMPOSE_PORT}:8080
     env_file:
       - .env
     user: root
@@ -51,7 +50,7 @@ services:
 
   im:
     image: algofab2018/marketplace
-    build: ./services/algofab
+    #build: ./services/algofab
     command: IM-Server
     env_file:
       - .env
@@ -63,7 +62,7 @@ services:
 
   # rh:
   #   image: algofab2018/marketplace
-  #   build: ./services/algofab
+  #   #build: ./services/algofab
   #   command: RH-Server
   #   ports:
   #     - 8083:3000
@@ -75,9 +74,3 @@ services:
   #     - mongo
 
 
-  # portal:
-  #   build: ./algofab
-  # im:
-  #   build: ./algofab
-  # rh:
-  #   build: ./algofab
