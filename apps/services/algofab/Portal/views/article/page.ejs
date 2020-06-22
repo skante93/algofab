@@ -104,11 +104,10 @@
                                                 <div class="form-group row">
                                                     <label for="documentation" class="col-sm-3 col-form-label col-form-label-lg"> Resource Data (tar archive) : </label>
                                                     <div class="col-sm-9">
-                                                        
-                                                            <button id="browse-resource-data" type="button" class="col-sm-4 btn btn-primary"> 
-                                                                Upload Data
-                                                            </button>
-                                                            <div class="my-spinner col-sm-2" id="upload-spinner"></div>
+                                                        <button id="browse-resource-data" type="button" class="col-sm-4 btn btn-primary">
+                                                            Upload Data
+                                                        </button>
+                                                        <div class="my-spinner col-sm-2" id="upload-spinner"></div>
                                                     </div>
                                                 </div>
 
@@ -120,7 +119,7 @@
 
 
                                             </form>
-                                            <input type="file" id="resource-data-picker" style="display: none"> <!-- accept="application/gzip"> -->
+                                            <input type="file" id="resource-data-picker" style="display: none" accept=".tar,.tar.gz,.zip">
                                             
                                         </div>
                                     </div>
@@ -696,70 +695,161 @@
             });
             var newVersionId = "<%= new_version_id %>";
 
+
+            var getReadyForUpload = function(){
+                var reader = {};
+                var file = {};
+                var slice_size = 1000 * 1024;
+
+                function start_upload( event ) {
+                    event.preventDefault();
+
+                    reader = new FileReader();
+                    file = document.querySelector( '#resource-data-picker' ).files[0];
+
+                    upload_file( 0 );
+
+                    $('#browse-resource-data').text("Uploading data");
+                    $('#upload-spinner').show();
+                }
+    
+                $('#resource-data-picker').change( start_upload )
+                //$( '#dbi-file-upload-submit' ).on( 'click', start_upload );
+
+                function upload_file( start ) {
+                    var next_slice = start + slice_size + 1;
+                    var blob = file.slice( start, next_slice );
+                    var transfer_size = file.size;
+
+                    reader.onloadend = function( event ) {
+                        if ( event.target.readyState !== FileReader.DONE ) {
+                            return;
+                        }
+
+                        socket.emit('upload resource data', newVersionId, event.target.result, {start: start, end: next_slice, size: transfer_size, name: file.name, type: file.type});
+
+                        socket.on('upload resource data', function(chunk_start, status){
+                            console.log("ACK | start: ", start, " | chunk_start : ", chunk_start)
+                            if (chunk_start != start) return;
+
+                            var size_done = start + slice_size;
+                            console.log("next_slice : ", next_slice, ", transfer_size : ", transfer_size);
+
+                            if ( next_slice < transfer_size ) {
+                                upload_file( next_slice );
+                            }
+                            else{
+                                $('#browse-resource-data').text("Data uploaded");
+                                $('#browse-resource-data').removeClass('btn-primary');
+                                $('#browse-resource-data').addClass('btn-success');
+
+                                $('#upload-spinner').hide();
+                                $('#new-version-form input[type="submit"]').prop('disabled', false);
+                            }
+                        });
+                        // $.ajax( {
+                        //     url: ajaxurl,
+                        //     type: 'POST',
+                        //     dataType: 'json',
+                        //     cache: false,
+                        //     data: {
+                        //         action: 'dbi_upload_file',
+                        //         file_data: event.target.result,
+                        //         file: file.name,
+                        //         file_type: file.type,
+                        //         nonce: dbi_vars.upload_file_nonce
+                        //     },
+                        //     error: function( jqXHR, textStatus, errorThrown ) {
+                        //         console.log( jqXHR, textStatus, errorThrown );
+                        //     },
+                        //     success: function( data ) {
+                        //         var size_done = start + slice_size;
+                        //         var percent_done = Math.floor( ( size_done / file.size ) * 100 );
+
+                        //         if ( next_slice < file.size ) {
+                        //             // Update upload progress
+                        //             $( '#dbi-upload-progress' ).html( `Uploading File -  ${percent_done}%` );
+
+                        //             // More to upload, call function recursively
+                        //             upload_file( next_slice );
+                        //         } else {
+                        //             // Update upload progress
+                        //             $( '#dbi-upload-progress' ).html( 'Upload Complete!' );
+                        //         }
+                        //     }
+                        // } );
+                    };
+
+                    reader.readAsDataURL( blob );
+                }
+            }
+            getReadyForUpload();
+
             $('#upload-spinner').hide();
             $('#browse-resource-data').click(function(){
                 $('#resource-data-picker').click();
             });
 
-            $('#resource-data-picker').change(function(evt) {
-                //console.log("This is readFile");
-                var files = evt.target.files;
-                var file = files[0];           
-                var reader = new FileReader();
-                console.log("File : "+JSON.stringify(file));
-                $('#browse-resource-data').text("Uploading data");
-                $('#upload-spinner').show();
+            // $('#resource-data-picker').change(function(evt) {
+            //     //console.log("This is readFile");
+            //     var files = evt.target.files;
+            //     var file = files[0];           
+            //     var reader = new FileReader();
+            //     console.log("File : "+JSON.stringify(file));
+            //     $('#browse-resource-data').text("Uploading data");
+            //     $('#upload-spinner').show();
                 
-                socket.emit('upload resource data init', newVersionId);
-                var data = [], done = false; 
-                reader.onloadend = function(event) {
-                    // done = true;
+            //     socket.emit('upload resource data init', newVersionId);
+            //     var data = [], done = false; 
+            //     reader.onloadend = function(event) {
+            //         // done = true;
                     
-                    socket.emit('upload resource data end', newVersionId);
-                }
+            //         socket.emit('upload resource data end', newVersionId);
+            //     }
                 
-                reader.onprogress = function(event) {
-                    console.log("onprogress : ",event);
-                    //data.push(event.target.result);
-                    socket.emit('upload resource data progress', newVersionId, event.target.result);
-                }
-                // var intervID = setInterval(function(){
-                //     // console.log("sending ...");
-                //     if (data.length > 0){
-                //         console.log("sending ...");
-                //         //socket.emit('upload resource data progress', newVersionId, data.shift());
-                //     }
+            //     reader.onprogress = function(event) {
+            //         console.log("onprogress : ",event);
+            //         //data.push(event.target.result);
+            //         socket.emit('upload resource data progress', newVersionId, event.target.result);
+            //     }
+            //     // var intervID = setInterval(function(){
+            //     //     // console.log("sending ...");
+            //     //     if (data.length > 0){
+            //     //         console.log("sending ...");
+            //     //         //socket.emit('upload resource data progress', newVersionId, data.shift());
+            //     //     }
 
-                //     if (data.length == 0 && done){
-                //         clearInterval(intervID);
-                //         $('#browse-resource-data').text("Data uploaded");
-                //         $('#browse-resource-data').removeClass('btn-primary');
-                //         $('#browse-resource-data').addClass('btn-success');
+            //     //     if (data.length == 0 && done){
+            //     //         clearInterval(intervID);
+            //     //         $('#browse-resource-data').text("Data uploaded");
+            //     //         $('#browse-resource-data').removeClass('btn-primary');
+            //     //         $('#browse-resource-data').addClass('btn-success');
 
-                //         $('#upload-spinner').hide();
-                //         //event.target.result;
-                //         // console.log("event.target.result : "+event.target.result);
-                //         socket.emit('upload resource data end', newVersionId);
-                //     }
-                // }, 1000);
+            //     //         $('#upload-spinner').hide();
+            //     //         //event.target.result;
+            //     //         // console.log("event.target.result : "+event.target.result);
+            //     //         socket.emit('upload resource data end', newVersionId);
+            //     //     }
+            //     // }, 1000);
 
-                setTimeout(function(){
-                    reader.readAsDataURL(file);    
-                }, 2000);
+            //     setTimeout(function(){
+            //         reader.readAsDataURL(file);    
+            //     }, 2000);
                 
-            });
-            socket.on('upload resource data', function(status, data_path){
-                console.log("status; ", status, ", data_path: ", data_path);
-                if (status == "success"){
-                    $('#browse-resource-data').text("Data uploaded");
-                    $('#browse-resource-data').removeClass('btn-primary');
-                    $('#browse-resource-data').addClass('btn-success');
+            // });
+            // socket.on('upload resource data', function(status, data_path){
+            //     console.log("status; ", status, ", data_path: ", data_path);
+            //     if (status == "success"){
+            //         $('#browse-resource-data').text("Data uploaded");
+            //         $('#browse-resource-data').removeClass('btn-primary');
+            //         $('#browse-resource-data').addClass('btn-success');
 
-                    $('#upload-spinner').hide();
-                    //event.target.result;
-                    $('#new-version-form input[type="submit"]').prop('disabled', false);
-                }
-            })
+            //         $('#upload-spinner').hide();
+            //         //event.target.result;
+            //         $('#new-version-form input[type="submit"]').prop('disabled', false);
+            //     }
+            // });
+
             var newVersionFrom = $('#new-version-form');
             newVersionFrom.submit(function(){
                 //

@@ -47,6 +47,7 @@ services:
       - ./data/accounts/:/accounts
     depends_on: 
       - mongo
+      - ldap
 
   im:
     image: algofab2018/marketplace

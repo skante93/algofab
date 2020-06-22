@@ -20,6 +20,7 @@ var LOG_TIMERS = {}, RMV_ALGO_TIMERS = {};
 var Algos = global.mongo.model('Algos');
 var AlgosMeta = global.mongo.model('AlgosMeta');
 var Article = global.mongo.model('Article');
+var ArticleVersionData = global.mongo.model('ArticleVersionData');
 
 //console.log("*** Connecting via socket to "+('http://'+ process.env.IM_SERVICE_HOST));
 
@@ -606,27 +607,64 @@ module.exports = function(server, sessionStore) {
 				}
 			});
 		});
-		socket.on('upload resource data init', function(versionID){
-			console.log(' <UPLOAD RESOURCE DATA INIT> | versionID : '+versionID);
-			console.log("process.cwd(): ", process.cwd());
-			console.log("fs.readdirSync(process.cwd()): ", fs.readdirSync(process.cwd()));
-			resource_data_writter[versionID] = [];//fs.createWriteStream(process.cwd()+'/resourceData/'+versionID+'.tar');
-		});
+		// socket.on('upload resource data init', function(versionID){
+		// 	console.log(' <UPLOAD RESOURCE DATA INIT> | versionID : '+versionID);
+		// 	console.log("process.cwd(): ", process.cwd());
+		// 	console.log("fs.readdirSync(process.cwd()): ", fs.readdirSync(process.cwd()));
+		// 	resource_data_writter[versionID] = [];//fs.createWriteStream(process.cwd()+'/resourceData/'+versionID+'.tar');
+		// });
 
-		socket.on('upload resource data progress', function(versionID, data){
-			console.log(' <UPLOAD RESOURCE DATA PROGRESS> | versionID : '+versionID);
+		// socket.on('upload resource data progress', function(versionID, data){
+		// 	console.log(' <UPLOAD RESOURCE DATA PROGRESS> | versionID : '+versionID);
 			
-			resource_data_writter[versionID].push(data);
+		// 	resource_data_writter[versionID].push(data);
+		// });
+		
+		socket.on('upload resource data', function(versionID, data, transfer_state){
+			console.log(' <UPLOAD RESOURCE DATA> | versionID : '+versionID, ", transfer_state : ", transfer_state);
+			if (transfer_state.start == 0){
+				console.log("beginning the tasks");
+				resource_data_writter[versionID] = [data];
+			}
+			else {
+				
+				resource_data_writter[versionID].push(data);
+				
+			}
+			
+			if (transfer_state.end < transfer_state.size){
+				console.log("right in the middle");
+			}
+			else{
+				console.log("end of the transfert");
+				//console.log("data: ", resource_data_writter[versionID]);
+				new ArticleVersionData({ 
+					_id: versionID,
+					name: transfer_state.name, 
+					type: transfer_state.type, 
+					data: resource_data_writter[versionID].join('') 
+				}).save(function(err, saved){
+					if (err){
+						console.log(err);
+						return;
+					}
+					//console.log("resource data saved: ", saved);
+					socket.emit('upload resource data', transfer_state.start, 'success');
+				});
+				return;
+			}
+
+			socket.emit('upload resource data', transfer_state.start, 'success');
 		});
 
-		socket.on('upload resource data end', function(versionID){
-			console.log(' <UPLOAD RESOURCE DATA END> | versionID : '+versionID);
-			//resource_data_writter[versionID].end();
-			var data = resource_data_writter[versionID].join('');
+		// socket.on('upload resource data end', function(versionID){
+		// 	console.log(' <UPLOAD RESOURCE DATA END> | versionID : '+versionID);
+		// 	//resource_data_writter[versionID].end();
+		// 	var data = resource_data_writter[versionID].join('');
 
-			fs.writeFileSync(process.cwd()+'/resourceData/'+versionID+'.tar', data.split(';base64,').pop(), {encoding: 'base64'});
-			socket.emit('upload resource data', 'success', '/path/to/data');
-		});
+		// 	fs.writeFileSync(process.cwd()+'/resourceData/'+versionID+'.tar', data.split(';base64,').pop(), {encoding: 'base64'});
+		// 	socket.emit('upload resource data', 'success', '/path/to/data');
+		// });
 
 		socket.on('remove algo', function(algoMetaID){
 			console.log(' <REMOVE ALGO> | ID : '+algoMetaID);

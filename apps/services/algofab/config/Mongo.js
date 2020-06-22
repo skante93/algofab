@@ -112,8 +112,15 @@ var articleVersionSchema = new Schema({
 			licenceID: String
 		} 
 	],
+	data: { type: Schema.Types.ObjectId, ref: 'ArticleVersionData' },
 	date : {type : Date, default : Date.now},
 }, { collection: 'articles_versions' });
+
+var articleVersionDataSchema = new Schema({
+	name: String,
+	type: String,
+	data: String
+}, {collection: "articles_versions_data"});
 
 
 var algosSchema = new Schema(
@@ -407,6 +414,7 @@ mongoose.model('Algos', algosSchema);
 mongoose.model('AlgosMeta', algoMetaSchema);
 mongoose.model('Article', articleSchema);
 mongoose.model('ArticleVersion', articleVersionSchema);
+mongoose.model('ArticleVersionData', articleVersionDataSchema);
 mongoose.model('Histo', historySchema);
 mongoose.model('Subscriptions', subscriptionsSchema);
 mongoose.model('Resetpwd', resetPWDSchema);

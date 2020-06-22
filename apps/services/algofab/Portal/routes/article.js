@@ -15,6 +15,7 @@ var Algos = mongo.model('Algos');
 var AlgosMeta = mongo.model('AlgosMeta');
 var Article = mongo.model('Article');
 var ArticleVersion = mongo.model('ArticleVersion');
+var ArticleVersionData = mongo.model('ArticleVersionData');
 var demoSessionID = mongo.model('demoSessionID');
 var Subscriptions = mongo.model('Subscriptions');
 var AVReports = mongo.model('AVReports');
@@ -52,12 +53,34 @@ router.get('/:articleID/version/:versionID/download', function(req, res){
     	return res.end('query parameter "licence" is required');
     }
 
-	if (!fs.existsSync(process.cwd()+'/resourceData/'+req.params.versionID+'.tar')){
-		return res.status(404).end("Resource data does not exist");
-	}
-	else{
-		res.sendFile(process.cwd()+'/resourceData/'+req.params.versionID+'.tar');
+	
+	var d_path = process.cwd()+'/resourceData/'+req.params.versionID+'.tar';
+	
+	//res.sendFile(process.cwd()+'/resourceData/'+req.params.versionID+'.tar');
+	ArticleVersion.findById(req.params.versionID).populate('data').exec(function(err, av){
+		if (err){
+			console.log(err);
+			return res.status(500).end(err);
+		}
 		
+		//console.log("av gotten, here is data : ", av.data);
+		
+		if (av.data){
+			res.writeHead(200, {
+		        'Content-Type': av.data.type,
+		        'Content-Disposition': `attachment; filename="${av.data.name}"`
+		    });
+		    //const download = Buffer.from(av.data.data.toString('utf-8'), 'base64');
+		    const d = av.data.data.split(';base64,')[1];
+		    res.end(d, 'base64');
+		}
+		else if (fs.existsSync(d_path)){
+			res.sendFile(d_path);
+		}
+		else {
+			res.status(404).end("Resource does not exist")
+		}
+
 		ArticleVersion.update({_id: req.params.versionID}, {
 			$push: {
 				downloads : {
@@ -69,7 +92,8 @@ router.get('/:articleID/version/:versionID/download', function(req, res){
 		}, function(err){
 			console.log(err? err : "Download recorded");
 		});
-	}
+	})
+		
 });
 
 router.post('/:articleID/version/:versionID/report', function(req, res){
@@ -208,11 +232,11 @@ router.post('/:id/version', function(req, res){
 		}
 
 		new ArticleVersion({
-			_id: req.body.versionNumber,
+			data: req.body.versionNumber,
 			articleID: req.params.id,
 			version: req.body.version,
 			docs: req.body.documentation
-		}).save(function(err){
+		}).save(function(err, newArticleVersion){
 			if (err){
 				console.log(err);
 				return res.end(err);
@@ -222,7 +246,7 @@ router.post('/:id/version', function(req, res){
 					console.log(err);
 					return res.end(err);
 				}
-				article.versions.push(req.body.versionNumber);
+				article.versions.push(newArticleVersion._id.toString());
 				article.save(function(err){
 					if (err){
 						console.log(err);
