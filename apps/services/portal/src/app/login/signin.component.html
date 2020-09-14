@@ -1,0 +1,39 @@
+<div id="signin-container" banner-img="/assets/img/algofab_white_bg_transparent.PNG">
+	<div class="container">
+		<div class="row">
+			<div id="signin-content" class="offset-md-3 col-md-6">
+				<a routerLink="/" id="signin-home-link"><h2> Home </h2></a>
+				<hr id="signin-divider">		
+				<form id="signin-form" class="" my-custom-styles="{&quot;color&quot;:&quot;black&quot;}" #signinForm="ngForm" (ngSubmit)="onSubmit()">
+					
+					<div class="form-group row">
+						<label for="id" class="col-sm-3 col-form-label">ID </label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" id="id" name="userID" [(ngModel)]="model.userID" placeholder="Username or Email">
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="password" class="col-sm-3 col-form-label">Password</label>
+						<div class="col-sm-7">
+							<input type="password" class="form-control" id="password" name="password" [(ngModel)]="model.password" placeholder="Password">
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<div class="offset-sm-3 col-sm-7">
+							<button type="submit" class="form-control btn btn-primary" [disabled]="!valid()">Sign in</button>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col-sm-8">
+							<a routerLink="/recover" style="color: blue; text-decoration: underline;"> Forgot ID or passowrd? </a>
+						</div>
+						<div class="col-sm-4">
+							<a routerLink="/signup" style="color: blue; text-decoration: underline;"> Sign up </a>
+						</div>
+					</div>
+				</form>		
+			</div>
+		</div>
+	</div>
+</div>

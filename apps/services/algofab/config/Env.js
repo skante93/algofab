@@ -53,6 +53,7 @@ exports.settings = {
             }
         },
 
+        DEMO_URL: "192.168.43.141", 
         DEMO : { 
             name : "ws37.tl.teralab-datascience.fr" , 
             port_range: { min : 33000, max : 35767}, 

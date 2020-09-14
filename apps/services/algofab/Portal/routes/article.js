@@ -20,6 +20,12 @@ var demoSessionID = mongo.model('demoSessionID');
 var Subscriptions = mongo.model('Subscriptions');
 var AVReports = mongo.model('AVReports');
 
+
+var KNOWN_PORTS = {
+	"80": { name: "HTTP" },
+	"443": { name: "HTTPS" }
+}
+
 // var collections = {
 // 	User : User,
 // 	Algos : Algos,
@@ -57,42 +63,48 @@ router.get('/:articleID/version/:versionID/download', function(req, res){
 	var d_path = process.cwd()+'/resourceData/'+req.params.versionID+'.tar';
 	
 	//res.sendFile(process.cwd()+'/resourceData/'+req.params.versionID+'.tar');
-	ArticleVersion.findById(req.params.versionID).populate('data').exec(function(err, av){
+	Article.findById(req.params.articleID, function(err, article){
 		if (err){
 			console.log(err);
 			return res.status(500).end(err);
 		}
-		
-		//console.log("av gotten, here is data : ", av.data);
-		
-		if (av.data){
-			res.writeHead(200, {
-		        'Content-Type': av.data.type,
-		        'Content-Disposition': `attachment; filename="${av.data.name}"`
-		    });
-		    //const download = Buffer.from(av.data.data.toString('utf-8'), 'base64');
-		    const d = av.data.data.split(';base64,')[1];
-		    res.end(d, 'base64');
-		}
-		else if (fs.existsSync(d_path)){
-			res.sendFile(d_path);
-		}
-		else {
-			res.status(404).end("Resource does not exist")
-		}
-
-		ArticleVersion.update({_id: req.params.versionID}, {
-			$push: {
-				downloads : {
-					username: req.session.user.username, 
-					agreementiD : req.query.agreement, 
-					licenceID : req.query.licence
-				}
+		ArticleVersion.findById(req.params.versionID).populate('data').exec(function(err, av){
+			if (err){
+				console.log(err);
+				return res.status(500).end(err);
 			}
-		}, function(err){
-			console.log(err? err : "Download recorded");
+			
+			//console.log("av gotten, here is data : ", av.data);
+			
+			if (av.data){
+				res.writeHead(200, {
+			        'Content-Type': av.data.type,
+			        'Content-Disposition': `attachment; filename="${av.data.name}"`
+			    });
+			    //const download = Buffer.from(av.data.data.toString('utf-8'), 'base64');
+			    const d = av.data.data.split(';base64,')[1];
+			    res.end(d, 'base64');
+			}
+			else if (fs.existsSync(d_path)){
+				res.sendFile(d_path);
+			}
+			else {
+				res.status(404).end("Resource does not exist")
+			}
+
+			ArticleVersion.update({_id: req.params.versionID}, {
+				$push: {
+					downloads : {
+						username: req.session.user.username, 
+						agreementiD : req.query.agreement, 
+						licenceID : req.query.licence
+					}
+				}
+			}, function(err){
+				console.log(err? err : "Download recorded");
+			});
 		});
-	})
+	});
 		
 });
 
@@ -154,7 +166,13 @@ router.get('/:articleID/version/:versionID/delete', function(req, res){
 					console.log(err)
 					return res.end(err);
 				}
-				fs.unlinkSync(process.cwd()+'/resourceData/'+req.params.versionID+'.tar')
+				try{
+					fs.unlinkSync(process.cwd()+'/resourceData/'+req.params.versionID+'.tar')
+				}catch(e){
+					if (e.code != 'ENOENT'){
+						return res.end(err);
+					}
+				}
 				res.redirect('/article/'+req.params.articleID);				
 			});
 		});
@@ -214,50 +232,91 @@ router.post('/:id/rate', function(req, res){
 router.post('/:id/version', function(req, res){
 	console.log("req.body: ", req.body);
 
-	
-	if (!req.body.version){
-		return res.end('Field "version" is required.')
-	}if (!req.body.versionNumber){
-		return res.end('Field "versionNumber" is required.')
-	}
-	
-	ArticleVersion.findOne({ articleID: req.params.id, version : req.body.version }, function(err, av){
+	var form = new multiparty.Form();
+	console.log("OK here!!!");
+		
+	form.parse(req, (error, fields, files)=>{
+		console.log("error: ", error, "; fields : ", fields, "; files : ", files);
+		var version = (error)? req.body.version : fields.version[0];
+		var dataID = (error)? req.body.dataID : "dataID" in fields? fields.dataID[0] : null;
+		var documentation = (error)? req.body.documentation : "documentation" in fields? fields.documentation[0] : null;
 
-		if (err){
-			console.log(err);
-			return res.end(err);
+		if (!version){
+			return res.end('Field "version" is required.')
 		}
-		if (av){
-			return res.end(`The article already has a version "${req.body.version}"`)
-		}
-
-		new ArticleVersion({
-			data: req.body.versionNumber,
-			articleID: req.params.id,
-			version: req.body.version,
-			docs: req.body.documentation
-		}).save(function(err, newArticleVersion){
+		console.log("OK here!!!");
+		
+		Article.findById(req.params.id, function(err, article){
 			if (err){
-				console.log(err);
 				return res.end(err);
+			}	
+			if (!article){
+				return res.end('Resource with id "'+req.params.id+'" does not exist');
 			}
-			Article.findById(req.params.id, function(err, article){
-				if (err){
-					console.log(err);
-					return res.end(err);
-				}
-				article.versions.push(newArticleVersion._id.toString());
-				article.save(function(err){
+
+			if (article.versions.indexOf(version) >=0 ){
+				return res.end(`The article already has a version "${req.body.version}"`);
+			}
+
+			
+
+			var definition = {
+				articleID: req.params.id,
+				version: version,
+				docs: documentation
+			};
+			if (dataID){
+				definition.data = dataID;
+			}
+
+			var record_and_respond = ()=>{
+				new ArticleVersion(definition).save(function(err, newArticleVersion){
 					if (err){
 						console.log(err);
 						return res.end(err);
 					}
-					res.redirect('/article/'+req.params.id+'?version='+req.body.version);
+					article.versions.push(newArticleVersion._id.toString());
+					article.save(function(err){
+						if (err){
+							console.log(err);
+							return res.end(err);
+						}
+						res.redirect('/article/'+req.params.id+'?version='+version);
+					});
 				});
-			});
-		});
-	});
+			}
 
+			if ( article.asset_type == settings.ARTICLE_CATEGORIES.types.filter(e => e.name == "As a Service")[0].id ) {
+				if (! ('spec' in files) ){
+					return res.end('Field "Portainer spec" is required.');
+				}
+				var spec = fs.readFileSync(files.spec[0].path);
+				try{
+					spec = JSON.parse(spec);
+				}
+				catch(e){
+					return res.end(e);
+				}
+				
+				utils.infraManager.portainer.run(spec).then(()=>{
+					definition.spec = {
+						type: 'portainer',
+						definition: spec
+					} 
+
+					record_and_respond();
+				}).catch( e => {
+					res.end(e);
+				});
+
+
+			}
+			else{
+				record_and_respond();
+			}
+		});
+
+	});
 });
 
 router.get('/:id/delete', function(req, res){
@@ -434,7 +493,34 @@ router.get('/:id', function(req, res){
             console.log("ratings_counts: ", ratings_counts);
             console.log("ratings_mean: ", ratings_mean);
 
-            res.render('article/page', {
+            var is_as_a_service = data.asset_type == settings.ARTICLE_CATEGORIES.types.filter(e => e.name == "As a Service")[0].id;
+            
+            var demo_accesses = {};
+
+            if (is_as_a_service){
+            	//console.log("data: ", data);
+            	data.versions.forEach(function(ver){
+            		//console.log("[", ver.version, " -", ver._id, " ]", " | ver.spec.definition: ", ver.spec.definition);
+	            	if ("spec" in ver && ver.spec.type == "portainer"){
+	            		
+	            		if ("definition" in ver.spec && "HostConfig" in ver.spec.definition){
+	            	
+		            		var portsSpec = ver.spec.definition.HostConfig.PortBindings;
+
+		            		demo_accesses[ver.version] = [];
+
+		            		for(var port in portsSpec){
+		            			var p_info = (port.split('/')[0] in KNOWN_PORTS)? KNOWN_PORTS[ port.split('/')[0] ] : null;
+		            			demo_accesses[ver.version].push({i_url: settings.DEMO_URL, i_port : portsSpec[port][0].HostPort, t_port: port, service: p_info == null ? null: p_info.name});
+		            		}
+		            	}
+	            	}
+	            });
+            }
+
+            var page = ( is_as_a_service )? 'article/page_as_a_service' : 'article/page';
+            
+            res.render(page, {
             	pop_message : pop_message, 
             	title : 'Page : algorithm ' + data.title, 
             	activeHeadersComp : 'algo', 
@@ -448,7 +534,9 @@ router.get('/:id', function(req, res){
             	ratings: {
             		counts: ratings_counts,
             		mean: ratings_mean
-            	}
+            	},
+            	displayed_version: req.query.version,
+            	demo_accesses: demo_accesses
             });
 
 		}); 

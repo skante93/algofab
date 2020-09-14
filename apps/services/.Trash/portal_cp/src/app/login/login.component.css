@@ -1,0 +1,24 @@
+#signin-container, #signup-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100vw;
+	height: 100vh;
+}
+
+
+#signin-container a, #signup-container a {
+	color: black;
+}
+
+#signin-home-link, #signup-home-link {
+	color: white;
+	text-align: center;
+}
+
+#signin-divider, #signup-divider {
+	color: black;
+	border: 2px solid black;
+	margin-top: 3em;
+	margin-bottom: 3em;
+}

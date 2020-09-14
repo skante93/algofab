@@ -10,80 +10,62 @@ objectClass: simpleSecurityObject
 objectClass: organizationalRole
 cn: admin
 description: LDAP administrator
-userPassword:: e1NTSEF9UEF1VEtsOTg0eVZmS3NnRWx4TTQ1VTJBRUMweW5zcTE=
+userPassword:: e1NTSEF9ZmxJd2ZaQUtIcXNoRW9VVktiRStnQVdRaGFIZy84NSs=
 
-dn: ou=users,dc=ldap,dc=algofab,dc=fr
+dn: ou=test,dc=ldap,dc=algofab,dc=fr
 objectClass: organizationalUnit
 objectClass: top
-ou: users
+ou: test
 
-dn: uid=toto,ou=users,dc=ldap,dc=algofab,dc=fr
+dn: uid=john1.doe@example.com,ou=test,dc=ldap,dc=algofab,dc=fr
+sn: DOE
+cn: John DOE
+mail: john1.doe@example.com
+uid: john1.doe@example.com
+objectClass: top
 objectClass: inetOrgPerson
-description: Algofab user.
-cn: Toto Tata
-givenName: Toto
-sn: Tata
+userPassword:: e1NTSEF9TVVFS2wvWGd2YjFmV3RST2lYbW1ENWh1SnVSR2M3NmNCeG9NMlkrSjF
+ 4anRyNkFQSFp1dGU2UXZKRkhROTNpN2QrVTlqdz09
+
+dn: uid=souleymanecheickkante@yahoo.fr,ou=test,dc=ldap,dc=algofab,dc=fr
 mail: souleymanecheickkante@yahoo.fr
-uid: toto
-userPassword:: e1NTSEF9TUgrWEE1K2szcldWZVN2NmpWUDhBQXU1MktNVmRzQjM=
-
-dn: uid=jdoe,ou=users,dc=ldap,dc=algofab,dc=fr
+uid: souleymanecheickkante@yahoo.fr
+objectClass: top
 objectClass: inetOrgPerson
-description: Algofab user.
-cn: Souleymane KANTE
+userPassword:: e1NTSEF9Nzlpa2hETXdSRks5RGxwUzNLQW5tQmRRS1l5d0MybndPc2x5UlJFZGd
+ UN1oxMzhVVkhkYitaQis1WVVMTmtoZG5PSXVUUT09
 givenName: Souleymane
 sn: KANTE
-mail: souleymane.kante@imt.fr
-uid: jdoe
-userPassword:: e1NTSEF9cHlLOWxQVEc0UHBieVM5OWN5TVN1eGgwM294d0ZDVEo=
+cn: Souleymane KANTE
 
-dn: uid=olivier,ou=users,dc=ldap,dc=algofab,dc=fr
+dn: uid=jdoe@example.com,ou=test,dc=ldap,dc=algofab,dc=fr
+sn: DOE
+cn: John DOE
+mail: jdoe@example.com
+uid: jdoe@example.com
+givenName: John
+objectClass: top
 objectClass: inetOrgPerson
-description: Algofab user.
-cn: Olivier Dehoux
-givenName: Olivier
-sn: Dehoux
-mail: olivier.dehoux@netcourrier.com
-uid: olivier
-userPassword:: e1NTSEF9K0ppeHZmSzJ6c3IwNi9tNXRtRnhqTkxiUGxBTWJOK0I=
+userPassword:: e1NTSEF9WHB4anN2K2puYkN2RjlHMnE0SGtLL0k5VWVBSzRvSEJwMHoyc3Y5Ri8
+ wandiMnhRdHVtWEhXdTZEY2w1c2wzM3M2dEJTUT09
 
-dn: uid=astaillandier,ou=users,dc=ldap,dc=algofab,dc=fr
+dn: uid=jdoe1@example.com,ou=test,dc=ldap,dc=algofab,dc=fr
+sn: DOE
+cn: John DOE
+mail: jdoe1@example.com
+uid: jdoe1@example.com
+objectClass: top
 objectClass: inetOrgPerson
-description: Algofab user.
-cn: Anne-Sophie Taillandier
-givenName: Anne-Sophie
-sn: Taillandier
-mail: taillandier@imt.fr
-uid: astaillandier
-userPassword:: e1NTSEF9a3hybCtrUXc3NEF6TndIem04M1ZiUlZRQmVJV1lQM2s=
+userPassword:: e1NTSEF9REVmdFJkWUVIeHhzd2lkRzJ3SVI1bE0rQUFXckdMRGMySUlDL2k0T0p
+ zS3NNeEN4V2dLUFpPWUkzOVp4RGdVTDRMN1Zrdz09
 
-dn: uid=gpolart,ou=users,dc=ldap,dc=algofab,dc=fr
+dn: uid=souleymane.kante@mines-telecom.fr,ou=test,dc=ldap,dc=algofab,dc=fr
+sn: DOE
+cn: John DOE
+mail: souleymane.kante@mines-telecom.fr
+uid: souleymane.kante@mines-telecom.fr
+objectClass: top
 objectClass: inetOrgPerson
-description: Algofab user.
-cn: Gilles Polart-Donat
-givenName: Gilles
-sn: Polart-Donat
-mail: gilles.polart-donat@imt.fr
-uid: gpolart
-userPassword:: e1NTSEF9ZFY3RWltQTZLWjVpNWQ1dUZ6ZmFEVGszNEc1azNPSjU=
-
-dn: uid=nataliec,ou=users,dc=ldap,dc=algofab,dc=fr
-objectClass: inetOrgPerson
-description: Algofab user.
-cn: Natalie CERNECKA
-givenName: Natalie
-sn: CERNECKA
-mail: natalie.cernecka@imt.fr
-uid: nataliec
-userPassword:: e1NTSEF9Tm1SdHV1ZHFINmt1V09QWUdBTEVYeXdoYjdzTVZRb0U=
-
-dn: uid=skante2,ou=users,dc=ldap,dc=algofab,dc=fr
-objectClass: inetOrgPerson
-description: Algofab user.
-cn: Souleymane\ Cheick KANTE
-givenName: Souleymane\ Cheick
-sn: KANTE
-mail: souleymanecheickkante@yahoo.fr
-uid: skante2
-userPassword:: e1NTSEF9SXlvZGg4cHZ6aC95NnpvUTJ1RFB0TFRYb3VTc2VrK3U=
+userPassword:: e1NTSEF9Ym51N0xDbllpTVlXZDNJOXZTTTlXeTFTS0RBbGMxUWhkYndtR0cyQWZ
+ UWVNDSkMwMmNGVWx2dXFLV3Z0YXBjU1k0eUViQT09
 

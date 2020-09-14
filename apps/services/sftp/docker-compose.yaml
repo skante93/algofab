@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  sftp: 
+    build: ./
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh
+      - live_data:/live-data
+    ports:
+      - "2222:22"
+    environment:
+      - SFTP_PUB_KEYS=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyMqfs5QAnPb0xLqEg2Vt4T1gS/Btw1X5r0JGhKwLEfpImciY4RiDOc0Sq3BK8CVwUN9316EIE31lgvnZ9+TCRdj4XSc/2O49EgTUzEzqrdT5RvFAPOPeklDDVhrbi75P94xeYM0qiJhcmYmloqGG1dSla1oGLdDXi9GzlnCoAOXl3yhHMzman0hbwJiHDwVvyTdegDo0ZvKoPYbaV41Bm2IobH/URrLQYDZCCUAB4JWZd6DcSsbEYGEKgI3NvcqO3Z6dn+eRlHJxqQZ4Qos0ZT9LRffWvUM3ocWsJ5aqXuml2pA0Or8oVbfNhej8P9VhvFSH8FkXPhQpSCuxfYXCb skante@skante-virtual-machine,toto
+
+volumes:
+  live_data: 
+    driver_opts:
+      type: nfs
+      o: "addr=192.168.43.128,nolock,soft,rw"
+      device: ":/home/skante/nfs/live-data/test"
+
+# {
+#   "version": "3",
+#   "services": {
+#     "sftp": {
+#       "image": "algofab2018/sftp",
+#       "ports": [
+#         "32698:22"
+#       ],
+#       "environment": [
+#         "SFTP_PUB_KEYS=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyMqfs5QAnPb0xLqEg2Vt4T1gS/Btw1X5r0JGhKwLEfpImciY4RiDOc0Sq3BK8CVwUN9316EIE31lgvnZ9+TCRdj4XSc/2O49EgTUzEzqrdT5RvFAPOPeklDDVhrbi75P94xeYM0qiJhcmYmloqGG1dSla1oGLdDXi9GzlnCoAOXl3yhHMzman0hbwJiHDwVvyTdegDo0ZvKoPYbaV41Bm2IobH/URrLQYDZCCUAB4JWZd6DcSsbEYGEKgI3NvcqO3Z6dn+eRlHJxqQZ4Qos0ZT9LRffWvUM3ocWsJ5aqXuml2pA0Or8oVbfNhej8P9VhvFSH8FkXPhQpSCuxfYXCb skante@skante-virtual-machine"
+#       ],
+#       "volumes": [
+#         "live_data:/live-data"
+#       ]
+#     }
+#   },
+#   "volumes": {
+#     "live_data": {
+#       "driver_opts": {
+#         "type": "nfs",
+#         "o": "addr=192.168.43.128,nolock,soft,rw",
+#         "device": ":/home/skante/nfs/live-data/souleymane-kante-mines-telecom-fr-my_ld_two"
+#       }
+#     }
+#   }
+# }

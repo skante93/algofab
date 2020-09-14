@@ -1,0 +1,14 @@
+
+.resource-list-container {
+	display: flex; 
+	align-items: center; 
+	justify-content: center; 
+	flex-wrap: wrap; 
+}
+
+.resources-intro-container, .resources-catalog-container, .resources-docs-container {
+	background-color: rgb(175, 197, 218);
+	border-radius: 5px;
+	padding: 1em;
+	margin-top: 1em;
+}

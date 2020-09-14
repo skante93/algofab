@@ -1,0 +1,60 @@
+<div id="signup-container" banner-img="/assets/img/algofab_white_bg_transparent.PNG">
+	<div class="container">
+		<div class="row">
+			<div id="signup-content" class="offset-md-3 col-md-6">
+				<a href="index.html" id="signup-home-link"><h2> Home </h2></a>
+				<hr id="signup-divider">		
+				<form id="signup-form" class="" my-custom-styles="{&quot;color&quot;:&quot;black&quot;}" #signupForm="ngForm" (ngSubmit)="onSubmit(this)">
+					<div class="form-group row">
+						<label for="username" class="col-sm-3 col-form-label">Username</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="username" [(ngModel)]="model.username" id="username" placeholder="Username" pattern="{{usernamePattern}}" required>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="email" class="col-sm-3 col-form-label">Email</label>
+						<div class="col-sm-7">
+							<input type="email" class="form-control" name="email" [(ngModel)]="model.email" id="email" placeholder="Email" required>
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<label for="f_name" class="col-sm-3 col-form-label">First name</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="f_name" [(ngModel)]="model.f_name" id="f_name" placeholder="First name">
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="l_name" class="col-sm-3 col-form-label">Last name</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control" name="l_name" [(ngModel)]="model.l_name" id="l_name" placeholder="Last name">
+						</div>
+					</div>
+					
+					<!-- 
+					site : 6LcDYsIZAAAAABj97Fv2vVTe5rGafz-ymF-9kFzn
+					secret: 6LcDYsIZAAAAANuq9uj_V9tylDf66om1-2aMDT8-
+					-->
+					<div class="form-group row">
+						<div class="offset-sm-3 col-sm-7" #reCaptchaContainer>
+							<app-captcha siteKey="6LcDYsIZAAAAABj97Fv2vVTe5rGafz-ymF-9kFzn" #reCaptcha></app-captcha>
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<div class="offset-sm-3 col-sm-7">
+							<button type="submit" class="form-control btn btn-primary" [disabled]="!valid()">Sign Up</button>
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<p style="font-size: 0.7em; text-align: center;">
+							By creating an account, you agree to the <a href="#" style="text-decoration: underline;">Terms of Service</a>, 
+							<a href="#" style="text-decoration: underline;">Privacy Policy</a>, and <a href="#" style="text-decoration: underline;">Data Processing Terms</a>.
+						</p>
+					</div>
+				</form>		
+			</div>
+		</div>
+	</div>
+</div>

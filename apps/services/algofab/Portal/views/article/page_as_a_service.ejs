@@ -1,0 +1,970 @@
+
+<%
+    function removalWithIn(d){
+        var dayToMillis = 1000*60*60*24;
+        var hourToMillis = 1000*60*60;
+        var minToMillis = 1000*60;
+
+        var delta =  d.getTime() - Date.now() ;
+        if(delta < 0)
+            return 'Expired';
+
+        var days = Math.floor(delta/dayToMillis);
+        //days = delta % days;
+
+        var hours = Math.floor( (delta%dayToMillis)/hourToMillis );
+        //hours %= 24;
+        
+        var min = Math.floor( (delta%hourToMillis)/minToMillis);
+        //min %= 60;
+
+        var sec = Math.floor(delta/1000);
+        sec %= 60;
+
+        
+        
+        
+        //return d.getTime() - Date.now() + '  ' + (1000*60*60*24*7)
+        return days+" days, " + hours + ' h : '+min+' m : '+sec+' s.';
+        //return Date.now() / (1000*60*60*24*30*12);
+    }
+%>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ../partials/head %>
+    <% include ../partials/functions %>
+
+  </head>
+  <body>
+    <% include ../partials/header %>
+
+    
+    
+
+    <div class="container">
+        <div class="row article-container">
+            <section>
+                <div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <h2 id="title" style="text-align: center;"><%= article.name %></h2> 
+                            <hr>
+                            <div style="text-align: center;">
+                                By <a href="mailto:<%= article.author.email %>"> <%= article.author.firstname %> <%= article.author.lastname %> </a>, on <%= article.date.toLocaleDateString() %>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <% if (article.versions.length == 0) {%>
+                                <div class="alert alert-warning" style="text-align: center;">No version available</div>
+                            <% } else { %> 
+                                <select class="form-control" id="version-selector" style="text-align: center;">
+                                    <option value="_none" disabled="" selected="">Select a version to display</option>
+                                    <% for (var i=0; i < article.versions.length; i++) { %>
+                                        <option 
+                                            value="<%= article.versions[i].version %>" 
+                                            <%= selected_version && selected_version == article.versions[i].version? "selected": "" %>
+                                            ><%= article.versions[i].version %></option>
+                                    <% } %>
+                                </select>
+                            <% } %>
+                        </div>
+                        <% if (article.author.username == user.username) {%>
+                            <div class="btn btn-primary add-version col-sm-4" data-toggle="modal" data-target="#newVersionModal">
+                                Add new Version
+                            </div>
+                            <div class="modal fade" id="newVersionModal" tabindex="-1" role="dialog" aria-labelledby="newVersionModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h2 class="modal-title" id="exampleModalLabel"> Create new resource version </h2>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form method="post" action="/article/<%= article._id.toString() %>/version" id="new-version-form" enctype="multipart/form-data">
+
+                                                <div class="form-group row">
+                                                    <label for="version" class="col-sm-3 col-form-label col-form-label-lg"> Version number : </label>
+                                                    <div class="col-sm-9">
+                                                        <input type="text" class="form-control form-control-lg" name="version" id="version" pattern="^([0-9]{1,3}\.){2}[0-9]{1,3}$" placeholder="Pattern is: x.y.z" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="documentation" class="col-sm-3 col-form-label col-form-label-lg"> Documentation : </label>
+                                                    <div class="col-sm-9">
+                                                        <textarea class="form-control form-control-lg" name="documentation" id="documentation"></textarea> 
+                                                    </div>
+                                                </div>
+
+                                                <input type="hidden" name="dataID" value="<%= new_version_id %>">
+
+                                                <div class="form-group row">
+                                                    <label for="browse-resource-data" class="col-sm-3 col-form-label col-form-label-lg"> Resource Data (tar archive) : </label>
+                                                    <div class="col-sm-9">
+                                                        <button id="browse-resource-data" type="button" class="col-sm-4 btn btn-primary">
+                                                            Upload Data
+                                                        </button>
+                                                        <div class="my-spinner col-sm-2" id="upload-spinner"></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="form-group row">
+                                                    <label for="documentation" class="col-sm-3 col-form-label col-form-label-lg"> Portainer spec : </label>
+                                                    <div class="col-sm-9">
+                                                        <input type="file" id="portainer-spec" class="btn btn-primary" name="spec" accept=".json" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-2 pull-right">
+                                                        <input type="submit" value="Submit" id="submit" class="btn btn-primary pull-right" id="sbmit-new-version-from" />
+                                                    </div>
+                                                </div>
+                                            </form>
+                                            <input type="file" id="resource-data-picker" style="display: none" accept=".tar,.tar.gz,.zip">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <hr>
+                    
+                    <% if(article.author.username == user.username){ %>
+                        <button type="button" class="btn btn-primary" id="edit-article" data-toggle="modal" data-target="#editArticleModal"> Edit Resource </button>
+                        <div class="modal fade" id="editArticleModal" tabindex="-1" role="dialog" aria-labelledby="editArticleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h2 class="modal-title" id="exampleModalLabel"> Updating resource </h2>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="post" enctype="multipart/form-data" id="update-article-form">
+
+                                            <div class="form-group row">
+                                                <div class="alert-danger validation-err"></div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="title" class="col-sm-3 col-form-label col-form-label-lg"> Name : </label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control form-control-lg" name="title" id="title" />
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="short_intro" class="col-sm-3 col-form-label col-form-label-lg"> Short introduction : </label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control form-control-lg" name="short_intro" id="short_intro"/>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="logo_upload" class="col-sm-3 col-form-label col-form-label-lg"> Logo : </label>
+                                                <div class="col-sm-9">
+                                                    <div>
+                                                        <button type="button" class="btn btn-primary" id="logo_launch_upload">Upload an image</button>
+                                                        <input type="file" name="logo_upload" id="logo_upload" accept="image/*" style="display : none;"/>
+                                                    </div>
+                                                    <div id="logo_preview">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="" class="col-sm-3 col-form-label col-form-label-lg"> Categories : </label>
+                                                <div class="col-sm-9">
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                            <select id="tech-category" name="technical_category" class="form-control">
+                                                                <option value="_none" disabled="" selected="">Technical categories*</option>
+                                                                <% for (var i=0; i < categories.technical.length; i++) { %>
+                                                                    <option value="<%= categories.technical[i].id %>"><%= categories.technical[i].name %></option>
+                                                                <% } %>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <select id="bus-category" name="business_category" class="form-control">
+                                                                <option value="_none" disabled="" selected="">Business categories*</option>
+                                                                <% for (var i=0; i < categories.business.length; i++) { %>
+                                                                    <option value="<%= categories.business[i].id %>"><%= categories.business[i].name %></option>
+                                                                <% } %>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <select id="asset-type" name="asset_type" class="form-control">
+                                                                <option value="_none" disabled="" selected="">Asset type*</option>
+                                                                <% for (var i=0; i < categories.types.length; i++) { %>
+                                                                    <option value="<%= categories.types[i].id %>"><%= categories.types[i].name %></option>
+                                                                <% } %>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="description" class="col-sm-3 col-form-label col-form-label-lg"> Description : </label>
+                                                    <div class="col-sm-9">
+                                                        <textarea class="form-control" rows="20" id="description" name="description">
+                                                            <%- article.description %>
+                                                        </textarea>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="kwds" class="col-sm-3 col-form-label col-form-label-lg"> Tags : </label>
+                                                    <div class="col-sm-3">
+                                                        <input type="text" class="form-control form-control-lg" name="kwds[]" id="kwds" />
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <button type="button" id="addkwds" class="btn">Add Tag</button>
+                                                    </div>
+                                                </div>
+
+                                                
+                                                <div class="form-group row" id="givenkwds"></div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-2 pull-right">
+                                                        <!-- <input type="button" value="Submit" id="submit" class="btn btn-primary pull-right"/> -->
+                                                        <input type="submit" value="Submit" id="submit" class="btn btn-primary pull-right"/>
+                                                    </div>
+                                                </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <% if(!article.delete_date) { %>
+                            <button type="button" class="btn btn-danger" id="remove-article" data-toggle="modal" data-target="#removeArticleModal"> Remove Resource</button>
+                            <div class="modal fade" id="removeArticleModal" tabindex="-1" role="dialog" aria-labelledby="removeArticleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h2 class="modal-title" id="exampleModalLabel"> Warning </h2>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <b>You are about to remove this resource, are you sure about your decision?</b>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I changed my mind</button>
+                                            <button type="button" class="btn btn-primary"><a href="/article/<%= article._id.toString() %>/delete" style="color:white">Yes, I want to remove it</a></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <button type="button" class="btn btn-danger" id="cancel-article-removal"> Cancel removal (<%= removalWithIn(article.delete_date) %> from deletion) </button>
+                        <% } %>
+                        <hr>
+                    <% } %>
+                </div>
+                
+                <div class="row">
+                    <div class="col-sm-6" style="padding-left: 2em;">
+                        <div class="row" style="margin-bottom: 2em;">
+                            <h3> Categories: </h3>
+                            <ul>
+                                <li> 
+                                    Technical: <span><%= (categories.technical.filter(e=> e.id == article.technical_category).length == 0)? "The technical category does not (or no longer exists)" :  categories.technical.filter(e=> e.id == article.technical_category)[0].name %></span>
+                                </li> 
+                                <li> 
+                                    Business: <span><%= (categories.business.filter(e=> e.id == article.business_category).length == 0)? "The business category does not (or no longer exists)" :  categories.business.filter(e=> e.id == article.business_category)[0].name %></span>  
+                                </li> 
+                                <li> 
+                                    Asset Type: <span><%= (categories.types.filter(e=> e.id == article.asset_type).length == 0)? "The asset type does not (or no longer exists)" :  categories.types.filter(e=> e.id == article.asset_type)[0].name %></span>
+                                </li> 
+                            </ul>
+                        </div>
+
+                        <div class="row" >
+                            <h3>Logo : </h3>
+                            <div id="logo">
+                                <div>
+                                    <% if(typeof article.logo !== 'undefined') { %>
+                                        <img src="<%= article.logo %>" width="95%"/>
+                                    <% } else { %>
+                                        There's currently no logo.
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="row" style="margin-bottom: 2em;">
+                            <h3> Tags :</h3>
+                            <div id="tags">
+                                <% if (article.tags && article.tags.length > 0) { %>
+                                    <% for(var i=0; article.tags && i < article.tags.length; i++) { %>
+                                        <pre style="display: inline-block;"> <%= article.tags[i] %> </pre>
+                                    <% } %>
+                                <% } else { %>
+                                    This resource has no definned tags. 
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="row" style="">
+                            <h3> Ratings :</h3>
+                            <% for (var i=1; i <= 5; i++) { %>
+                            <span class="fa fa-star <%= Math.floor(ratings.mean) >= i? 'checked': '' %>"></span>
+                            <% } %>
+                            <!-- <span class="fa fa-star <%= Math.floor(ratings.mean) >= 2? 'checked': '' %>"></span>
+                            <span class="fa fa-star <%= Math.floor(ratings.mean) >= 3? 'checked': '' %>"></span>
+                            <span class="fa fa-star <%= Math.floor(ratings.mean) >= 4? 'checked': '' %>"></span>
+                            <span class="fa fa-star <%= Math.floor(ratings.mean) >= 5? 'checked': '' %>"></span> -->
+                            
+                            <p><%= ratings.mean %> average based on <%= article.ratings.length %> reviews.</p>
+                            <hr style="border:3px solid #f1f1f1">
+
+                            <div class="row">
+                                <div class="col-sm-2"> 5 stars </div>
+                                <div class="col-sm-8" id="five-star-progress-bar">
+                                    <div class="progress" style="background: #D8D8D8;">
+                                        <div class="progress-bar progress-bar-success" role="progressbar"  aria-valuenow="<%= ratings.counts.five/article.ratings.length %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= ratings.counts.five/article.ratings.length %>%;"> </div>  
+                                    </div>
+                                </div>
+                                <div class="col-sm-2" class="five-star-votes"> <%= ratings.counts.five %> </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-2"> 4 stars </div>
+                                <div class="col-sm-8" id="four-star-progress-bar">
+                                    <div class="progress" style="background: #D8D8D8;">
+                                        <div class="progress-bar progress-bar-primary" role="progressbar"  aria-valuenow="<%= ratings.counts.four/article.ratings.length %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= ratings.counts.four/article.ratings.length %>%;"> </div>  
+                                    </div>
+                                </div>
+                                <div class="col-sm-2" class="four-star-votes"> <%= ratings.counts.four %> </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-2"> 3 stars </div>
+                                <div class="col-sm-8" id="three-star-progress-bar">
+                                    <div class="progress" style="background: #D8D8D8;">
+                                        <div class="progress-bar progress-bar-info" role="progressbar"  aria-valuenow="<%= ratings.counts.three/article.ratings.length %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= ratings.counts.three/article.ratings.length %>%;"> </div>  
+                                    </div>
+                                </div>
+                                <div class="col-sm-2" class="tree-star-votes"> <%= ratings.counts.three %> </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-2"> 2 stars </div>
+                                <div class="col-sm-8" id="two-star-progress-bar">
+                                    <div class="progress" style="background: #D8D8D8;">
+                                        <div class="progress-bar progress-bar-warning" role="progressbar"  aria-valuenow="<%= ratings.counts.two/article.ratings.length %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= ratings.counts.two/article.ratings.length %>%;"> </div>  
+                                    </div>
+                                </div>
+                                <div class="col-sm-2" class="two-star-votes"> <%= ratings.counts.two %> </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-2"> 1 stars </div>
+                                <div class="col-sm-8" id="one-star-progress-bar">
+                                    <div class="progress" style="background: #D8D8D8;">
+                                        <div class="progress-bar progress-bar-danger" role="progressbar"  aria-valuenow="<%= ratings.counts.one/article.ratings.length %>" aria-valuemin="0" aria-valuemax="100" style="width: <%= ratings.counts.one/article.ratings.length %>%;"> </div>  
+                                    </div>
+                                </div>
+                                <div class="col-sm-2" class="one-star-votes"> <%= ratings.counts.one %> </div>
+                            </div>
+
+                            <% if ( !(typeof user !== 'undefined' && user.username == article.author.username) ) { %>
+                                <div class="btn btn-primary col-sm-4" id="rate-article" data-toggle="modal" data-target="#rateModal"> Rate this resource </div>
+
+                                <div class="btn btn-primary col-sm-offset-1 col-sm-4" id="article-reviews" data-toggle="modal" data-target="#reviewModal"> Read reviews </div>
+                            <% } else { %>
+                                <div class="btn btn-primary col-sm-4" id="article-reviews" data-toggle="modal" data-target="#reviewModal"> Read reviews </div>
+                            <% } %>
+
+                            
+
+                            <div class="modal fade" id="rateModal" tabindex="-1" role="dialog" aria-labelledby="rateModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h2 class="modal-title" id="exampleModalLabel"> Rate Resource </h2>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="/article/<%= article._id.toString() %>/rate" method="post">
+                                                <input type="hidden" name="username" value="<%= user.username %>">
+                                                <div class="form-group row">
+                                                    <label for="note" class="col-sm-3 col-form-label col-form-label-lg"> Note : </label>
+                                                    <div class="col-sm-9">
+                                                        <input type="number" class="form-control form-control-lg" name="note" id="note" min="1" max="5" required/>
+                                                    </div>
+
+                                                </div>
+                                                <div class="form-group row">
+                                                    <label for="comment" class="col-sm-3 col-form-label col-form-label-lg"> Description : </label>
+                                                    <div class="col-sm-9">
+                                                        <textarea class="form-control" rows="20" id="comment" name="comment"></textarea>
+                                                    </div>
+                                                    
+                                                </div>
+                                                <div class="form-group row">
+                                                    <input type="submit" value="Submit" class="btn btn-primary pull-right">
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <!-- <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-primary">Save changes</button>
+                                        </div> -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="reviewModal" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h2 class="modal-title" id="exampleModalLabel"> Resource reviews </h2>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <% if (article.ratings.length ==0 ){ %>
+                                                <h3>There are currently no reviews for this article</h3>
+                                            <% } else{ %>
+                                                <% for (var i=0; i< article.ratings.length; i++){ %>
+                                                    <dir class="row review-item">
+                                                        <div class="col-sm-3 review-heading">
+
+                                                            <div style="display: table; width:100%; height:100%">
+                                                                <div style="display: table-cell; vertical-align: middle;">
+                                                                    <div class="row">
+                                                                        <%= article.ratings[i].username %>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <% for (var j=1; j <= 5; j++) { %>
+                                                                            <span class="fa fa-star <%= article.ratings[i].note >= j? 'checked': '' %>"></span>
+                                                                        <% } %>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <%= article.ratings[i].date.toDateString() %>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-8 review-content">
+                                                            <div style="display: table; width:100%; height:100%">
+                                                                <div style="display: table-cell; vertical-align: middle;">
+                                                                    <%- article.ratings[i].comment %>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </dir>
+                                                <% } %>
+                                            <% } %>
+                                        </div>
+                                        <!-- <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-primary">Save changes</button>
+                                        </div> -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div>
+                    <h3> Description: </h3>
+                    <div id="description2"> <%- article.description %> </div>
+                </div>
+
+
+                <!--
+                <div class="row">
+                    <button type="button" class="btn btn-primary" id="edit-algo-information"> Edit algorithm </button>
+                </div>
+                -->
+            </section>
+            <% if (selected_version){ %>
+                <section>
+                
+                    <% article_version = article.versions.filter(e => e.version == selected_version)[0]; %>
+                    <h2> Resource version <b><i><%= selected_version %></i></b></h2>
+                    <div style="background: white; padding: 1em;">
+                        <ul class="nav nav-pills" id="version-tabs-header" style="margin-bottom:2em;">
+                            <li role="presentation" id="docs" class="active"><a href="#"> Documentation </a></li>
+                            <li role="presentation" id="download"><a href="#"> Download </a></li>
+                            <li role="presentation" id="report-issue"><a href="#"> Report Issue </a></li>
+                            <li role="presentation" id="demo"><a href="#"> Demo </a></li>
+                            <% if ( typeof user !== 'undefined' && user.username == article.author.username ) { %>
+                            <li role="presentation" id="manage"><a href="#"> Manage </a></li>
+                            <% } %>
+                        </ul>
+
+                        <div id="version-tab-display">
+                            <div id="docs-content">
+                                <% if (article_version.docs) { %> 
+                                    <%- article_version.docs %>
+                                <% } else { %>
+                                    <h3>This resource is not yet documented</h3>
+                                <% } %> 
+                            </div>
+                            <div id="download-content"> 
+                                <div class="row">
+                                    <div class="col-sm-8 col-sm-offset-2">
+                                        <p> 
+                                            Please accept the user agreement and the confirm you took notice of the licence applied to this resource: 
+                                        </p>
+                                        <div class="">
+                                            <input type="checkbox" name="userAgreement" id="userAgreement" class="">
+                                            <label for="userAgreement"> I accept the <a href="">User agreement </a> </label>
+                                        </div>
+                                        <div class="">
+                                            <input type="checkbox" name="licence" id="licence" class="">
+                                            <label for="licence"> I read and will comply with the <a href=""> Licence </a> </label>
+                                        </div>
+                                        <div class="">
+                                            <button class="btn btn-primary" id="download-version" disabled> Download </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="report-issue-content"> 
+                                <form id="issue-form" action="/article/<%= article._id.toString() %>/version/<%= article_version._id.toString() %>/report" method="post">
+
+                                    <input type="hidden" name="authorID" value="<%= article.author._id.toString() %>">
+                                    <div class="form-group row">
+                                        <label for="subject" class="col-sm-2 col-form-label col-form-label-lg"> Subject </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" name="subject" id="subject" class="form-control form-control-l" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="report" class="col-sm-2 col-form-label col-form-label-lg"> Report </label>
+                                        <div class="col-sm-9">
+                                            <textarea name="report" id="report" class="form-control col-sm-9"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <button class="btn btn-primary pull-right"> Submit </button>
+                                    </div>
+
+                                </form>
+                            </div>
+                            <div id="demo-content">
+                            	<p>Here are the addresses you can use to interact with the application :</p>
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2" style="vertical-align: middle; text-align: center;"> Internet Address </th>
+                                            <th rowspan="2" style="vertical-align: middle; text-align: center;"> Target port </th>
+                                        </tr>
+                                        <tr>
+                                            <th style="vertical-align: middle; text-align: center;"> URL </th>
+                                            <th style="vertical-align: middle; text-align: center;"> Port </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <% for (var i=0; i < demo_accesses[article_version.version].length; i++) {
+                                                var accesses = demo_accesses[article_version.version][i];
+                                            %> 
+                                                <td>
+                                                    <% if(accesses.service && (accesses.service == "HTTP" || accesses.service == "HTTPS")) { %>
+                                                        <a href="<%= accesses.service.toLowerCase() %>://<%= accesses.i_url %>:<%= accesses.i_port %>">
+                                                            <%= accesses.i_url %>
+                                                        </a>
+                                                    <% } else { %>
+                                                        <%= daccesses.i_url %>
+                                                    <% } %>
+                                                </td>
+                                                <td><%= accesses.i_port %></td>
+                                                <td><%= accesses.t_port %></td>
+                                            <% } %>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="manage-content">
+                                <div class="container">
+                                    <div class="row">
+
+                                        <button type="button" class="btn btn-primary" id="edit-article-version" data-toggle="modal" data-target="#editArticleVersionModal"> Edit Version </button>
+                                        <div class="modal fade" id="editArticleVersionModal" tabindex="-1" role="dialog" aria-labelledby="editArticleVersionModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h2 class="modal-title" id="exampleModalLabel"> Editing Version </h2>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <h2 class="alert alert-danger"> Not yet implemented </h2>
+                                                        <form method="post" enctype="multipart/form-data" id="update-article-form">
+                                                            <!-- <div class="form-group row">
+                                                                <div class="alert-danger validation-err"></div>
+                                                            </div>
+                                                            <div class="form-group row">
+                                                                <label for="title" class="col-sm-3 col-form-label col-form-label-lg"> Name : </label>
+                                                                <div class="col-sm-9">
+                                                                    <input type="text" class="form-control form-control-lg" name="title" id="title" />
+                                                                </div>
+                                                             </div>-->
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <button type="button" class="btn btn-danger" id="remove-article" data-toggle="modal" data-target="#removeArticleVersionModal"> Remove Version</button>
+                                        <div class="modal fade" id="removeArticleVersionModal" tabindex="-1" role="dialog" aria-labelledby="removeArticleVersionModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h2 class="modal-title" id="exampleModalLabel"> Warning </h2>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <b>You are about to remove this resource version, are you sure about your decision?</b>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I changed my mind</button>
+                                                        <button type="button" class="btn btn-primary"><a href="/article/<%= article._id.toString() %>/version/<%= article_version._id.toString() %>/delete" style="color:white">Yes, I want to remove it</a></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                </section>
+            <% } %>
+        </div>
+    </div>
+    <% include ../partials/footer %>
+    <script type="text/javascript"> 
+
+        $(function(){ 
+            // tinymce.init({
+            //     selector: '#comment',
+            //     height: 500,
+            //     menubar: true,
+            //     plugins: [
+            //     'advlist autolink lists link image charmap print preview anchor',
+            //     'searchreplace visualblocks code fullscreen',
+            //     'insertdatetime media table paste code help wordcount'
+            //     ],
+            //     content_css: '//www.tiny.cloud/css/codepen.min.css'
+            // });
+            <% if (selected_version){ %>
+            $('#download-version').click(function(){
+                var agreement = 'agreementID';
+                var licence = 'licenceID';
+                var url = `/article/<%= article._id.toString() %>/version/<%= article_version._id.toString() %>/download?user=<%= user.username %>&agreement=${agreement}&licence=${licence}`;
+                window.open(url , '_blank');
+            })
+            <% } %>
+            $('#userAgreement, #licence').change(function(){
+
+                var ok = $('#userAgreement').prop('checked') && $('#licence').prop('checked');
+                console.log("OK: ", ok);
+                if (ok && $('#download-version').prop('disabled') == true ){
+                    $('#download-version').prop('disabled', false);
+                }
+                else if (!ok && $('#download-version').prop('disabled') == false) {
+                    $('#download-version').prop('disabled', true);
+                }
+            });
+            $('#issue-form').submit(function(){
+                $('#issue-form').find('#report').val( tinymce.get('report').getContent() );
+            });
+
+            $('#download-content, #report-issue-content, #manage-content, #demo-content').hide();
+            $('#version-tabs-header li').click(function(e){
+                e.preventDefault();
+                
+                var this_id = $(this).attr('id');
+                
+                $('#version-tabs-header li').each(function(index, elem){
+                    if ($(elem).attr('id') == this_id){
+                        if ( ! $(elem).hasClass('active') ){
+                            $(elem).addClass('active');
+                            $('#'+this_id+'-content').show();
+                        }
+                    }
+                    else{
+                        if ( $(elem).hasClass('active') ){
+                            $(elem).removeClass('active');
+                            $('#'+$(elem).attr('id')+'-content').hide();
+                        }
+                    }
+                });
+            });
+
+            tinymce.init({
+                selector: '#description, #comment, #documentation, textarea#report',
+                height: 500,
+                menubar: true,
+                plugins: [
+                'advlist autolink lists link image charmap print preview anchor',
+                'searchreplace visualblocks code fullscreen',
+                'insertdatetime media table paste code help wordcount'
+                ],
+                content_css: '//www.tiny.cloud/css/codepen.min.css'
+            });
+
+            $("#version-selector").change(function(){
+                console.log("goto version clicked!");
+                console.log("version : ", $(this).val());
+                window.location.replace('/article/<%= article._id.toString() %>?version='+$(this).val());
+            });
+            var newVersionId = "<%= new_version_id %>";
+
+
+            var getReadyForUpload = function(){
+                var reader = {};
+                var file = {};
+                var slice_size = 1000 * 1024;
+
+                function start_upload( event ) {
+                    event.preventDefault();
+
+                    reader = new FileReader();
+                    file = document.querySelector( '#resource-data-picker' ).files[0];
+
+                    upload_file( 0 );
+
+                    $('#browse-resource-data').text("Uploading data");
+                    $('#upload-spinner').show();
+                }
+    
+                $('#resource-data-picker').change( start_upload )
+                //$( '#dbi-file-upload-submit' ).on( 'click', start_upload );
+
+                function upload_file( start ) {
+                    var next_slice = start + slice_size + 1;
+                    var blob = file.slice( start, next_slice );
+                    var transfer_size = file.size;
+
+                    reader.onloadend = function( event ) {
+                        if ( event.target.readyState !== FileReader.DONE ) {
+                            return;
+                        }
+
+                        socket.emit('upload resource data', newVersionId, event.target.result, {start: start, end: next_slice, size: transfer_size, name: file.name, type: file.type});
+
+                        socket.on('upload resource data', function(chunk_start, status){
+                            console.log("ACK | start: ", start, " | chunk_start : ", chunk_start)
+                            if (chunk_start != start) return;
+
+                            var size_done = start + slice_size;
+                            console.log("next_slice : ", next_slice, ", transfer_size : ", transfer_size);
+
+                            if ( next_slice < transfer_size ) {
+                                upload_file( next_slice );
+                            }
+                            else{
+                                $('#browse-resource-data').text("Data uploaded");
+                                $('#browse-resource-data').removeClass('btn-primary');
+                                $('#browse-resource-data').addClass('btn-success');
+
+                                $('#upload-spinner').hide();
+                                $('#new-version-form input[type="submit"]').prop('disabled', false);
+                            }
+                        });
+                        // $.ajax( {
+                        //     url: ajaxurl,
+                        //     type: 'POST',
+                        //     dataType: 'json',
+                        //     cache: false,
+                        //     data: {
+                        //         action: 'dbi_upload_file',
+                        //         file_data: event.target.result,
+                        //         file: file.name,
+                        //         file_type: file.type,
+                        //         nonce: dbi_vars.upload_file_nonce
+                        //     },
+                        //     error: function( jqXHR, textStatus, errorThrown ) {
+                        //         console.log( jqXHR, textStatus, errorThrown );
+                        //     },
+                        //     success: function( data ) {
+                        //         var size_done = start + slice_size;
+                        //         var percent_done = Math.floor( ( size_done / file.size ) * 100 );
+
+                        //         if ( next_slice < file.size ) {
+                        //             // Update upload progress
+                        //             $( '#dbi-upload-progress' ).html( `Uploading File -  ${percent_done}%` );
+
+                        //             // More to upload, call function recursively
+                        //             upload_file( next_slice );
+                        //         } else {
+                        //             // Update upload progress
+                        //             $( '#dbi-upload-progress' ).html( 'Upload Complete!' );
+                        //         }
+                        //     }
+                        // } );
+                    };
+
+                    reader.readAsDataURL( blob );
+                }
+            }
+            getReadyForUpload();
+
+            $('#upload-spinner').hide();
+            $('#browse-resource-data').click(function(){
+                $('#resource-data-picker').click();
+            });
+            
+
+            
+
+            var newVersionFrom = $('#new-version-form');
+            newVersionFrom.submit(function(){
+                //
+                console.log("on submit ...");
+                var documentation = tinymce.get('documentation').getContent();
+
+                newVersionFrom.find('#documentation').val(documentation);
+
+            });
+
+            
+            var form = $('#update-article-form');
+
+            var tags = [], /*JSON.parse("<%- JSON.stringify(article.tags) %>"),*/ logo_file = null;
+            form.submit(function(){
+                $('.validation-err').html("");
+
+                console.log("Form submitted !!!");
+
+                var name = form.find('#title').val();
+                var short_intro = form.find('#short_intro').val();
+                
+                
+                var categories = {
+                    technical : form.find('#tech-category').val(),
+                    business : form.find('#bus-category').val(),
+                    types : form.find('#asset-type').val(),
+                };
+                var description = tinymce.get('description').getContent();
+                
+                console.log(`
+                    Name: ${name},
+                    categories: ${JSON.stringify(categories, null, 2)},
+                    description: ${description},
+                    Tags: ${"[\""+tags.join('", "')+"]"}
+                    `);
+                console.log("logo: ", logo_file);
+
+                socket.emit('update article', "<%= article._id.toString() %>", name, short_intro, description, tags, categories, logo_file);
+                var tuas = traceCreateOrUpdateArticleSocket("update");
+                setTimeout(function(){
+                    form.modal('toggle');
+                }, 1500);
+
+                return false;
+            });
+
+            form.find('.modal-dialog').css('width', '80%');
+
+            console.log("keywords : "+tags);
+            var addKWDS = function(){
+                if( form.find('#kwds').val() && tags.indexOf(form.find('#kwds').val()) ==-1 ){
+                    tags.push( form.find('#kwds').val() );
+                    form.find('#givenkwds').html(redrawKWDS());
+                    form.find('#kwds').val('');
+                    form.find('#kwds').focus()
+                }
+            }
+
+            form.find('#kwds').on('keydown', function(e) {
+                if (e.which == 13) {
+                    e.preventDefault();
+                    addKWDS();
+                }
+            });
+
+            form.find("#addkwds").click(addKWDS);
+
+            var redrawKWDS = function(){
+                console.log("redraw started");
+                var cont = $('<div class="col-sm-9"></div>');
+                tags.forEach(function(tag, index){
+
+                    var kwd = $('<pre style="display: inline-block">'+tag+'</pre>').css({"margin-right" : "1em", "cursor" : "pointer"});
+                    kwd.click(function(){
+                        console.log('index : '+index);
+                        tags.splice(index, 1);
+                        form.find('#givenkwds').html(redrawKWDS());
+                    });
+
+                    kwd.find('span').css({
+                        "background-color" : "#DCDCDC",
+                        "cursor" : "pointer",
+                        "border-radius" : "3px",
+                        "font-size" : "1.5em"
+                    });
+                    cont.append(kwd);
+                });
+
+                var r = $('<div class="row"><div class="col-sm-3"></div></div>');
+                r.append(cont);
+                console.log("redraw ended");
+                return r;
+            }
+
+            form.find('#givenkwds').html(redrawKWDS());
+
+            form.find('#logo_launch_upload').click(function(e){
+                //
+                form.find('input#logo_upload').click();
+            });
+
+            form.find('#logo_upload').change(function(evt) {
+                //console.log("This is readFile");
+                var files = evt.target.files;
+                var file = files[0];           
+                var reader = new FileReader();
+                console.log("File : "+JSON.stringify(file));
+
+                var img = document.createElement("img");// $("img");//.css({ "max-width" : "200", "max-height" : "200"});
+
+                img.file = file;
+
+                form.find("#logo_preview").html(img);
+                form.find("#logo_preview img").css({ "max-width" : "200px", "max-height" : "200px", "margin-top" : "1em"});
+                reader.onload = function(event) {
+                    logo_file = event.target.result;
+                    img.src = logo_file;
+
+                    //console.log("event.target.result : "+logo_file);
+                }
+                reader.readAsDataURL(file);
+            });
+
+            
+        }); 
+    </script>
+    
+  </body>
+</html>
+
+
+
+

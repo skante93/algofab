@@ -12,12 +12,28 @@ services:
       - ${LDAP_COMPOSE_PORT}:80
     env_file:
       - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      timeout: 5s
+      interval: 1s
+      retries: 60
     privileged: true
 
   mongo:
     image: mongo
     volumes:
       - ./data/mongo/:/data/db
+
+  portainer:
+    image: portainer/portainer
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    ports:
+      - 9000:9000
+      - 8000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
 
   api:
     image: algofab2018/marketplace
@@ -32,7 +48,30 @@ services:
       - ./services/algofab:/home/admin/algofab
     depends_on: 
       - mongo
-      
+
+  n_api:
+    image: algofab2018/marketplace
+    #build: ./services/algofab
+    command: newAPI
+    ports:
+      - ${API_COMPOSE_PORT}:3000
+    env_file:
+      - .env
+    user: root
+    volumes:
+      - ./services/algofab:/home/admin/algofab
+      - app_data:/app-data
+    depends_on: 
+      - mongo
+      - ldap
+      - portainer
+  n_portal:
+    build: ./services/portal
+    command: ng serve --host 0.0.0.0 --port 4200
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./services/portal:/home/skante/server/        
   portal:
     image: algofab2018/marketplace
     #build: ./services/algofab
@@ -47,7 +86,8 @@ services:
       - ./data/accounts/:/accounts
     depends_on: 
       - mongo
-      - ldap
+      - portainer
+      #- ldap
 
   im:
     image: algofab2018/marketplace
@@ -75,3 +115,10 @@ services:
   #     - mongo
 
 
+volumes:
+  app_data:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.150.1,nolock,soft,rw"
+      device: ":/home/skante/nfs"
+  portainer_data:

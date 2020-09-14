@@ -6,6 +6,7 @@ module.exports = function(SG){
 		proxy : require('./proxy'),
 		dao : require('./DAO'),
 		ldap : require('./ldap'),
+		infraManager: require('./infraManager'),
 		kube : process.env.WITH_K8S == "TRUE"? require('./kube') : null,
 		kubectl: process.env.WITH_K8S == "TRUE"? require('./kubectl'): null
 	};

@@ -72,7 +72,7 @@ var LDAP_add = function(user) {
 		return e;
 	}
 	console.log("CONTENT: \n"+content+"\n---------");
-	var cmdArgs = ['-a', '-x', '-D', settings.LDAP.credential.login, '-w', settings.LDAP.credential.password, '-H', settings.LDAP.server, '-f', filename]
+	var cmdArgs = ['-a', '-x', '-D', settings.LDAP.credential.login, '-w', '"'+settings.LDAP.credential.password+'"', '-H', settings.LDAP.server, '-f', filename]
 	console.log("SHELL~$ ldapmodify "+cmdArgs.join(" "));
 	
 	var cmd = spawnSync('ldapmodify', cmdArgs, {shell: true});

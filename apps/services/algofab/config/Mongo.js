@@ -113,6 +113,7 @@ var articleVersionSchema = new Schema({
 		} 
 	],
 	data: { type: Schema.Types.ObjectId, ref: 'ArticleVersionData' },
+	spec: { type: Object },
 	date : {type : Date, default : Date.now},
 }, { collection: 'articles_versions' });
 

@@ -1,0 +1,34 @@
+mongo_url : "mongodb://mongo/test_algofab"
+ldap:
+  url : "ldap://ldap"
+  search_dn: "ou=test,dc=ldap,dc=algofab,dc=fr"
+  auth:
+    login: "cn=admin,dc=ldap,dc=algofab,dc=fr"
+    password: "password"
+
+mail_options :
+  service: 'gmail'
+  auth:
+    user: 'menodemailer@gmail.com'
+    pass: 'gipfzrowbmvqqkbj'
+
+app_settings:
+  app_name: "Algofab"
+  app_ext_protocol: "https"
+  app_domain: "tl.teralab-datascience.fr"
+  uri_names:
+    signin: "signin"
+    signup: "signup"
+    signout: "signout"
+  
+  user_roles:
+    values: [ 'admin', 'user' ]
+    default: "user"
+  
+  username_validation_regex : '^[a-z]{1}[a-z0-9]+$'
+  password_validation_regex: '^[a-zA-Z0-9\-\$\%]{8,20}$'
+  password_expiration_delay : 300000 # 5 mins
+  logs:
+    out: process.cwd()+'/out.log'
+    err: process.cwd()+'/err.log'
+    log_console: true

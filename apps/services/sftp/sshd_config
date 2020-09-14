@@ -1,0 +1,16 @@
+
+Include /etc/ssh/sshd_config.d/*.conf
+
+ChallengeResponseAuthentication no
+
+UsePAM yes
+
+X11Forwarding yes
+
+PrintMotd no
+
+AcceptEnv LANG LC_*
+
+#Subsystem sftp internal-sftp
+#       ChrootDirectory /live-data
+#       AllowTCPForwarding yes

@@ -1,0 +1,22 @@
+<header>			
+	<div class="header-nav" #nav>
+		<section *ngFor="let section of menu" 
+			[attr.my-custom-styles]="section.style? JSON.stringify(section.style) : null" 
+			>
+			
+			<a *ngFor="let item of section.items" routerLink="{{item.link}}" 
+				[attr.my-custom-styles]="item.style? JSON.stringify(item.style) : null" 
+				[attr.class]="item.class? item.class : null">
+				<img *ngIf="item.img" src="{{item.img}}">
+				<span *ngIf="!item.img">{{item.text}}</span>
+			</a>
+		</section>
+	</div>
+	
+	<div class="banner" banner-img="/assets/img/banner_bg.jpg">
+		<div class="banner-content" style="text-align: center;">
+			<h3> Algofab </h3>
+			<p>Lorem ispum ...</p>
+		</div>
+	</div>
+</header>
