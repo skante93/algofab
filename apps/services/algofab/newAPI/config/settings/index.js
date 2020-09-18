@@ -35,6 +35,7 @@ var settingsValues = {
 		username_validation_regex : new RegExp('^[a-z]{1}[a-z0-9]+$'),
 		password_validation_regex: new RegExp('^[a-zA-Z0-9\-\$\%]{8,20}$'),
 		livedata_name_regex: new RegExp('^[a-zA-Z]{1}[a-zA-Z0-9\-\ ]+$'),
+		algo_name_regex: new RegExp('^[a-zA-Z]{1}[a-zA-Z0-9\-\ ]+$'),
 		password_expiration_delay : 1000*60*5, // 5 mins
 		logs: {
 			out: process.cwd()+'/out.log',
@@ -55,7 +56,7 @@ var settingsValues = {
 	},
 	
 	nfs_data_options: {
-		address: "192.168.43.128",
+		address: "192.168.150.1",
 		path: "/home/skante/nfs",
 		apiMountPoint: "/app-data"
 	},

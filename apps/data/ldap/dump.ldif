@@ -10,7 +10,7 @@ objectClass: simpleSecurityObject
 objectClass: organizationalRole
 cn: admin
 description: LDAP administrator
-userPassword:: e1NTSEF9ZmxJd2ZaQUtIcXNoRW9VVktiRStnQVdRaGFIZy84NSs=
+userPassword:: e1NTSEF9dndhY0hYRWdxVFVzVm8xOE5BR0gvTko1N2FkYTRKV1c=
 
 dn: ou=test,dc=ldap,dc=algofab,dc=fr
 objectClass: organizationalUnit
@@ -68,4 +68,14 @@ objectClass: top
 objectClass: inetOrgPerson
 userPassword:: e1NTSEF9Ym51N0xDbllpTVlXZDNJOXZTTTlXeTFTS0RBbGMxUWhkYndtR0cyQWZ
  UWVNDSkMwMmNGVWx2dXFLV3Z0YXBjU1k0eUViQT09
+
+dn: uid=jdoe,ou=test,dc=ldap,dc=algofab,dc=fr
+sn: DOE
+cn: John DOE
+mail: jdoe@example.com
+uid: jdoe
+objectClass: top
+objectClass: inetOrgPerson
+userPassword:: e1NTSEF9TWMzMGk2a3R0ZkdZTDQwQklrTDJHRFlqYktOTy9xZi9HdXJaQWtxL3l
+ tVmtEOFB3UlErYmlpWFhsRHNSVDFia2ZOd3BBZz09
 

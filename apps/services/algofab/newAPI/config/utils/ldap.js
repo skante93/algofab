@@ -22,20 +22,20 @@ class LDAPManager {
 
 	makeUserDN(userProfile){ 
 		//console.log("## makeUserDN, userProfile:", userProfile);
-		var email = null;
-		if ("main_email" in userProfile && userProfile.main_email){
-			email = userProfile.main_email;
-		}
-		else if ("email" in userProfile && userProfile.email){
-			email = userProfile.email;
-		}
-		else if ("emails" in userProfile){
-			email = userProfile.emails.filter(e=>e.verified ==true)[0].email;
-		}
+		// var email = null;
+		// if ("main_email" in userProfile && userProfile.main_email){
+		// 	email = userProfile.main_email;
+		// }
+		// else if ("email" in userProfile && userProfile.email){
+		// 	email = userProfile.email;
+		// }
+		// else if ("emails" in userProfile){
+		// 	email = userProfile.emails.filter(e=>e.verified ==true)[0].email;
+		// }
 
-		if (email == null) return null;
+		// if (email == null) return null;
 
-	    return `uid=${email}, ${settings.ldap.search_dn}`;
+	    return !userProfile.username? null : `uid=${userProfile.username}, ${settings.ldap.search_dn}`;
 	}
 
 	add(userInfo, changeIfExists, callback){
@@ -52,7 +52,7 @@ class LDAPManager {
 	        sn: userInfo.lastname,
 	        cn: `${userInfo.firstname} ${userInfo.lastname}`,
 	        mail: userInfo.email,
-	        uid: userInfo.email,
+	        uid: userInfo.username,
 	        objectclass: ['top', 'inetorgperson'],
 	        userPassword: hashPassword(userInfo.password)
 	    }
@@ -90,12 +90,11 @@ class LDAPManager {
 
 
 		var newLDIF = ("ldif" in newInfo)? newInfo.ldif : ("userInfo" in newInfo)? {} : newInfo;
-		var newDN = ("userInfo" in newInfo)? "": dn;
+		var newDN = ("userInfo" in newInfo)? this.makeUserDN(newInfo.userInfo) : dn;
 
 		if("userInfo" in newInfo){
-			
 
-		    var newDN = this.makeUserDN(newInfo.userInfo);
+		    //newDN = this.makeUserDN(newInfo.userInfo);
 		    newDN = newDN == null? dn : newDN;
 		   	
 		    if ('email' in newInfo.userInfo){
@@ -105,13 +104,16 @@ class LDAPManager {
 		        newLDIF.userpassword = ssha.create(newInfo.password);
 		    }
 		    if ('firstname' in newInfo.userInfo || 'lastname' in newInfo.userInfo){
+				var cn = "";
 		    	if ('firstname' in newInfo.userInfo ){
 		        	newLDIF.givenname = newInfo.userInfo.firstname;
-		    	}
+					cn = newInfo.userInfo.firstname;
+				}
 		    	if ('lastname' in newInfo.userInfo){
-			        newLDIF.sn = newInfo.userInfo.lastname;
+					newLDIF.sn = newInfo.userInfo.lastname;
+					cn += (cn != ""? " ": '')+newInfo.userInfo.lastname;
 			    }
-			    newLDIF.cn = `${newInfo.userInfo.firstname} ${newInfo.userInfo.lastname}`;
+			    newLDIF.cn = cn;
 		    }
 
 		    if (Object.keys(newLDIF).length == 0 ){
@@ -126,7 +128,7 @@ class LDAPManager {
 	        if (bindErr){
 	            return callback(bindErr);
 	        }
-
+			// handle different dns case
 	        new Promise((resolve, reject)=>{
 	            //
 	            //console.log("current dn: ", dn, " | new dn: ", newDN);
@@ -141,7 +143,9 @@ class LDAPManager {
 	                }
 	                resolve();
 	            });
-	        }).then(()=>{
+			})
+			// first retrieve the current info on ldap
+			.then(()=>{
 	        	//var filter = newDN.split(',')[0];
 	        	//console.log("filter: ", filter);
 
@@ -154,7 +158,8 @@ class LDAPManager {
 		        		resolve(results.length == 0? null: results[0]);
 		        	});
 		        });
-	        })
+			})
+			// make the relevant changes one by one
 	        .then((currentLDAPInfo)=>{
 	        	// console.log("newLDIF : ", newLDIF);
 	        	// console.log("currentLDAPInfo : ", currentLDAPInfo);
@@ -170,6 +175,7 @@ class LDAPManager {
 	        		var currentChange = allChanges.shift();
 	        		//console.log("currentChange: ", currentChange);
 
+					// Nothing tochange
 	        		if (currentLDAPInfo[currentChange] == newLDIF[currentChange]){
 	        			return nextChange();
 	        		}
@@ -194,20 +200,6 @@ class LDAPManager {
 	        	}
 
 	        	nextChange();
-	            // var change = [
-	            //     new ldapChange({
-	            //         operation: "replace",
-	            //         modification: newLDIF
-	            //     })
-	            // ];
-	            // ldapClient.modify(newDN, change, (modifyErr, result)=>{
-	            //     if (modifyErr){
-	            //         console.log(modifyErr);
-	            //         return callback(modifyErr);
-	            //     }
-	            //     //console.log(`modifyErr: ${modifyErr}, result: ${result}`);
-	            //     callback(null, result);
-	            // });
 	        })
 	        .catch(e=>{
 	            //

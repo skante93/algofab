@@ -2,11 +2,16 @@ import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { ResourcesService } from '../services/resources/resources.service';
 import { Router, ActivatedRoute } from '@angular/router';
 
+import { ResourcesListItemComponent, ResourcesListComponent } from './list/resources-list.component';
+import { ResourcesPageComponent } from './page/resources-page.component'
+
 var $ = window['$'];
 
+
+/*
 @Component({
 	selector: 'app-resources-list-item',
-	/*templateUrl: './resources.component.html',*/
+	//templateUrl: './resources.component.html',
 	template: `
 		<div #comp>
 			<div class="resource-header">
@@ -36,7 +41,7 @@ export class ResourcesListItemComponent implements OnInit {
 	constructor(private router: Router) { }
 
 	ngOnInit(): void {
-		/*console.log("Hello from resource id ", this.id, " : ");*/
+		//console.log("Hello from resource id ", this.id, " : ");
 	}
 
 	ngAfterViewInit() {
@@ -71,8 +76,13 @@ export class ResourcesListItemComponent implements OnInit {
 			"height": dims[1]+'px',
 			"position": "relative",
 			"margin": "1em",
-			/*"border": "1px solid black"*/
+			//"border": "1px solid black"
 		});
+
+		$(this.comp.nativeElement).hover(
+			function(){ $(this).css('transform', 'scale(1.1)'); }, 
+			function(){ $(this).css('transform', 'scale(1)'); }
+		);
 
 		header.css({
 			"display": "flex",
@@ -92,7 +102,7 @@ export class ResourcesListItemComponent implements OnInit {
 		header.find('.resource-name').css({
 			"width": (dims[0]*0.7)+'px',
 			"padding":"1em",
-			/*"border": "1px solid green",*/
+			//"border": "1px solid green",
 		});
 
 		header.find('.resource-type').css({
@@ -117,7 +127,7 @@ export class ResourcesListItemComponent implements OnInit {
 			"position": "absolute", 
 			"bottom": "5px", 
 			"right": "5px",
-			/*"cursor": "pointer"*/
+			//"cursor": "pointer"
 		});
 	}
 
@@ -173,7 +183,8 @@ export class ResourcesListComponent implements OnInit {
 		)
 	}
 }
-  
+*/
+/*
 @Component({
 	selector: 'app-resources-page',
 	templateUrl: "./resources-page.component.html",
@@ -205,6 +216,8 @@ export class ResourcesPageComponent implements OnInit {
 	}
 	
 }
+*/
+
 @Component({
   selector: 'app-resources',
   templateUrl: './resources.component.html',

@@ -66,10 +66,10 @@ router.get('/', ParamsParser({
 *       content:
 *         application/json:
 *           schema:
-*             $ref: '#/definitions/userProfile'
+*             $ref: '#/definitions/userJSONSignupObject'
 *         multipart/form-data:
 *           schema:
-*             $ref: '#/definitions/userProfile'
+*             $ref: '#/definitions/userMultipartSignupObject'
 *     responses:
 *       '200':
 *         description: TODO
@@ -129,7 +129,6 @@ router.get('/:uid', ParamsParser({
 
 		rest_response.err(req, res, { error: e.toString() });
 	});
-	
 });
 
 
@@ -211,8 +210,6 @@ router.delete('/:uid', ParamsParser({
 *               password: 
 *                 type: string
 *                 required: true 
-*               expiredPasswordOK:
-*                 type: boolean    
 *     responses:
 *       '200':
 *         description: TODO
@@ -221,7 +218,7 @@ router.delete('/:uid', ParamsParser({
 router.post('/:uid/login', ParamsParser({
 	uid: {type: "string", in: "path"},
 	password: {type: "string", in: "body", required: true},
-	expiredPasswordOK: {type:"boolean", in: "body"}
+	//expiredPasswordOK: {type:"boolean", in: "query"}
 }), (req, res)=>{
 	//console.log("params: ", res.locals);
 
@@ -446,8 +443,8 @@ router.get('/:uid/verify-email', ParamsParser({
 */
 router.put('/:uid/profile', ParamsParser({
 	uid: {type: "string", in: "path"},
-	email: {type: "string", in: "body", lowerCase: true},
-	username: {type: "string", in: "body"},
+	//email: {type: "string", in: "body", lowerCase: true},
+	//username: {type: "string", in: "body"},
 	firstname: {type: "string", in: "body"},
 	lastname: {type: "string", in: "body"},
 	status: {type: "string", in: "body"},

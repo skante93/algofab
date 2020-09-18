@@ -30,6 +30,7 @@ export class HeaderComponent implements OnInit {
 		middle: [
 			{ "name": "home", "link": "/", "text": "Home", "class": "" },
 			{ "name": "resources", "link": "/resources", "text": "Resources", "class": "" },
+			{ "name": "services", "link": "/services", "text": "Services", "class": "" },
 			{ "name": "docs", "link": "/docs", "text": "Docs", "class": "" },
 			{ "name": "about", "link": "/about", "text": "About", "class": "" }
 		],

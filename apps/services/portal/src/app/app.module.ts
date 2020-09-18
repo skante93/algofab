@@ -12,7 +12,9 @@ import { SigninComponent } from './signin/signin.component';
 import { SignupComponent } from './signup/signup.component';
 */
 import { SigninComponent, SignupComponent, SignoutComponent } from './login/login.component';
-import { ResourcesListItemComponent, ResourcesComponent, ResourcesListComponent, ResourcesPageComponent } from './resources/resources.component';
+import { ResourcesListItemComponent, ResourcesListComponent } from './resources/list/resources-list.component';
+import { ResourcesPageComponent } from './resources/page/resources-page.component';
+import { ResourcesComponent } from './resources/resources.component';
 import { NotfoundComponent } from './notfound/notfound.component';
 import { AboutComponent } from './about/about.component';
 
@@ -23,6 +25,8 @@ import { CaptchaComponent } from './bricks/captcha/captcha.component';
 import { AuthService } from './services/auth/auth.service';
 import { ResourcesService } from './services/resources/resources.service';
 import { DocsComponent } from './docs/docs.component';
+
+import { ToolsModule } from './tools/tools.module';
 
 @NgModule({
   declarations: [
@@ -36,9 +40,6 @@ import { DocsComponent } from './docs/docs.component';
     SigninComponent,
     SignupComponent,
     SignoutComponent,
-    ResourcesListItemComponent,
-    ResourcesComponent,
-    ResourcesListComponent,
     NotfoundComponent,
     AboutComponent,
     CaptchaComponent,
@@ -48,7 +49,9 @@ import { DocsComponent } from './docs/docs.component';
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
+    ToolsModule
+    //ResourcesModule
   ],
   providers: [AuthService, ResourcesService],
   bootstrap: [AppComponent]

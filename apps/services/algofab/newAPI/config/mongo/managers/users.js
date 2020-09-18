@@ -6,6 +6,7 @@ const fs = require('fs'), bCrypt = require('bcrypt'), utils = require('../../uti
 const mongoModels = require('../models'), 
 	usersModel = mongoModels.model('Users'), photoModel = mongoModels.model('Photos');
 
+const TokensManager = require('./tokens'), tknManager = new TokensManager();
 
 const hashPassword = (password)=> bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
 
@@ -90,7 +91,7 @@ class UsersManager {
 	}
 
 	create(params){
-		return new Promise ((resolve, reject)=>{
+		return new Promise (async (resolve, reject)=>{
 			//
 			if ( !('status' in params) ){
 				params.status = settings.app_settings.user_roles.default;
@@ -103,6 +104,13 @@ class UsersManager {
 				return reject(new Error(`MissingParamError: Field "email" is mandatory`));
 			}
 
+			if ( !("username" in params) ){
+				return reject(new Error(`MissingParamError: Field "username" is mandatory`));
+			}
+			else if (!settings.app_settings.username_validation_regex.test(params.username)){
+				return reject(new Error(`MissingParamError: Field "username" is not correctly formatted, please refer to the following regex : ${settings.app_settings.username_validation_regex.toString()}.`));
+			}
+
 			if ( !("firstname" in params) ){
 				params.firstname = "John";
 			}
@@ -112,36 +120,39 @@ class UsersManager {
 			}
 
 			params.emails = [ {email : params.email, verified: true } ]
-			params.main_email = params.email;
+			var userID = mongoModels.Types.ObjectId().toString();
+			var auth_token = await tknManager.create(userID);
+			console.log("auth_token [", typeof auth_token, "] is : ", auth_token);
+			//params.main_email = params.email;
 
-			if ('username' in params && !settings.app_settings.username_validation_regex.test(params.username)){
-				return reject(new Error(`MissingParamError: Field "username" is not correctly formatted, please refer to the following regex : ${settings.app_settings.username_validation_regex.toString()}.`));
-			}
 
-			var existsQuery = ('username' in params)? {$or: [{"profile.username" : params.username}, {"profile.emails.email" : params.email}]}: {"profile.emails.email" : params.email};
+			var existsQuery = {$or: [{"profile.username" : params.username}, {"profile.emails.email" : params.email}]};
 
 			usersModel.find(existsQuery, (err, matchingUsers)=>{
 				if (err) 
 					return reject (new Error(`DBError: ${err.toString().replace(/^Error\:\ /, '')}`) );
 
 				if (matchingUsers.length != 0){
-					var errMsg = ("username" in params)? `AlreadyExistError: Either the username "${params.username}" already exists or the email "${params.email}" is already taken.`: `he email "${params.email}" is already taken.`;
+					var errMsg = `AlreadyExistError: Either the username "${params.username}" already exists or the email "${params.email}" is already taken.`;
 					return reject(new Error(errMsg));
 				}
 
-				var password = ("force_password" in params)? params.force_password: randomPassword();
+				var clear_password = ("force_password" in params)? params.force_password: randomPassword();
 
 
 				//console.log("new user profile is : ", params);
 				new usersModel({
+					_id : userID,
 					profile: params,
-					passwords:[{ hash : hashPassword(password), expireAt: Date.now() }]
+					passwords:[{ hash : hashPassword(clear_password), expireAt: Date.now() }],
+					auth_token: auth_token
 				}).save((err, user)=>{
-					if (err) 
+					if (err) {
 						return reject (new Error(`DBError: ${err.toString().replace(/^Error\:\ /, '')}`) );
-					
+					}
+
 					var mailAndReturn = ()=>{
-						utils.mail.newAccountCreation(user, password).then(()=>{
+						utils.mail.newAccountCreation(user, clear_password).then(()=>{
 							resolve(user);
 						}).catch(e=>{
 							user.remove((err)=>{
@@ -154,20 +165,23 @@ class UsersManager {
 					}
 					
 					if ( !("ldap" in settings) ){
-						mailAndReturn();
+						return mailAndReturn();
 					}
 
-					ldapManager.add({
+					var userInfo = {
 						firstname : user.profile.firstname, 
 						lastname: user.profile.lastname, 
+						username: params.username,
 						email: params.email, 
-						password: password
-					}, true, (err, result)=>{
-						if (err) 
+						password: clear_password
+					};
+
+					ldapManager.add(userInfo, true, (err, result)=>{
+						if (err) {
 							return reject (new Error(`LDAPAccountCreationError: ${err.toString().replace(/^Error\:\ /, '')}`) );
+						}
 						mailAndReturn();
 					});
-					
 				});
 			});
 		});
@@ -200,9 +214,7 @@ class UsersManager {
 				return reject(new Error(`MissingParamError: Parameter "password" is mandatory`));
 			}
 
-			if ( !("expiredPasswordOK" in params) ){
-				params.expiredPasswordOK = false;
-			}
+			
 
 			var query = mongoModels.Types.ObjectId.isValid(params.uid)? {_id: params.uid} : {$or: [{"profile.emails.email": params.uid }, {"profile.username": params.uid }]};
 
@@ -215,14 +227,26 @@ class UsersManager {
 				
 				var passwordEntered = user.passwords.filter(e=> bCrypt.compareSync(params.password, e.hash)) ;
 
-				if (passwordEntered.length == 0)
+				if (passwordEntered.length == 0) {
 					return reject(new Error(`WrongValueError: Password is incorrect`));
+				}
 
+				// Expiration deadline is after right now
 				if (passwordEntered[0].expireAt && Date.now() >= passwordEntered[0].expireAt.getTime() ){
-					if (!params.expiredPasswordOK){
-						return reject(new Error(`WrongValueError: Password expired.`));
-					}
-					return resolve({warning: "WrongValueError: Password expired.", user: user});
+					return reject(new Error(`WrongValueError: Password expired.`));	
+				}
+
+				// Expiration deadline is less than a week away   
+				if (passwordEntered[0].expireAt && (Date.now() + in_ms.day * 7) >= passwordEntered[0].expireAt.getTime()){
+					var in_ms = { day: 1000 * 60 * 60 * 24, hour: 1000 * 60 * 60, mins: 1000 * 60};
+					var remaining_time = passwordEntered[0].expireAt.getTime() - Date.now(); 
+					var r_days = parseInt(remaining_time/in_ms.day), 
+						r_hours = parseInt((remaining_time - r_days*in_ms.day)/in_ms.hour),
+							r_mins = parseInt((remaining_time - r_days*in_ms.day - r_hours*in_ms.hour)/in_ms.mins);
+					
+					var t = ((r_days != 0)? r_days+" days " : "") + ((r_hours != 0)? r_hours+" hours " : "") + ((r_mins != 0)? r_mins+" mins " : "");
+
+					return resolve({warning: `ExpirationCloseWrning: Password expiring soon (in ${t}), please remember to update it.`});
 				}
 
 				resolve(user);
@@ -263,9 +287,22 @@ class UsersManager {
 
 				user.passwords.push({hash : hashPassword(params.password), expireAt: Date.now()+settings.app_settings.password_expiration_delay });
 
-				user.save(err=> {
-					if (err) return reject (new Error(`DBError: ${err.toString().replace(/^Error\:\ /, '')}`) );
-					resolve(user);
+				var saveAndQuit = ()=>{
+					user.save(err=> {
+						if (err) return reject (new Error(`DBError: ${err.toString().replace(/^Error\:\ /, '')}`) );
+						resolve(user);
+					});
+				}
+
+				if ( !("ldap" in settings) ){
+					return saveAndQuit();
+				}
+
+				ldapManager.change(ldapManager.makeUserDN(user.profile), {userInfo : {password: params.password}}, (err, result)=>{
+					if (err) {
+						return reject_child (new Error(`LDAPAccountUpdateError: ${err.toString().replace(/^Error\:\ /, '')}`) );
+					}
+					saveAndQuit();
 				});
 			});
 		});
@@ -292,12 +329,13 @@ class UsersManager {
 				}
 				profile.status = params.status;
 			}
-			if ("username" in params && params.username != null){
-				if (!settings.app_settings.username_validation_regex.test(params.username)){
-					return reject(new Error(`MissingParamError: Field "username" is not correctly formatted, please refer to the following regex : ${settings.app_settings.username_validation_regex.toString()}.`));
-				}
-				profile.username = params.username;
-			}
+			// if ("username" in params && params.username != null){
+			// 	if (!settings.app_settings.username_validation_regex.test(params.username)){
+			// 		return reject(new Error(`MissingParamError: Field "username" is not correctly formatted, please refer to the following regex : ${settings.app_settings.username_validation_regex.toString()}.`));
+			// 	}
+			// 	profile.username = params.username;
+			// }
+
 			if ("photo" in params && params.photo != null){
 				profile.photo = params.photo;
 			}
@@ -359,15 +397,17 @@ class UsersManager {
 					//var photo_b64 = fs.readFileSync(params.photo.path);
 					//console.log("photo_b64: ", photo_b64);
 					//profile.photo = `data:${profile.photo.headers['content-type']};base64,${photo_b64}`;
-					
-					profile.photo = {
-						content_type: "content-type" in profile.photo.headers? profile.photo.headers["content-type"]: profile.photo.originalFilename.toLowerCase().endsWith('.png')? "image/png": "image/jpeg",
-						buffer: fs.readFileSync(params.photo.path)
-					};
+					try{
+						profile.photo = {
+							content_type: "content-type" in profile.photo.headers? profile.photo.headers["content-type"]: profile.photo.originalFilename.toLowerCase().endsWith('.png')? "image/png": "image/jpeg",
+							buffer: fs.readFileSync(params.photo.path)
+						};
 
-					fs.unlinkSync(params.photo.path);
-
-					resolve_child(userToUpdate);
+						fs.unlinkSync(params.photo.path);
+						resolve_child(userToUpdate);
+					}catch (e) {
+						reject_child(e);
+					}
 				});
 			})
 			// handle ldap
@@ -378,7 +418,7 @@ class UsersManager {
 					//console.log("Chain 3");
 
 					if ( !("ldap" in settings) ){
-						resolve_child(userToUpdate);
+						return resolve_child(userToUpdate);
 					}
 
 					ldapManager.change(ldapManager.makeUserDN(userToUpdate.profile), {userInfo : profile}, (err, result)=>{
@@ -392,11 +432,11 @@ class UsersManager {
 				//console.log("#4 ", typeof userToUpdate);
 				for (var p in profile){
 					if (p == "email"){
-						//
-						userToUpdate.profile.emails.push({
-							email: profile.email,
-							verified: false
-						});
+						// TODO : hanlde the email cases
+						// userToUpdate.profile.emails.push({
+						// 	email: profile.email,
+						// 	verified: false
+						// });
 					}
 					else{
 						userToUpdate.profile[p] = profile[p];
@@ -410,32 +450,6 @@ class UsersManager {
 				});
 			})
 			.catch(reject);
-			
-			// updateProfilechecks(profile, (err, userToUpdate)=>{
-			// // Now let's update it
-			// 	if (err) return reject (err);
-
-				
-			// 	console.log("#4 ", typeof userToUpdate);
-			// 	for (var p in profile){
-			// 		if (p == "email"){
-			// 			//
-			// 			userToUpdate.profile.emails.push({
-			// 				email: profile.email,
-			// 				verified: false
-			// 			});
-			// 		}
-			// 		else{
-			// 			userToUpdate.profile[p] = profile[p];
-			// 		}
-			// 	}
-
-			// 	userToUpdate.save((err, newUser)=>{
-			// 		if (err) return reject (new Error(`DBError: ${err.toString().replace(/^Error\:\ /, '')}`) );
-
-			// 		resolve(newUser);
-			// 	});
-			// });
 		});
 	}
 

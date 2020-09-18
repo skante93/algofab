@@ -4,7 +4,7 @@ var validateSpecAgainstSchema = async (obj, schema, trace)=>{
 	//
 	if (typeof trace === 'undefined') trace = "";
 
-	if (typeof obj === 'undefined'){
+	if (typeof obj === 'undefined' || obj == null){
 		if("required" in schema && schema.required == true){
 			//
 			return new Error(`${trace? trace+" : ":""} required but not specified`);
@@ -25,7 +25,9 @@ var validateSpecAgainstSchema = async (obj, schema, trace)=>{
 
 	if (schema.type == "object"){
 		//
-		if (obj.constructor.prototype !== ({}).constructor.prototype){
+		//console.log("obj : ", obj);
+		//if (obj.constructor.prototype !== ({}).constructor.prototype){
+		if (obj instanceof Array || typeof obj !== 'object'){
 			return new Error(`${trace? trace+" : ":""}expected object but got ${obj instanceof Array ? "array" : typeof obj}`);
 		}
 		if ("notEmpty" in schema && schema.notEmpty == true && Object.keys(obj).length == 0){
@@ -52,6 +54,7 @@ var validateSpecAgainstSchema = async (obj, schema, trace)=>{
 		}
 		else{
 			for (var p in schema.properties){
+				
 				if (p.startsWith('!')){
 					//
 					var forbidden_key = p.substring("!");
@@ -61,9 +64,9 @@ var validateSpecAgainstSchema = async (obj, schema, trace)=>{
 				}
 				else{
 					if (schema.properties[p].required == true && !(p in obj)){
-						return new Error(`${trace? trace+" : ":""}field "${p}" required.`);
+						return new Error(`${trace? trace+": ":""}field "${p}" required.`);
 					}
-					var v = await validateSpecAgainstSchema(obj[p], schema.properties[p], trace+" > "+p);
+					var v = await validateSpecAgainstSchema(obj[p], schema.properties[p], trace + " > "+p);
 					
 					if (v instanceof Error){
 						return v;
@@ -106,6 +109,14 @@ var validateSpecAgainstSchema = async (obj, schema, trace)=>{
 	}
 	else if (schema.type == "integer"){
 		//
+		if (typeof obj === "string"){
+			try {
+				obj = parseInt(obj);
+			}
+			catch(e){
+				return new Error(`${trace? trace+" : ":""}expected an integer but got ${obj} instead.`);
+			}
+		}
 		if (typeof obj !== 'number'){
 			return new Error(`${trace? trace+" : ":""}expected an integer but got ${obj instanceof Array ? "array" : typeof obj}`);
 		}
@@ -123,6 +134,9 @@ var validateSpecAgainstSchema = async (obj, schema, trace)=>{
 		if (typeof obj !== 'string'){
 			return new Error(`${trace? trace+" : ":""}expected a string but got ${obj instanceof Array ? "array" : typeof obj}`);
 		}
+		if ("lowerCase" in schema){
+			obj = obj.toLocaleLowerCase();
+		}
 		if ("process" in schema){
 			var v;
 			if (schema.process.constructor.prototype === (async ()=>{}).constructor.prototype){
@@ -135,6 +149,18 @@ var validateSpecAgainstSchema = async (obj, schema, trace)=>{
 		}
 		return obj;
 	}
+	else if (schema.type == "boolean"){
+		if (typeof obj === "string"){
+			return (obj === "true")? true : (obj === "false")? false : new Error(`a boolean expectes either "true" or "false" values only (value "${obj}" is no boolean).`)
+		}
+		else if(typeof obj === "boolean"){
+			return obj;
+		}
+		else {
+			return new Error(`Expected boolean but got type : ${typeof obj}`);
+		}
+	}
+
 	else{
 		//
 		return new Error(`${trace? trace+" : ":""}schema type "${schema.type}" not (yet) supported.`)

@@ -4,9 +4,10 @@ const settings = require('../../settings');
 const utils = require('../../utils'), infraManager = new utils.InfraManager();
 
 const mongoModels = require('../models'), 
-	liveDataModel = mongoModels.model('LiveData'); //, photoModel = mongoModels.model('Photos');
+	liveDataModel = mongoModels.model('LiveData');
 
-const UsersManager = require('./users');
+
+const UsersManager = require('./users'), AlgosManager = require('./algos'), algosManager = new AlgosManager();
 
 
 class LiveDataManager{
@@ -76,7 +77,7 @@ class LiveDataManager{
 			}
 			
 			//console.log("Reahced here!!! #1");
-			liveDataModel.find({ author: params.author._id.toString()}, async(err, lds)=> {
+			liveDataModel.find({ author: params.author._id.toString()}, (err, lds)=> {
 
 				if (err) return reject (new Error(`DBError: ${err.toString().replace(/^Error\:\ /, '')}`) );
 
@@ -84,7 +85,7 @@ class LiveDataManager{
 				var thisUniquePSN = this.uniqueLDPathSegmentName(params.name);
 				for (var i=0; i<lds.length; i++){
 					if ( this.uniqueLDPathSegmentName(lds[i].name) == thisUniquePSN){
-						return reject(new Error(`ValueError: Parameter name is too close to that of another of your resource (named: ${lds[i].name}), please choose another name`));
+						return reject(new Error(`ValueError: Parameter "name" is too close to that of another of your resource (named: ${lds[i].name}), please choose another name`));
 					}
 				}
 
@@ -92,11 +93,10 @@ class LiveDataManager{
 				//console.log("Reahced here!!! #3");
 				params.spec = {name : thisUniquePSN, sshKeys : params.sshKeys};
 
-				try{
-					var result = await infraManager.buildLiveData(params, params.author);
+				infraManager.buildLiveData(params, params.author).then(result=>{
 					//console.log("result : ", result);
 					params.author = params.author._id.toString();
-					params.spec = { deployed: result.deployed, response: { stack_name: result.response.Name, stack_id: result.response.Id } };
+					params.spec = { deployed: result.deployed, info: { name: result.response.Name, id: result.response.Id } };
 					//console.log("Reahced here!!! #4");	
 					
 					new liveDataModel(params).save((err, ld)=>{
@@ -104,46 +104,66 @@ class LiveDataManager{
 
 						resolve(ld);
 					});
-				}
-				catch(e){ reject(e); };
+				})
+				.catch(e =>{ reject(e); });
 			});
 		});
 	}
 
-	delete(params){
+	remove(params, author){
 		return new Promise((resolve, reject)=>{
 
 			if ( !("ldid" in params && params.ldid) ){
 				return reject(new Error(`MissingParamError: Parameter "ldid" is mandatory.`));
 			}
 
-			if ( !("byUser" in params && params.byUser) ){
-				return reject(new Error(`MissingParamError: Parameter "byUser" is mandatory.`));
-			}
-
 			// TODO check byUser user has the right to remove the live-data
 
 			
 
-			liveDataModel.findById(params.ldid, async (err, ld)=>{
+			liveDataModel.findById(params.ldid, (err, ld)=>{
 				if (err) return reject (new Error(`DBError: ${err.toString().replace(/^Error\:\ /, '')}`) );
 
 				if (!ld) return reject(new Error(`NotFoundError: no live data with ID "${params.ldid}" found.`));
+				
+				var remove_this_live_data_and_quit = (err)=>{
+					if (err) { return reject(err); }
 
-				//console.log("ld.spec.response: ", ld.spec.response);
-				try{
-					var result = await infraManager.removeStack(ld.spec.response.stack_id);					
+					infraManager.removeStack(ld.spec.info.id).then(result =>{
+						ld.remove((err)=>{
 
-					ld.remove((err)=>{
+							if (err) return reject (new Error(`DBError: ${err.toString().replace(/^Error\:\ /, '')}`) );
 
-						if (err) return reject (new Error(`DBError: ${err.toString().replace(/^Error\:\ /, '')}`) );
-
-						resolve();
-					});
+							resolve();
+						});
+					}).catch(e => reject(e));
 				}
-				catch(e){ reject(e); };
+
+				algosManager.getInstancesMountingLiveData(ld._id.toString()).then((ais)=>{
+					if (ais.length != 0){
+						if ( !(params.force === true) ){
+							return reject (new Error('It is not safe to remove this liveData that is being used elsewhere. If you still wish to remove it, use the force option (this will delete all the algo instances using this liveData).'));
+						}
+					}
+
+					var remove_next = (index, callback)=>{
+                        if (typeof index === 'function' && typeof callback === 'undefined') {
+                            callback = index; index = 0;
+                        }
+
+                        if (index == ais.length) return callback(null);
+
+                        this.removeInstance({
+                            instanceID: ais[index]._id.toString()
+                        })
+                        .then(()=>{ remove_next (index+1, callback ); })
+                        .catch(e=> { callback(e); })
+                    }
+
+                    remove_next(remove_this_live_data_and_quit);
+					
+				}).catch(e=> reject(e) );
 			});
-			
 		});
 	}
 }

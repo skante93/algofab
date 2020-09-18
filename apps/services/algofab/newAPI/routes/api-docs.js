@@ -49,30 +49,32 @@ const swaggerOptions = {
 			{ApiKeyAuth: []}
 		],
 		definitions: {
-			userProfile: {
+			userJSONSignupObject: {
 				type: "object",
 				properties: {
 					firstname: { type: "string", description: "TODO", example: "John"},
 					lastname: { type: "string", description: "TODO", example: "DOE"},
-					status: { type: "string", description: "TODO", example: "user"},
-					username: { type: "string", description: "TODO", example: "jdoe"},
-					emails: { 
-						type: "array", 
-						items : {
-							type: "object",
-							properties: {
-								email : { type: "string", description: "TODO", example: "jdoe@example.com"},
-								verified: { type: "boolean", description: "TODO", example: false}
-							}
-						}
-					},
-					email : { type: "string", description: "TODO", example: "jdoe@example.com"},
-					photo: {
-						type: "string",
-						format: "binary"
-					}
+					status: { type: "string", description: "TODO", example: "user", enum: ["user", "admin"]},
+					username: { type: "string", description: "TODO", example: "jdoe", required: true},
+					email : { type: "string", description: "TODO", example: "jdoe@example.com", required: true}
 				}
 			},
+
+			userMultipartSignupObject: {
+				allOf: [
+					{ $ref: "#/definitions/userJSONSignupObject" },
+					{
+						type: "object",
+						properties: {
+							photo: {
+								type: "string",
+								format: "binary"
+							}
+						}
+					}
+				]
+			},
+			
 			userPreferences: {
 				type: "object",
 				properties: {}
@@ -142,17 +144,97 @@ const swaggerOptions = {
 			liveData: {
 				type : "object",
 				properties: {
-					apiVersion: {type:"string", description: "TODO", example: "v1"},
+					//apiVersion: {type:"string", description: "TODO", example: "v1"},
 					name: {type:"string", description: "TODO", example: "My LD One"},
 					type: {type:"string", description: "TODO", example: "empty"},
 					description: {type:"string", description: "TODO", example: "My LD One"},
 					sshKeys: {
 						type: "array",
-						items: { type: "string", description: "TODO", example: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyMqfs5QAnPb0xLqEg2Vt4T1gS/Btw1X5r0JGhKwLEfpImciY4RiDOc0Sq3BK8CVwUN9316EIE31lgvnZ9+TCRdj4XSc/2O49EgTUzEzqrdT5RvFAPOPeklDDVhrbi75P94xeYM0qiJhcmYmloqGG1dSla1oGLdDXi9GzlnCoAOXl3yhHMzman0hbwJiHDwVvyTdegDo0ZvKoPYbaV41Bm2IobH/URrLQYDZCCUAB4JWZd6DcSsbEYGEKgI3NvcqO3Z6dn+eRlHJxqQZ4Qos0ZT9LRffWvUM3ocWsJ5aqXuml2pA0Or8oVbfNhej8P9VhvFSH8FkXPhQpSCuxfYXCb skante@skante-virtual-machine"}
+						items: { type: "string", description: "TODO", example: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDM3pTuOmKUmv0BiEQORKxu+GFeJlCuG67m0GyKzGFTqNhlzRqgC/C+oFJn/Lk4Kqu/uXOzzOHeebnCrrb89z/mIEfE4Hp5vKfs4o0neQXrtia/dpddfGXqZLgBArwi4eIVqVmC8g1qOXbTZ1MA9Eax8cajTrrBPN8GH+eOzbPZUYmhcA3CLnQvXxZef6bohBurMY7Yah19Nr8/3lHJcGx3C9HOtofjs+S4RDE6YxO8xY8Bwd8buW8d2YpDaqoD3O93wrkN3tZocB88pRIoQ08vUJmKjRx1ycHwIFM0N/0N7+S8ET2FcgapA8hfKG5v51OM5kLp7SXc/Ta5SI1Pi6RR skante@flecorre-tl-tower"}
 					},
 					// spec: { 
 					// 	type: "object" 
 					// }
+				}
+			},
+
+			algoInstance: {
+				type: 'object',
+				properties: {
+					name: {type:"string", description: "TODO", example: "My Instance one of Algo one"},
+					inputs: { type: "object" },
+					output: { type: "object" },
+					settings: {
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								name: {type:"string", description: "TODO", example: "var1"},
+								value: {type:"string", description: "TODO", example: "val1"},
+							}
+						}
+					},
+					liveDataMountPoints: {
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								name: {type:"string", description: "TODO", example: "ldone"},
+								liveDataID: {type:"string", description: "TODO", example: "#myPersonalLiveData#"}
+							}
+						}
+					},
+					templateID: { type: "string", description: "TODO", example: "#ID-Of-The-Algo-Template#",required: true}
+				}
+			},
+			algoTemplate: {
+				type: 'object',
+				properties: {
+					name: {type:"string", description: "TODO", example: "My Algo one"},
+					description: {type:"string", description: "TODO", example: "Super description for Algo One"},
+					inputs: { type: "object" },
+					output: { type: "object" },
+					settings: {
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								name: {type:"string", description: "TODO", example: "var1"},
+								type: {type:"string", description: "TODO", example: "integer"},
+								description: {type:"string", description: "TODO", example: "We use var1 to do such and such ..."},
+								required: { type: "boolean", example: true },
+								default: {type: "string", example: "defaultValForVar1"}
+							}
+						}
+					},
+					container: {
+						type: "object",
+						properties: {
+							image: {type:"string", description: "TODO", example: "myDockerHubLogin/myImage:myTag"},
+							ports: {
+								type: "array",
+								items: {
+									type: "object",
+									properties: {
+										name: {type:"string", description: "TODO", example: "http"},
+										description: {type:"string", description: "TODO", example: "My http port exposing ..."},
+										containerPort: {type:"integer", description: "TODO", example: 80}
+									}
+								}
+							}
+						}
+					},
+					liveDataMountPoints: {
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								name: {type:"string", description: "TODO", example: "ldOne"},
+								description: {type:"string", description: "TODO", example: "This liveData solves ...."},
+								mountPoint: {type:"string", description: "TODO", example: "/dataset-ld-one"}
+							}
+						}
+					}
 				}
 			}
 		}

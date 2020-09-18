@@ -80,7 +80,7 @@ services:
       - ${PORTAL_COMPOSE_PORT}:8080
     env_file:
       - .env
-    user: root
+    user: "1001:1001"
     volumes:
       - ./services/algofab:/home/admin/algofab
       - ./data/accounts/:/accounts
@@ -117,6 +117,7 @@ services:
 
 volumes:
   app_data:
+    driver: local
     driver_opts:
       type: "nfs"
       o: "addr=192.168.150.1,nolock,soft,rw"

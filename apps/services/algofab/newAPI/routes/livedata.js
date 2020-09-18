@@ -3,54 +3,13 @@ var router = require('express').Router(), rest_response = CONFIG.utils.rest_resp
 
 const filterLiveDataObject = (u)=>{
 	var uf = JSON.parse(JSON.stringify(u));
+	
+	delete uf.spec;
+	
 	return uf;
 }
 
 
-/**
-* @swagger
-* /live-data/{ldid}:
-*   delete:
-*     tags: [ "LiveData" ]
-*     summary: TODO
-*     description: TODO
-*     parameters:
-*       - name: ldid
-*         in: path
-*         type: string
-*         required: true
-*     responses:
-*       '200':
-*         description: TODO
-*         
-*/
-router.delete('/:ldid', ParamsParser({
-	ldid: {type: "string", in: "path", lowerCase: true}
-}), (req, res)=>{
-
-	if (!res.locals.user){
-		//console.log("let's answer with an err");
-		return rest_response.err(req, res, {
-			statusCode: 401, 
-			error: new Error(`UnAuthorized: you need to specifify your <b>valid</b> API key (header "X-API-KEY") to perform this operation.`) 
-		});
-	}
-
-	res.locals.params.byUser = res.locals.user;
-
-	//console.log("params: ", res.locals.params);
-	liveDataMan.delete(res.locals.params).then(()=>{
-		//console.log("user: ", user);
-		const responseObj = { body : "Done!", statusCode: 200 };
-
-		rest_response.out(req, res, responseObj);
-	}).catch(e=>{
-		//
-		console.log(e);
-
-		rest_response.err(req, res, { error: e.toString() });
-	});
-});
 
 
 /**
@@ -94,11 +53,18 @@ router.get('/', ParamsParser({
 
 /**
 * @swagger
-* /live-data:
+* /live-data/{apiVersion}:
 *   post:
 *     tags: [ "LiveData" ]
 *     summary: TODO
 *     description: TODO
+*     parameters:
+*       - name: apiVersion
+*         in: path
+*         schema:
+*           type: string
+*           enum: ["v1"]
+*         required: true
 *     requestBody: 
 *       description: TODO
 *       required: true
@@ -111,8 +77,8 @@ router.get('/', ParamsParser({
 *         description: TODO
 *         
 */
-router.post('/', ParamsParser({
-	apiVersion: {type: "string", in: "body", default: "v1"},
+router.post('/:apiVersion', ParamsParser({
+	apiVersion: {type: "string", in: "path", lowerCase: true, default: "v1"},
 	name: {type: "string", in: "body"},
 	type: {type: "string", in: "body", default: "empty"},
 	description: { type: "string", in: "body"},
@@ -148,6 +114,57 @@ router.post('/', ParamsParser({
 
 
 
+/**
+* @swagger
+* /live-data/{ldid}:
+*   delete:
+*     tags: [ "LiveData" ]
+*     summary: TODO
+*     description: TODO
+*     parameters:
+*       - name: ldid
+*         in: path
+*         type: string
+*         required: true
+*       - name: force
+*         in: query
+*         schema:
+*           type: string
+*           enum: ["true", "false"]
+*         required: false
+*     responses:
+*       '200':
+*         description: TODO
+*         
+*/
+router.delete('/:ldid', ParamsParser({
+	ldid: {type: "string", in: "path", lowerCase: true},
+	force: {type: "boolean", in: "query"}
+}), (req, res)=>{
+
+	if (!res.locals.user){
+		//console.log("let's answer with an err");
+		return rest_response.err(req, res, {
+			statusCode: 401, 
+			error: new Error(`UnAuthorized: you need to specifify your <b>valid</b> API key (header "X-API-KEY") to perform this operation.`) 
+		});
+	}
+
+	res.locals.params.byUser = res.locals.user;
+
+	//console.log("params: ", res.locals.params);
+	liveDataMan.remove(res.locals.params, res.locals.user).then(()=>{
+		//console.log("user: ", user);
+		const responseObj = { body : "Done!", statusCode: 200 };
+
+		rest_response.out(req, res, responseObj);
+	}).catch(e=>{
+		//
+		console.log(e);
+
+		rest_response.err(req, res, { error: e.toString() });
+	});
+});
 
 
 

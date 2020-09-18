@@ -175,6 +175,55 @@ const LIVE_DATA_MANIFEST_FORMATS = {
 	}
 };
 
+const ALGO_INSTANCE_MANIFEST_FORMATS = {
+	"v1": {
+		"*": {
+			type: "object",
+			required: true,
+			properties: {
+				name: { type: "string", required: true },
+				//description: {type: "string"},
+				settings: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							name: {type: "string", required: true},
+							value: {type: "string", required: true},
+						}
+					}
+				},
+				container: {
+					type: "object",
+					properties: {
+						image: { type: "string", required: true },
+						ports: {
+							type: "array",
+							items :{
+								type: "object",
+								properties: {
+									containerPort: {type: "integer", required: true}
+								}
+							}
+						}
+					}
+				},
+				liveDataMountPoints: {
+					type: "array",
+					items:{
+						type: "object",
+						properties: {
+							name: { type: "string", required : true},
+							liveDataID: {type: "string", required : true},
+							mountPoint: {type: "string", required : true}
+						}
+					}
+				}
+			}
+		}
+	}
+};
+
 const waitTillOk = (condition, callback, maxWaitTime)=>{
 	if (typeof maxWaitTime === 'undefined'){
 		maxWaitTime = 20; // seconds
@@ -212,7 +261,7 @@ class InfraManager {
 	async validateManifest(type, manifest){
 		return new Promise(async (resolve,reject)=>{
 
-			const MANIFEST_FORMATS = (type == "live-data")? LIVE_DATA_MANIFEST_FORMATS : DEMO_MANIFEST_FORMATS;
+			const MANIFEST_FORMATS = (type == "live-data")? LIVE_DATA_MANIFEST_FORMATS : (type == "algo-instance")? ALGO_INSTANCE_MANIFEST_FORMATS : DEMO_MANIFEST_FORMATS;
 			
 			if (!("apiVersion" in manifest && manifest.apiVersion)) {
 				return reject(`MissingParamError: Field "apiVersion" is mandatory.`);
@@ -231,7 +280,9 @@ class InfraManager {
 				return reject(`FormatError: Field "type" has to be a string but got ${manifest.type instanceof Array ? "array": typeof manifest.type}.`);
 			}
 			if (Object.keys(MANIFEST_FORMATS[manifest.apiVersion]).indexOf(manifest.type) < 0) {
-				return reject(`ValueError: Field "type" has wrong value: "${manifest.type}" not supported. Please choose one of the following values: "${Object.keys(MANIFEST_FORMATS[manifest.apiVersion]).join('", "')}".`);
+				if (!('*' in MANIFEST_FORMATS[manifest.apiVersion])){
+					return reject(`ValueError: Field "type" has wrong value: "${manifest.type}" not supported. Please choose one of the following values: "${Object.keys(MANIFEST_FORMATS[manifest.apiVersion]).join('", "')}".`);
+				}
 			}
 
 			/*
@@ -244,10 +295,9 @@ class InfraManager {
 			*/
 
 			var newManifest = JSON.parse(JSON.stringify(manifest));
-			newManifest.spec = await validateSpecAgainstSchema(manifest.spec, MANIFEST_FORMATS[manifest.apiVersion][manifest.type]);
-			if (newManifest.spec instanceof Error) return reject(newManifest.spec);
-			
-			resolve(newManifest);
+			newManifest.spec = await validateSpecAgainstSchema(manifest.spec, MANIFEST_FORMATS[manifest.apiVersion][ ('*' in MANIFEST_FORMATS[manifest.apiVersion]? '*': manifest.type)]);
+			//console.log("manifest.spec: ", manifest.spec);
+			(newManifest.spec instanceof Error)? reject(newManifest.spec) : resolve(newManifest);
 		});
 	}
 	/*
@@ -291,6 +341,28 @@ class InfraManager {
 	}
 	*/
 
+	deployStack(stack_name, stack_json) {
+		return new Promise((resolve, reject)=>{
+			request.post({ 
+				url: portainerConnectionOptions.url+`/api/stacks?type=1&method=string&endpointId=${portainerAPIParams.endpoint.Id}`,
+				body: JSON.stringify({
+					Name: stack_name,
+					SwarmID: portainerAPIParams.swarm.ID,
+					StackFileContent: YAML.stringify(stack_json)
+				}),
+				headers: { "Authorization": `Bearer ${portainerAPIParams.authToken}` } 
+			}, function(error, res, body){ 
+				if (error || res.statusCode != 200){
+					return reject( error || JSON.parse(body).message );
+				}
+
+				//manifest.docker_response = JSON.parse(body);
+				//console.log(error || `[${res.statusCode}] ${JSON.stringify(JSON.parse(body), null, 2)}`);
+				resolve({deployed: stack_json, response: JSON.parse(body)});
+			});
+		});
+	}
+
 	async buildLiveData(manifest, author){
 		//
 		return new Promise( (resolve, reject)=>{
@@ -305,7 +377,7 @@ class InfraManager {
 					//
 					//console.log("Reahced here!!! ###3");
 				
-					var nfs_dirname = `${author.profile.main_email.replace(/(@|\.)/g, '-')}-${v_manifest.spec.name}`;
+					var nfs_dirname = `${author.profile.username}-${v_manifest.spec.name}`;
 					
 					mkdirp(`${settings.nfs_data_options.apiMountPoint}/live-data/${nfs_dirname}`);
 
@@ -317,7 +389,8 @@ class InfraManager {
 								image: "algofab2018/sftp",
 								ports: [ hp+':22' ],
 								environment: [ "SFTP_PUB_KEYS="+v_manifest.spec.sshKeys.join(',') ],
-								volumes: [ 'live_data:/live-data' ]
+								volumes: [ 'live_data:/live-data' ],
+								//user: "1001:1001"
 							}
 						},
 						volumes: {
@@ -332,29 +405,105 @@ class InfraManager {
 					}
 
 					//console.log("stack: ", JSON.stringify(stack, null, 2));
-					request.post({ 
-						url: portainerConnectionOptions.url+`/api/stacks?type=1&method=string&endpointId=${portainerAPIParams.endpoint.Id}`,
-						body: JSON.stringify({
-							Name: nfs_dirname,
-							SwarmID: portainerAPIParams.swarm.ID,
-							StackFileContent: YAML.stringify(stack)
-						}),
-						headers: { "Authorization": `Bearer ${portainerAPIParams.authToken}` } 
-					}, function(error, res, body){ 
-						if (error || res.statusCode != 200){
-							return reject( error || JSON.parse(body).message );
-						}
+					this.deployStack(nfs_dirname, stack).then( resolve ). catch( reject );
+					// request.post({ 
+					// 	url: portainerConnectionOptions.url+`/api/stacks?type=1&method=string&endpointId=${portainerAPIParams.endpoint.Id}`,
+					// 	body: JSON.stringify({
+					// 		Name: nfs_dirname,
+					// 		SwarmID: portainerAPIParams.swarm.ID,
+					// 		StackFileContent: YAML.stringify(stack)
+					// 	}),
+					// 	headers: { "Authorization": `Bearer ${portainerAPIParams.authToken}` } 
+					// }, function(error, res, body){ 
+					// 	if (error || res.statusCode != 200){
+					// 		return reject( error || JSON.parse(body).message );
+					// 	}
 
-						//manifest.docker_response = JSON.parse(body);
-						//console.log(error || `[${res.statusCode}] ${JSON.stringify(JSON.parse(body), null, 2)}`);
-						resolve({deployed: stack, response: JSON.parse(body)});
-					});
+					// 	//manifest.docker_response = JSON.parse(body);
+					// 	//console.log(error || `[${res.statusCode}] ${JSON.stringify(JSON.parse(body), null, 2)}`);
+					// 	resolve({deployed: stack, response: JSON.parse(body)});
+					// });
 				}
 				else{ //Kubernetes
 					//
 					//console.log("Reahced here!!! ###4");
 				}
 				//console.log("Reahced here!!! ###5");
+			});
+		});
+	}
+
+	
+	async buildAlgoInstance(manifest, author){
+		//
+		return new Promise( (resolve, reject)=>{
+			//console.log("portainerAPIParams: ", portainerAPIParams);
+			waitTillOk( ()=> portainerAPIParams != null, async (err)=>{
+				//console.log("Reahced here!!! ###1");
+				try{ var v_manifest = await this.validateManifest("algo-instance", manifest); } catch(e) { return reject(e) }
+				//console.log("Manifest is valid");
+				//console.log("Reahced here!!! ###2");
+				
+				
+				
+				var stack_name = `${author.profile.username}-${v_manifest.spec.name}`;
+				
+				//mkdirp(`${settings.nfs_data_options.apiMountPoint}/live-data/${nfs_dirname}`);
+				var service_algo = { image: v_manifest.spec.container.image, volumes:[] }, volumes = {};
+				if (v_manifest.spec.container.ports){
+					//console.log("v_manifest.spec.container.ports [before] : ", v_manifest.spec.container.ports);
+					for (var i=0; i<v_manifest.spec.container.ports.length; i++){
+						v_manifest.spec.container.ports[i].hostPort = await hostPorts.randomAvailablePortSync();
+					}
+					//console.log("v_manifest.spec.container.ports [after] : ", v_manifest.spec.container.ports);
+					service_algo.ports = v_manifest.spec.container.ports.map(p=> p.hostPort+':'+p.containerPort);
+				}
+
+				if (v_manifest.spec.settings){
+					service_algo.environment = v_manifest.spec.settings.map(e=> 'ALGO_INPUT_'+e.name.toUpperCase()+'='+e.value);
+				}
+
+				if (v_manifest.spec.liveDataMountPoints){
+					v_manifest.liveDataMountPoints.forEach((ld)=>{
+						var vol_name = ld.liveData.spec.info.name+'_live_data';
+						volumes[vol_name] = {external: true};
+						service_algo.volumes.push(vol_name+':'+ld.mountPoint);
+					});
+				}
+				
+				var stack = {
+					version: "3",
+					services: {
+						algo: service_algo
+					},
+					volumes: volumes
+				}
+				if (Object.keys(volumes).length == 0){
+					delete stack.volumes
+					delete stack.services.algo.volumes
+				}
+				console.log("stack: \n", YAML.stringify(stack));
+
+				this.deployStack(stack_name, stack).then( resolve ). catch( reject );
+				
+				// request.post({ 
+				// 	url: portainerConnectionOptions.url+`/api/stacks?type=1&method=string&endpointId=${portainerAPIParams.endpoint.Id}`,
+				// 	body: JSON.stringify({
+				// 		Name: nfs_dirname,
+				// 		SwarmID: portainerAPIParams.swarm.ID,
+				// 		StackFileContent: YAML.stringify(stack)
+				// 	}),
+				// 	headers: { "Authorization": `Bearer ${portainerAPIParams.authToken}` } 
+				// }, function(error, res, body){ 
+				// 	if (error || res.statusCode != 200){
+				// 		return reject( error || JSON.parse(body).message );
+				// 	}
+
+				// 	//manifest.docker_response = JSON.parse(body);
+				// 	//console.log(error || `[${res.statusCode}] ${JSON.stringify(JSON.parse(body), null, 2)}`);
+				// 	resolve({deployed: stack, response: JSON.parse(body)});
+				// });
+				
 			});
 		});
 	}

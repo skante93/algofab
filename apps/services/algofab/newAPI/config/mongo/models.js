@@ -77,6 +77,17 @@ var agreementsSchema = new Schema(
 	}
 );
 
+var tokenSchema = new Schema(
+	{
+		jwt: { type: String },
+		author: {type: Schema.Types.ObjectId, ref : 'Users'},
+		createdAt: {type: Date, default: Date.now },
+	},
+	{
+		collection: "jwt"
+	}
+);
+
 var usersSchema = new Schema(
 	{ // Schema
 		profile: {
@@ -87,13 +98,14 @@ var usersSchema = new Schema(
 					verified: { type: Boolean, default: false }
 				}
 			],
-			main_email: String,
+			email: String,
 			firstname: String,
 			lastname: String,
 			status: String,
 //			photo: { type: Schema.Types.ObjectId, ref : 'Photos' }
 			photo: { content_type: String, buffer: Buffer }
 		},
+		auth_token: {type: Schema.Types.ObjectId, ref : 'Tokens'},
 		passwords: [
 			{
 				hash: String,
@@ -105,7 +117,7 @@ var usersSchema = new Schema(
 			//
 		},
 		freezed: { type: Boolean, default: false},
-		date: {type: Date, default: Date.now },
+		createdAt: {type: Date, default: Date.now },
 		deleteAt: {type: Date}
 	}, 
 	{
@@ -116,6 +128,8 @@ var usersSchema = new Schema(
 
 var groupsSchema = new Schema({
 	name: String,
+}, {
+	collection: 'groups'
 });
 
 var resourcesSchema = new Schema (
@@ -185,11 +199,77 @@ var liveDataSchema = new Schema({
 	apiVersion: {type: String, enum: ["v1"], default: "v1" },
 	name: {type: String, required: true},
 	type: {type: String, enum: ["empty"]},
-	description: String,
-	sshKeys: {type: String, required: true},
-	spec: {type:Object, required:true},
+	description: {type: String},
+	sshKeys: [{type: String, required: true}],
+	spec: {type: Object, required:true},
 	author: { type: Schema.Types.ObjectId, ref : 'Users'}
+}, {
+	collection: 'live_data'
 });
+
+var algoTemplateSchema = new Schema({
+	//apiVersion: {type: String, enum: ["v1"], default: "v1" },
+	name: {type: String, required: true},
+	description: {type: String},
+	settings: [
+		{
+			name: {type: String},
+			type: {type: String},
+			description: {type: String},
+			required: {type: Boolean, default: false},
+			default: {type: String}
+		}
+	],
+	container: {
+		image: {type: String},
+		ports: [
+			{
+				name: {type: String},
+				description: {type: String},
+				containerPort: {type: String}
+			}
+		]
+	},
+	inputs: { type: Object },
+	output: { type: Object },
+	liveDataMountPoints: [
+		{
+			name: { type : String},
+			description: { type : String},
+			mountPoint: { type : String}
+		}
+	],
+	author: { type: Schema.Types.ObjectId, ref : 'Users'}
+}, {
+	collection: 'algo_template'
+});
+
+var algoInstanceSchema = new Schema({
+	apiVersion: {type: String, enum: ["v1"], default: "v1" },
+	
+	name: {type: String, required: true},
+	type: {type: String},
+	settings: [
+		{
+			name: {type: String, required: true},
+			value: {type: String, required: true}			
+		}
+	],
+	inputs: { type: Object },
+	output: { type: Object },
+	liveDataMoutPoints: [ 
+		{
+			name: { type: String },
+			liveDataID: { type: Schema.Types.ObjectId, ref : 'LiveData'},
+		} 
+	],
+	templateID : {type: Schema.Types.ObjectId, ref : 'AlgosTemplates'},
+	spec: {type: Object, required:true},
+	author: { type: Schema.Types.ObjectId, ref : 'Users'}
+}, {
+	collection: "algo_instance"
+});
+
 
 var articleVersionDataSchema = new Schema({
 	name: String,
@@ -204,10 +284,13 @@ mongoose.model('Ratings', ratingsSchema);
 mongoose.model('Downloads', downloadsSchema);
 mongoose.model('Licences', licencesSchema);
 mongoose.model('Agreements', agreementsSchema);
+mongoose.model('Tokens', tokenSchema);
 mongoose.model('Users', usersSchema);
 mongoose.model('Groups', groupsSchema);
 mongoose.model('Resources', resourcesSchema);
 mongoose.model('LiveData', liveDataSchema);
+mongoose.model('AlgoTemplates', algoTemplateSchema);
+mongoose.model('AlgoInstances', algoInstanceSchema);
 
 //mongoose.model('Downloads', downloadsSchema);
 
