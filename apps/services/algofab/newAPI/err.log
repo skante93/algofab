@@ -258,3 +258,4 @@
 192.168.160.1 [Fri Sep 18 2020 08:30:55 GMT+0000 (Coordinated Universal Time)] 17ms [error] [souleymane.kante@mines-telecom.fr] 500 "DELETE /algos/5f6465ec7fa3320599578973/instances/5f646de498139806293df461" "Unable to find a stack with the specified identifier inside the database"
 192.168.160.1 [Fri Sep 18 2020 08:33:47 GMT+0000 (Coordinated Universal Time)] 29ms [error] [souleymane.kante@mines-telecom.fr] 500 "DELETE /algos/5f6465ec7fa3320599578973/instances/5f646de498139806293df461" "SyntaxError: Unexpected token u in JSON at position 0"
 192.168.160.1 [Fri Sep 18 2020 09:20:19 GMT+0000 (Coordinated Universal Time)] 15ms [error] [-] 500 "GET /algos/templates" "Error: DBError: MongoError: Failed to parse: collation: "algo_template". 'collation' field must be of BSON type object."
+172.18.0.1 [Thu Sep 24 2020 13:49:02 GMT+0000 (Coordinated Universal Time)] 85ms [error] [-] 500 "POST /users/admin/login" "Error: WrongValueError: Password expired."

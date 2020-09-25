@@ -1,0 +1,26 @@
+
+
+    <a [hidden]="!display"
+        [routerLink]="dropdown == undefined ? link : null"  
+        [attr.class]="classes != undefined ? classes : null" #menu>
+        
+        <ng-template [ngIf]="img != undefined">
+            <img src="{{img}}">
+        </ng-template>
+        <ng-template [ngIf]="text != undefined">
+            {{text}}
+        </ng-template>
+        <ng-template [ngIf]="dropdown != undefined">
+            <span class="menu-dropdown" #dropdownMenu>
+                <ng-template [ngIf]="dropdown.icon != undefined">
+                    <i class="{{dropdown.icon}} dropdown-btn"></i>
+                </ng-template>
+                <ng-template [ngIf]="dropdown.text != undefined">
+                    <span class="dropdown-btn">{{dropdown.text}}</span>
+                </ng-template>
+                <div class="dropdown-items" *ngIf="dropdown.items != undefined">
+                    <a *ngFor="let d of dropdown.items" routerLink="{{d.link}}">{{d.text}}</a>
+                </div>
+            </span>
+        </ng-template>
+    </a>

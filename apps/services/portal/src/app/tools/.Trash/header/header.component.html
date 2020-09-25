@@ -1,0 +1,230 @@
+
+<div [hidden]="!screenIsWide" >
+	<div class="header-menu" #wideTemplateNav>
+		<div class="menu-background">
+			<div class="left-bg"></div>
+			<div class="middle-bg"></div>
+			<div class="right-bg"></div>
+		</div>
+		<div class="left">
+			<header-lg-menu *ngFor="let item of menuSpec.left" 
+				[name]="item.name != undefined ? item.name : null" 
+				[link]="item.link != undefined ? item.link : null" 
+				[img]="item.img != undefined ? item.img : null" 
+				[text]="item.text != undefined ? item.text : null" 
+				[classes]="item.classes != undefined ? item.classes : null" 
+				[display]="item.whenLoggedIn == undefined || ((auth.loggedIn() && item.whenLoggedIn == true) || (!auth.loggedIn() && item.whenLoggedIn == false))" 
+				[dropdown]="item.dropdown != undefined ? item.dropdown : null">
+			</header-lg-menu>
+		</div>
+		<div class="middle">
+			<header-lg-menu *ngFor="let item of menuSpec.middle" 
+				[name]="item.name != undefined ? item.name : null" 
+				[link]="item.link != undefined ? item.link : null" 
+				[img]="item.img != undefined ? item.img : null" 
+				[text]="item.text != undefined ? item.text : null" 
+				[classes]="item.classes != undefined ? item.classes : null" 
+				[display]="item.whenLoggedIn == undefined || ((auth.loggedIn() && item.whenLoggedIn == true) || (!auth.loggedIn() && item.whenLoggedIn == false))" 
+				[dropdown]="item.dropdown != undefined ? item.dropdown : null">
+			</header-lg-menu>
+		</div>
+		<div class="right">
+			<header-lg-menu *ngFor="let item of menuSpec.right" 
+				[name]="item.name != undefined ? item.name : null" 
+				[link]="item.link != undefined ? item.link : null" 
+				[img]="item.img != undefined ? item.img : null" 
+				[text]="item.text != undefined ? item.text : null" 
+				[classes]="item.classes != undefined ? item.classes : null" 
+				[display]="item.whenLoggedIn == undefined || ((auth.loggedIn() && item.whenLoggedIn == true) || (!auth.loggedIn() && item.whenLoggedIn == false))" 
+				[dropdown]="item.dropdown != undefined ? item.dropdown : null">
+			</header-lg-menu>
+		</div>
+	</div>
+</div>
+
+<div [hidden]="screenIsWide">
+	<div class="small-header-menu">
+		<div class="menu-background"></div>
+		<div class="small-main">
+			<div class="main-left flexCenter">
+				<a routerLink="/"> <img src="/assets/img/algofab_white_bg.PNG"> </a>
+			</div>
+			<div class="main-right flexCenter">
+				<i class="fa fa-bars menu-toggle-icon" #toggleIcon></i>
+			</div>
+		</div>
+		<div class="menu-items">
+			<header-sm-menu *ngFor="let item of menuSpec.middle" 
+				[name]="item.name != undefined ? item.name : null" 
+				[link]="item.link != undefined ? item.link : null" 
+				[img]="item.img != undefined ? item.img : null" 
+				[text]="item.text != undefined ? item.text : null" 
+				[classes]="item.classes != undefined ? item.classes : null" 
+				[display]="item.whenLoggedIn == undefined || ((auth.loggedIn() && item.whenLoggedIn == true) || (!auth.loggedIn() && item.whenLoggedIn == false))" 
+				[dropdown]="item.dropdown != undefined ? item.dropdown : null">
+			</header-sm-menu>
+
+			<hr>
+
+			<header-sm-menu *ngFor="let item of menuSpec.right" 
+				[name]="item.name != undefined ? item.name : null" 
+				[link]="item.link != undefined ? item.link : null" 
+				[img]="item.img != undefined ? item.img : null" 
+				[text]="item.text != undefined ? item.text : null" 
+				[classes]="item.classes != undefined ? item.classes : null" 
+				[display]="item.whenLoggedIn == undefined || ((auth.loggedIn() && item.whenLoggedIn == true) || (!auth.loggedIn() && item.whenLoggedIn == false))" 
+				[dropdown]="item.dropdown != undefined ? item.dropdown : null">
+			</header-sm-menu>
+		</div>
+	</div>
+</div>
+
+<div class="header-banner">
+	<div class="banner-content" style="text-align: center;">
+		<h3> Algofab </h3>
+		<p>Lorem ispum ...</p>
+	</div>
+</div>
+
+
+
+
+
+
+
+
+<!-- OLD -->
+<ng-template [ngIf]="false">
+	<ng-template [ngIf]="screenIsWide" >
+		<div class="header-menu" #wideTemplateNav>
+			<div class="menu-background">
+				<div class="left-bg"></div>
+				<div class="middle-bg"></div>
+				<div class="right-bg"></div>
+			</div>
+			<div class="left">
+				<a *ngFor="let item of menuSpec.left" 
+					[routerLink]="item.dropdown != undefined? null: item.link" 
+					[attr.class]="item.class? item.class : null">
+					
+					<ng-template [ngIf]="item.whenLoggedIn == undefined || ((auth.loggedIn() && item.whenLoggedIn == true) || (!auth.loggedIn() && item.whenLoggedIn == false))">
+						<ng-template [ngIf]="item.img != undefined">
+							<img src="{{item.img}}">
+						</ng-template>
+						<ng-template [ngIf]="item.text != undefined">
+							{{item.text}}
+						</ng-template>
+						<ng-template [ngIf]="item.value != undefined">
+							{{item.value()}}
+						</ng-template>
+						<ng-template [ngIf]="item.dropdown != undefined">
+							<span class="menu-dropdown">
+								<ng-template [ngIf]="item.dropdown.icon != undefined">
+									<i class="{{item.dropdown.icon}} dropdown-btn"></i>
+	
+									<div class="dropdown-items">
+										<a *ngFor="let d of item.dropdown.items" routerLink="{{d.link}}">{{d.text}}</a>
+									</div>
+								</ng-template>
+							</span>
+						</ng-template>
+					</ng-template>
+				</a>
+			</div>
+			<div class="middle">
+				<a *ngFor="let item of menuSpec.middle" 
+					[routerLink]="item.dropdown != undefined? null: item.link" 
+					[attr.class]="item.class? item.class : null">
+					
+					<ng-template [ngIf]="item.whenLoggedIn == undefined || ((auth.loggedIn() && item.whenLoggedIn == true) || (!auth.loggedIn() && item.whenLoggedIn == false))">
+						<ng-template [ngIf]="item.img != undefined">
+							<img src="{{item.img}}">
+						</ng-template>
+						<ng-template [ngIf]="item.text != undefined">
+							{{item.text}}
+						</ng-template>
+						<ng-template [ngIf]="item.value != undefined">
+							{{item.value()}}
+						</ng-template>
+						<ng-template [ngIf]="item.dropdown != undefined">
+							<span class="menu-dropdown">
+								<ng-template [ngIf]="item.dropdown.icon != undefined">
+									<i class="{{item.dropdown.icon}} dropdown-btn"></i>
+	
+									<div class="dropdown-items">
+										<a *ngFor="let d of item.dropdown.items" routerLink="{{d.link}}">{{d.text}}</a>
+									</div>
+								</ng-template>
+							</span>
+						</ng-template>
+					</ng-template>
+				</a>
+			</div>
+			<div class="right">
+				<a *ngFor="let item of menuSpec.right" 
+					[routerLink]="item.dropdown != undefined? null: item.link" 
+					[attr.class]="item.class? item.class : null">
+					
+					<ng-template [ngIf]="item.whenLoggedIn == undefined || ((auth.loggedIn() && item.whenLoggedIn == true) || (!auth.loggedIn() && item.whenLoggedIn == false))">
+						<ng-template [ngIf]="item.img != undefined">
+							<img src="{{item.img}}">
+						</ng-template>
+						<ng-template [ngIf]="item.text != undefined">
+							{{item.text}}
+						</ng-template>
+						<ng-template [ngIf]="item.value != undefined">
+							{{item.value()}}
+						</ng-template>
+						<ng-template [ngIf]="item.dropdown != undefined">
+							<span class="menu-dropdown">
+								<ng-template [ngIf]="item.dropdown.icon != undefined">
+									<i class="{{item.dropdown.icon}} dropdown-btn"></i>
+	
+									<div class="dropdown-items">
+										<a *ngFor="let d of item.dropdown.items" routerLink="{{d.link}}">{{d.text}}</a>
+									</div>
+								</ng-template>
+							</span>
+						</ng-template>
+					</ng-template>
+				</a>
+			</div>
+		</div>
+	
+		<div class="header-banner">
+			<div class="banner-content" style="text-align: center;">
+				<h3> Algofab </h3>
+				<p>Lorem ispum ...</p>
+			</div>
+		</div>
+	</ng-template>
+	
+	<ng-template [ngIf]="!screenIsWide">
+		<div class="small-header-menu">
+			<div class="menu-background"></div>
+			<div class="small-main">
+				<div class="main-left flexCenter">
+					<a routerLink="/"> <img src="/assets/img/algofab_white_bg.PNG"> </a>
+				</div>
+				<div class="main-right flexCenter">
+					<i class="fa fa-bars menu-toggle-icon"></i>
+				</div>
+			</div>
+			<div class="menu-items">
+				<a class="menu-item" *ngFor="let item of menuSpec.middle" [routerLink]="item.dropdown != undefined? null: item.link">
+					<ng-template [ngIf]="item.dropdown == undefined">
+						{{item.text}}
+					</ng-template>
+					<ng-template [ngIf]="item.dropdown != undefined"></ng-template>
+				</a>
+			</div>
+		</div>
+	
+		<div class="header-banner">
+			<div class="banner-content" style="text-align: center;">
+				<h3> Algofab </h3>
+				<p>Lorem ispum ...</p>
+			</div>
+		</div>
+	</ng-template>
+</ng-template>

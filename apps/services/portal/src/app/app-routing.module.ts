@@ -14,6 +14,7 @@ import { DocsComponent } from './docs/docs.component';
 import { ResourcesModule } from './resources/resources.module';
 
 import { AlgofabServicesModuule } from './algofab-services/algos.module';
+import { StoreModule } from './store/store.module';
 
 
 const routes: Routes = [
@@ -38,7 +39,8 @@ const routes: Routes = [
 	imports: [
 		RouterModule.forRoot(routes),
 		ResourcesModule,
-		AlgofabServicesModuule
+		AlgofabServicesModuule,
+		StoreModule
 	],
 	exports: [RouterModule]
 })

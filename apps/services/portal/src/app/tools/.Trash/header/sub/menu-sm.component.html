@@ -1,0 +1,21 @@
+
+
+<div class="small-header-menu">
+    <div class="menu-background"></div>
+    <div class="small-main">
+        <div class="main-left flexCenter">
+            <a routerLink="/"> <img src="/assets/img/algofab_white_bg.PNG"> </a>
+        </div>
+        <div class="main-right flexCenter">
+            <i class="fa fa-bars menu-toggle-icon"></i>
+        </div>
+    </div>
+    <div class="menu-items">
+        <a class="menu-item" *ngFor="let item of menuSpec.middle" [routerLink]="item.dropdown != undefined? null: item.link">
+            <ng-template [ngIf]="item.dropdown == undefined">
+                {{item.text}}
+            </ng-template>
+            <ng-template [ngIf]="item.dropdown != undefined"></ng-template>
+        </a>
+    </div>
+</div>

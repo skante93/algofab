@@ -1,0 +1,70 @@
+@import './nav.component.scss';
+
+img{
+	max-width: $navImgMaxWidth;
+	max-height: $navImgMaxHeight;
+}
+
+.menu-item-link {
+    @include menuItemStyle();
+    color: rgba(0,0,0,.5);
+    cursor: pointer;
+}
+
+.white-link {
+    color: white !important;
+}
+
+.dropdown-btn {
+    @debug "dropdown btn styled";
+    border-width: 0px;
+    border-radius: 5px;
+}
+
+.dropdown-items {
+    display: none;
+    position: absolute;
+    margin-top: 1em;
+    background-color: white;
+    border-radius: 5px;
+    min-width: 10em;
+
+    a {
+        display: block;
+        text-align: center;
+        padding: 0.5em;
+        
+    }
+}
+
+
+// small    ...
+
+.small-menu-item-link {
+    @include menuItemStyle();
+    color: rgba(0,0,0,.5);
+    text-align: center;
+    margin-top: 0.8em;
+    margin-bottom: 0.8em;
+    font-size: 1.3em;;
+    color: rgba(0,0,0,.5);
+}
+
+.small-menu-dropdown {
+    @include flexCenter();
+    flex-direction: column;
+    
+    .small-dropdown-items {
+        display: none;
+        width: 80vw;
+        background-color: white;
+        color: black;
+        border: 1px solid black;
+        border-radius: 5px;
+        margin-top: 0.5em;
+        
+        a{
+            border: 1px blue solid;
+        }
+    }
+}

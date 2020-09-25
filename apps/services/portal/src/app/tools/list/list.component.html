@@ -1,0 +1,44 @@
+
+<ng-template [ngIf]="items_spec != undefined">
+    <div class="list-container">
+        <div class="list-options">
+            <button class="filter-btn btn btn-primary pull-left"> filter </button>
+
+            <div class="list-style-selector">
+                <ng-container *ngFor="let item of styles | keyvalue">
+                    <i class="{{item.value.icon}} {{item.value.selected === true? 'selected' : ''}} pull-right" (click)="changeStyle(item.key)"></i>
+                </ng-container>
+            </div>
+        </div>
+        <div [hidden]="listStyle != 'list'" class="list-style" #listStyleComponent>
+            <div *ngFor="let item of items_spec" class="list-item">
+                <!-- <div class="logo-container">
+                    <img [src]="item.logo? item.logo : default_logo">
+                </div> -->
+                <div class="icon-container">
+                    <img [src]="item.icon? item.icon : default_icon">
+                </div>
+                <div class="introduction-container">
+                    {{item.introduction}}
+                </div>
+                <div class="redirect-container">
+                    <a routerLink="{{item.redirect}}"><button class="btn btn-primary"> More ...</button></a>
+                </div>
+            </div>
+        </div>
+        
+        <div [hidden]="listStyle != 'gallery'" class="gallery-style" #galleryStyleComponent>
+            <div *ngFor="let item of items_spec" class="gallery-item">
+
+                <div class="item-header">
+                    <div class="item-name">{{item.title}}</div>
+                    <div class="item-icon" [attr.bg-img]="item.icon ? item.icon : default_icon"></div>
+                </div>
+    
+                <div class="item-content" [attr.bg-img]="item.logo ? item.logo : default_logo">
+                    <button class="item-redirect btn btn-primary" (click)="redirectToPage(item.redirect)"> More... </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>

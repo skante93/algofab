@@ -1,0 +1,32 @@
+
+@import 'header.component.scss';
+
+img{
+	max-width: $navImgMaxWidth;
+	max-height: $navImgMaxHeight;
+}
+
+a {
+    @include menuItemStyle();
+	color: rgba(0,0,0,.5);
+}
+
+a.white-link {
+    color: white !important;
+}
+
+.dropdown-items {
+    display: none;
+    position: absolute;
+    margin-top: 1em;
+    background-color: white;
+    border-radius: 5px;
+    min-width: 10em;
+
+    a {
+        display: block;
+        text-align: center;
+        padding: 0.5em;
+        
+    }
+}
