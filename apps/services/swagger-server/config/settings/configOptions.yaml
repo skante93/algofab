@@ -1,0 +1,231 @@
+globals:
+  regex_FQDN: fqdn_regex  #^(a-zA-Z0-9\._\-)$
+  regex_URL_PATH_SEGMENT: url_regex  # ^(a-zA-Z0-9\._\-)$
+  regex_LDAP_DN: ldap_dn_regex #
+
+settings:
+  app_name:
+    type: string
+    #pattern: ""
+    env: STORE_APP_NAME
+    default: TeraLab Store
+
+  remote_access:
+    required: true
+    oneOf: 
+      - type: object
+        properties:
+          direct_access:
+            oneOf:
+              - type: object
+                properties:
+                  api: 
+                    type: string
+                    required: true
+                  portal: 
+                    type: string
+                    required: true
+              - type: object
+                properties:
+                  domain:
+                    type: string
+                    required: true 
+      - type: object
+        properties:
+          proxy_conf: # Application is served through a proxy
+            type: object
+            properties:
+              protocol:
+                type: string
+                required: true
+                enum: [ "http", "http://", "https", "https://" ]
+              fqdn: 
+                type: string
+                required: true
+                #default: ws67-af-api.tl.teralab-datascience.fr
+
+  preferences: 
+    type: object
+    properties:
+      ldap_support: 
+        type: boolean
+        default: false
+      mailing_support:
+        type: boolean
+        default: true
+      workshop_support:
+        type: boolean
+        default: true
+  
+  mongo : 
+    type: object
+    properties:
+      url:
+        type: string
+        #pattern: mongodb://#{regex_FQDN}/#{regex_PATH_SEGMENT}
+        env: STORE_MONGO_URL
+        default: mongodb://mongo/test_algofab
+
+  ##
+  ## LDAP Options are optional
+  ##
+
+  ldap:
+    type: object
+    properties:
+      url : 
+        type: string
+        required: true
+        pattern: ldap://#{regex_FQDN}
+        #default: ldap://ldap
+      search_dn:
+        type: string
+        required: true
+        #pattern: #{regex_LDAP_DN} 
+        #default: "ou=test,dc=ldap,dc=algofab,dc=fr",
+      auth: 
+        type: object 
+        required: true
+        properties: 
+          login: 
+            type: string
+            required: true
+            #pattern: #{regex_LDAP_DN} 
+            #default: "cn=admin,dc=ldap,dc=algofab,dc=fr",
+          password: 
+            type: string
+            required: true
+            #default: "password"
+
+  ##
+  ## MAIL Options are optional
+  ##
+
+  mail:
+    type: object
+    properties:
+      server:
+        type: string
+        required: true
+        enum: [ "gmail" ]
+      auth:
+        type: object
+        required: true
+        properties:
+          username: 
+            type: string
+            required: true
+            #default: menodemailer@gmail.com
+          password:
+            type: string
+            required: true
+            #default: gipfzrowbmvqqkbj
+
+  url_maps:
+    signin: signin
+    signup: signup
+    signout: signout
+
+  app_roles:
+    type: object
+    properties:
+      super:
+        type: object
+        properties:
+          username: 
+            type: string
+            default: admin
+          email: 
+            type: string
+            format: email
+          default_password:
+            type: string
+            default: admin123
+          auth_token: ABSOLUTE_PASS
+      admin:
+        type: object
+        properties: 
+          privilege: "ALL_GRANTED"
+      user:
+        type: object
+        properties:
+          privilege: "RBAC"
+
+  validation_schemes:
+    type: object
+    properties:
+      username: 
+        type: string
+        format: regex
+        #default: ^[a-z]{1}[a-z0-9]+$
+      password: 
+        type: string
+        format: regex
+        #default: ^[a-zA-Z0-9\-\$\%]{8,20}$
+      storage_name:
+        type: string
+        format: regex
+        #default: ^[a-zA-Z]{1}[a-zA-Z0-9\-\ ]+$
+      algo_name: 
+        type: string
+        format: regex
+        #default: ^[a-zA-Z]{1}[a-zA-Z0-9\-\ ]+$
+
+  data_origin:
+    oneOf: 
+      - type: object
+        properties:
+          nfs: 
+            type: object
+            properties:
+              address: 
+                type: string
+                #default: 192.168.150.1
+              path:
+                type: string
+                #default: /home/skante/nfs
+
+  deployment_apis:
+    anyOf:
+      - type: object
+        properties:
+          docker:
+            
+  api:
+    type: object
+    properties:
+      logging:
+        type: object
+        properties:
+          log_level:
+            type: string
+            enum: [ "INFO", "DEBUG" ]
+          output_path: 
+            type: string
+            # format: eval
+            # default: "process.cwd() + '/out.log'"
+          error_path: 
+            type: string
+            # format: eval
+            # default: "process.cwd() + '/err.log'"
+      operations_timing:
+        type: object
+        properties:
+          user_deletion_delay: 
+            type: duration
+            default: 1m # 1 min
+          resource_deletion_delay: 
+            type: duration
+            default: 1m # 1 min
+          daemon_cycles:
+            type: object
+            properties:
+              all: 
+                type: duration
+                #default: 3m
+              check_algo_builds:
+                type: duration
+                default: 2m
+              remove_outdated:
+                type: duration
+                default: 2m

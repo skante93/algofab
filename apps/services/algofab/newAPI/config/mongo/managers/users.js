@@ -93,29 +93,30 @@ class UsersManager {
 	create(params){
 		return new Promise (async (resolve, reject)=>{
 			//
-			if ( !('status' in params) ){
+			console.log("params: ", params);
+			if ( !('status' in params && params.status != null) ){
 				params.status = settings.app_settings.user_roles.default;
 			}
 			else if (settings.app_settings.user_roles.values.indexOf(params.status) < 0){
 				return reject(new Error(`FormatError: Status "${params.status}" not supported.`));
 			}
 
-			if ( !("email" in params) ){
+			if ( !("email" in params && params.email != null) ){
 				return reject(new Error(`MissingParamError: Field "email" is mandatory`));
 			}
 
-			if ( !("username" in params) ){
+			if ( !("username" in params && params.username != null) ){
 				return reject(new Error(`MissingParamError: Field "username" is mandatory`));
 			}
 			else if (!settings.app_settings.username_validation_regex.test(params.username)){
 				return reject(new Error(`MissingParamError: Field "username" is not correctly formatted, please refer to the following regex : ${settings.app_settings.username_validation_regex.toString()}.`));
 			}
 
-			if ( !("firstname" in params) ){
+			if ( !("firstname" in params && params.firstname != null) ){
 				params.firstname = "John";
 			}
 
-			if ( !("lastname" in params) ){
+			if ( !("lastname" in params && params.lastname != null) ){
 				params.lastname = "DOE";
 			}
 

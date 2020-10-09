@@ -1,0 +1,63 @@
+
+
+
+
+$banner-img: '/assets/img/banner_bg.jpg';
+
+@mixin flexCenter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+@mixin parallax($bg-img, $bg-size: cover, $transparency: .5){
+
+    width: 100vw;
+    height: 90vh;
+
+    background-attachment: fixed;
+    background-image: url($bg-img);
+    background-size: $bg-size;
+    background-repeat: no-repeat;
+    background-position: center center;
+
+    @include flexCenter();
+
+    &::after{
+        content: "";
+        width: 100vw;
+        height: 90vh;
+        opacity: 1 - $transparency;
+        background-color: white;
+        position: absolute;
+        //border: 3px solid blue;
+        z-index: 1;
+    }
+
+    .parallax-text {
+        width: 50%;
+        //font-size: 4em;
+        text-align: center;
+        z-index: 2;
+
+        .title {
+            font-size: 4em;
+        }
+        .info {
+            font-size: 2em;
+        }
+    }
+}
+
+.parallax-docs {
+    @include parallax('/assets/img/direction.png', .5, .1)
+}
+
+.parallax-catalog {
+    @include parallax('/assets/img/library.jpg', $transparency: .4)
+}
+
+.parallax-two {
+    @include parallax('/assets/img/algofab.PNG')
+}

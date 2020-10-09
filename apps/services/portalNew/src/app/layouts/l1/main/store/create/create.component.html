@@ -1,0 +1,92 @@
+
+
+<div class="container">
+    <div class="row">
+        <form class="col-sm" [formGroup]="formGroup" (submit)="onSubmit()">
+
+            <div class="form-group row">
+                <label class="col-sm-2" for="name"> Name </label>
+                <div class="col-sm">
+                    <input type="text" class="form-control" id="name" name="name" formControlName="name" placeholder="Name of your resource">
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-sm-2" for="version"> Version </label>
+                <div class="col-sm">
+                    <input type="text" class="form-control" id="version" name="version" formControlName="version" placeholder="Specify a version number (format: x.y.z)">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2" for="type"> Type </label>
+                <div class="col-sm">
+                    <select class="form-control" id="type" name="type" formControlName="type">
+                        <option *ngFor="let rt of resource_types" value="{{rt.value}}">{{rt.name}}</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-sm-2" for="version"> Tags </label>
+                <div class="col-sm">
+                    
+                    <ng-container 
+                        formArrayName="tags"
+                        *ngFor="let tag of formGroup.get('tags')['controls']; index as i" 
+                        >
+                        <ng-container [formGroupName]="i" class="col-sm row" style="border: 1px  black solid;">
+                            <div class="col-sm row" style="margin-bottom: 1em;">
+                                
+                                <input class="col-sm" formControlName="name" placeholder="Name of the tag">
+                                <input class="offset-sm-1 col-sm" formControlName="value" placeholder="Value of the tag">
+                                <button yupe="button" class="offset-sm-1 col-sm-2 btn btn-danger" (click)="removeTag(i)">Remove Item</button>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+                    <button type="button" class="btn btn-secondary" (click)="addTag()"> Add Item</button>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2" for="introduction"> Introduction </label>
+                <div class="col-sm">
+                    <input type="text" class="form-control" id="introduction" name="introduction" formControlName="introduction" placeholder="Introduce in less than 200 characters your resource">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2" for="description"> Description </label>
+                <div class="col-sm">
+                    <textarea class="form-control" id="description" name="description" formControlName="description" placeholder="Make a full description of your resource here">
+
+                    </textarea>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2" for="licence"> Licence </label>
+                <div class="col-sm">
+                    <select class="form-control" id="licence" name="licence" formControlName="licence">
+                        <option *ngFor="let l of licences" value="{{l._id}}">{{l.name}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2" for="agreement"> Agreement </label>
+                <div class="col-sm">
+                    <select class="form-control" id="agreement" name="agreement" formControlName="agreement">
+                        <option *ngFor="let a of user_agreements " value="{{a._id}}">{{a.name}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-sm-2">
+                    <input type="submit" class="btn btn-primary" value="Create resource">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

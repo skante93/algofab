@@ -1,0 +1,80 @@
+
+<ng-template #signinTemplate>
+    <form class="offset-sm-2 col-sm-8" #signinForm="ngForm" (submit)="onSubmit(signinForm)" id="signinForm">
+        <div class="form-group row">
+            <label class="col-sm-2" for="login"> Login </label>
+            <div class="col-sm">
+                <input type="text" id="login" name="login" ngModel #login="ngModel" class="form-control" placeholder="Username or email" required>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2" for="password"> Password </label>
+            <div class="col-sm">
+                <input type="password" id="password" name="password" ngModel #password="ngModel" class="form-control" placeholder="Password" required>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <input type="submit" class="btn btn-primary" value="Signin">
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-8">
+                <a routerLink="/recover" style="color: blue; text-decoration: underline;"> Forgot ID or passowrd? </a>
+            </div>
+            <div class="col-sm" style="text-align: right;">
+                <a routerLink="/signup" style="color: blue; text-decoration: underline; text-align: right; "> Sign up </a>
+            </div>
+        </div>
+    </form>
+</ng-template>
+
+
+<div class="one-page-form">
+        
+        <div class="container">
+            <div class="row">
+                <a routerLink="/home" id="home-link"> <i class="fas fa-home" id="home-icon" title="Back to home"></i> </a>
+            </div>
+            <div class="row">
+                <ng-container *ngIf="from == 'signup'; else signinTemplate">
+                    <form class="offset-sm-2 col-sm-8" #signupForm="ngForm" (submit)="onSubmit(signupForm)" id="signupForm">
+                        <div class="form-group row">
+                            <label class="col-sm-2" for="username"> Username </label>
+                            <div class="col-sm">
+                                <input type="text" id="username" name="username" ngModel #username="ngModel" class="form-control" placeholder="Choose a username" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2" for="email"> Email </label>
+                            <div class="col-sm">
+                                <input type="email" id="email" name="email" ngModel #email="ngModel" class="form-control" placeholder="Specify you email address" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <!-- 
+                            site : 6LcDYsIZAAAAABj97Fv2vVTe5rGafz-ymF-9kFzn
+                            secret: 6LcDYsIZAAAAANuq9uj_V9tylDf66om1-2aMDT8-
+                            -->
+                            <div class="offset-sm-2 col-sm" #reCaptchaContainer>
+                                <tools-captcha siteKey="6LcDYsIZAAAAABj97Fv2vVTe5rGafz-ymF-9kFzn" #reCaptcha></tools-captcha>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-sm-2">
+                                <button type="submit" class="btn btn-primary" [disabled]="readyToGo(signupForm) || !ready"> Signup </button>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <p style="font-size: 0.8em; text-align: center; width:100%">
+                                By creating an account, you agree to the <a href="#" style="text-decoration: underline;">Terms of Service</a>, 
+                                <a href="#" style="text-decoration: underline;">Privacy Policy</a>, and <a href="#" style="text-decoration: underline;">Data Processing Terms</a>.
+                            </p>
+                        </div>
+                    </form>
+                </ng-container>
+            </div>
+        </div>
+</div>

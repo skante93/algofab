@@ -1,0 +1,56 @@
+
+@mixin flexCenter {
+    display: flex;
+    align-items: center;
+    justify-content: center;    
+}
+
+@mixin onePageForm($transparency: .5) {
+    width: 100vw;
+    height: 100vh;
+
+    @include flexCenter();
+
+    background-image: url(/assets/img/algofab_white_bg.PNG);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    
+    &::after{
+        content: "";
+        position: absolute;
+        width: 100vw;
+        height: 100vh;
+        background-color: white;
+        opacity: 1 - $transparency;
+        z-index: 1;
+    }
+}
+
+[disabled]{
+    cursor: not-allowed;
+}
+
+.one-page-form {
+    @include onePageForm(.3);
+
+    #signinForm, #signupForm {
+        z-index: 2;
+    }
+}
+
+a#home-link { 
+    z-index: 2;
+    font-size: 5em;
+    margin: auto;
+    margin-bottom: .5em;
+    color: rgb(92, 88, 95);
+
+}
+
+#signinForm {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 1em;
+}
+

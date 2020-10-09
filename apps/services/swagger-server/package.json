@@ -1,0 +1,25 @@
+{
+  "name": "swagger-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "gridfs-stream": "^1.1.1",
+    "jwt-simple": "^0.5.6",
+    "mongoose": "^5.10.8",
+    "multiparty": "^4.2.2",
+    "nodemailer": "^6.4.13",
+    "swagger-ui-express": "^4.1.4",
+    "yaml": "^1.10.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

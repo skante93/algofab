@@ -1,0 +1,25 @@
+
+
+$banner-img: '/assets/img/banner_bg.jpg';
+
+@mixin flexCenter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner {
+    @include flexCenter();
+
+    width: 100vw;
+    height: 90vh;
+    background-image: url($banner-img);
+	
+	.banner-content{
+		width: 50%;
+		//border: 1px solid green;
+		text-align: center;
+		color: white;
+	}
+}
+

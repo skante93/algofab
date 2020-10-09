@@ -12,8 +12,11 @@ import { RouterModule } from '@angular/router';
 import { NavItemComponent, NavComponent } from './nav/nav.component'
 import { ListComponent } from './list/list.component';
 //import { FormFieldDirective, AutoFormComponent } from './autoForm/autoform.component';
-import { AutoFormComponent } from './autoForm/autoform.component';
-import { FormInputComponent, YoFormComponent } from './autoForm/auto';
+//import { AutoFormComponent } from './autoForm/autoform.component';
+
+import { NumberInputComponent, AutoFormComponent } from './auto-form/auto-form.component';
+
+//import { FormInputComponent, YoFormComponent } from './autoForm/auto';
 
 //import { MainService } from './services/main';
 
@@ -22,9 +25,10 @@ import { FormInputComponent, YoFormComponent } from './autoForm/auto';
         NavItemComponent,
         NavComponent,
         ListComponent,
+        NumberInputComponent,
         AutoFormComponent,
-        FormInputComponent,
-        YoFormComponent
+        // FormInputComponent,
+        // YoFormComponent,        
         //FormFieldDirective
     ],
     // providers :[
@@ -41,6 +45,7 @@ import { FormInputComponent, YoFormComponent } from './autoForm/auto';
         NavItemComponent,
         NavComponent,
         ListComponent,
+        NumberInputComponent,
         AutoFormComponent,
         //FormFieldDirective
     ]

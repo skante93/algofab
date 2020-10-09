@@ -1,0 +1,109 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "A big API project",
+        "description": "Perfect API project",
+        "licence": {
+            "name": "MIT"
+        }
+    },
+    "tags": [
+        {
+            "name": "users",
+            "description": "TODO"
+        }
+    ],
+    "definitions": {
+        "login": {
+            "type": "object",
+            "properties": {
+                "login" : { "type": "string", "example": "jdoe", "default": "jdoe"},
+                "password" : { "type": "string", "required": true}
+            }
+        },
+        "accountProfile": {
+            "type": "object",
+            "properties": {
+                "username": { "type": "string" },
+                "email": {"type": "string"},
+                "firstname": {"type": "string"},
+                "lastname": {"type": "string"},
+                "photo": {"type": "string", "format": "binary"}
+            }
+        },
+        "resourceMetadata": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string" },
+                "type": { 
+                    "type": "string", 
+                    "enum": ["ai_model", "notebook", "dataset", "docker", "executable", "service", "library"] 
+                },
+                "introduction": { "type": "string" },
+                "description": { "type": "string" },
+                "documentations": { 
+                    "type": "object",
+                    "properties": {
+                        "media_type": { "type":"string", "enum":["html", "file", "external_links"] },
+                        "html_docs": { "type": "string" },
+                        "file_docs": {"type": "string", "format": "binary"},
+                        "doc_links": { "type": "array", "items": { "type": "string"} }
+                    } 
+                },
+                "logo": { "type": "string", "format": "binary" },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": { "type":"string" },
+                            "value": { "type":"string" }
+                        }
+                    }
+                },
+                "private": { "type": "boolean", "default":true},
+                "licence": { "type": "string"},
+                "agreement": { "type": "string"}                
+            }
+        },
+        "licence": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string", "required": true },
+                "version": { "type": "string" },
+                "comment": { "type": "string" },
+                "external_links": { 
+                    "type": "array",
+                    "items": { "type": "string" } 
+                }
+            }
+        },
+        "agreement": {
+            "type": "object",
+            "properties": {
+                "name": { "type": "string", "required": true },
+                "version": { "type": "string" },
+                "external_links": { 
+                    "type": "array",
+                    "items": { "type": "string" } 
+                },
+                "content": {
+                    "type": "object",
+                    "properties": {
+                        "media_type": { "type": "string", "required": true, "enum": ["html", "file"] },
+                        "html_content": { "type" :"string" },
+                        "file_content": { "type": "string", "format": "binary" }
+                    }
+                }
+            }
+        },
+        "account": {
+            "type": "object",
+            "properties": {
+                "username": {"type": "string"},
+                "photo": {"type" : "string", "format": "binary"}
+            }
+        }
+    }
+}

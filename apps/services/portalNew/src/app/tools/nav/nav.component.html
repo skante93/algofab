@@ -1,0 +1,68 @@
+<ng-template [ngIf]="items">
+    <div [hidden]="!screenIsWide" >
+        <div class="header-menu" #wideTemplateNav>
+            <div class="menu-background">
+                <div class="left-bg"></div>
+                <div class="middle-bg"></div>
+                <div class="right-bg"></div>
+            </div>
+            <div *ngFor="let section of items | keyvalue" class="{{section.key}}">
+                <tools-nav-item *ngFor="let item of section.value" 
+                    id="nav-{{item.name}}-lg"
+                    [name]="item.name != undefined ? item.name : null" 
+                    [link]="item.link != undefined ? item.link : null" 
+                    [img]="item.img != undefined ? item.img : null" 
+                    [text]="item.text != undefined ? item.text : null" 
+                    [classes]="item.classes != undefined ? item.classes : null" 
+                    [display]="item.display === false ? false : true" 
+                    [dropdown]="item.dropdown != undefined ? item.dropdown : null"
+                    dropDownStyle="wide"
+                    [wideThreeshold]="wideThreeshold">
+                </tools-nav-item>
+            </div>
+        </div>
+    </div>
+
+    <div [hidden]="screenIsWide">
+        <div class="small-header-menu">
+            <div class="menu-background"></div>
+            <div class="small-main">
+                <div class="main-left flexCenter">
+                    <a routerLink="/"> <img src="/assets/img/algofab_white_bg.PNG"> </a>
+                </div>
+                <div class="main-right flexCenter">
+                    <i class="fa fa-bars menu-toggle-icon" #toggleIcon></i>
+                </div>
+            </div>
+            <div class="menu-items">
+                <tools-nav-item *ngFor="let item of items.middle" 
+                    id="nav-{{item.name}}-sm"
+                    [name]="item.name != undefined ? item.name : null" 
+                    [link]="item.link != undefined ? item.link : null" 
+                    [img]="item.img != undefined ? item.img : null" 
+                    [text]="item.text != undefined ? item.text : null" 
+                    [classes]="item.classes != undefined ? item.classes : null" 
+                    [display]="item.display === false ? false : true"  
+                    [dropdown]="item.dropdown != undefined ? item.dropdown : null"
+                    dropDownStyle="small"
+                    [wideThreeshold]="wideThreeshold">
+                </tools-nav-item>
+    
+                <hr>
+    
+                <tools-nav-item *ngFor="let item of items.right"
+                    id="nav-{{item.name}}-sm" 
+                    [name]="item.name != undefined ? item.name : null" 
+                    [link]="item.link != undefined ? item.link : null" 
+                    [img]="item.img != undefined ? item.img : null" 
+                    [text]="item.text != undefined ? item.text : null" 
+                    [classes]="item.classes != undefined ? item.classes : null" 
+                    [display]="item.display === false ? false : true" 
+                    [dropdown]="item.dropdown != undefined ? item.dropdown : null"
+                    dropDownStyle="small"
+                    [wideThreeshold]="wideThreeshold">
+                </tools-nav-item>
+            </div>
+        </div>
+    </div>
+</ng-template>

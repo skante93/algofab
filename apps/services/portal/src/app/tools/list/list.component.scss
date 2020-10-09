@@ -3,8 +3,17 @@
 $list-item-height: 5em;
 $list-container-width: 96vw;
 
+
+$gallery-item-width-height-ratio: 1;
+
+$gallery-item-min-width: 150px;
+$gallery-item-max-width: 300px;
 $gallery-item-width: 25vw;
-$gallery-item-height: $gallery-item-width ;
+
+
+$gallery-item-min-height: $gallery-item-min-width * $gallery-item-width-height-ratio;
+$gallery-item-max-height: $gallery-item-max-width * $gallery-item-width-height-ratio;
+$gallery-item-height: $gallery-item-width * $gallery-item-width-height-ratio;
 
 
 [hidden] {
@@ -145,10 +154,13 @@ $gallery-item-height: $gallery-item-width ;
 
         .gallery-item{
             width: $gallery-item-width;
-            min-width: 200px;
+            min-width: $gallery-item-min-width;
+            max-width: $gallery-item-max-width;
+            
             height: $gallery-item-height;
-            min-height: 200px;
-			position: relative;
+            min-height: $gallery-item-min-height;
+            max-height: $gallery-item-max-height;
+            position: relative;
             margin: 2em;
             
             &:hover {
@@ -166,30 +178,30 @@ $gallery-item-height: $gallery-item-width ;
                 background-image: linear-gradient(350deg, #00b8de 5%, rgba(250,250,250,1) 90%);
                 box-shadow: 5px 5px 5px grey;
                 width: $gallery-item-width;
-                min-width: 200px;
+                min-width: $gallery-item-min-width;
                 height: $gallery-item-height * 0.2; // 20 % to total height
-                min-height: 200px * 0.2; // 20 % to total height
+                min-height: $gallery-item-min-height  * 0.2; // 20 % to total height
                 z-index: 2;
                 
                 .item-name{
                     width: $gallery-item-width * 0.7;
-			        min-width: 200px * 0.7;
+			        min-width: $gallery-item-min-width * 0.7;
 			        padding: 1em
                 }
 
                 .item-icon{
                     width: $gallery-item-width * 0.3;
-                    min-width: 200px * 0.3;
+                    min-width: $gallery-item-min-width * 0.3;
                     height: $gallery-item-height * 0.3;
-                    min-height: 200px * 0.2;
+                    min-height: $gallery-item-min-height * 0.2;
                 }
             }
             
             .item-content{
                 width: $gallery-item-width;
-                min-width: 200px;
+                min-width: $gallery-item-min-width;
                 height: $gallery-item-height * 0.8;
-                min-height: 200px * 0.8;
+                min-height: $gallery-item-min-height * 0.8;
                 padding-top: 2em;
                 bottom: 0;
                 color : white;

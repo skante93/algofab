@@ -1,0 +1,9 @@
+<tools-nav #navbar></tools-nav>
+
+
+<div class="banner" [hidden]="mainService.isLoggedIn()">
+    <div class="banner-content">
+        <h1 [innerHTML]="banner_name"> </h1>
+        <p [innerHTML]="banner_introduction"> </p>
+    </div>
+</div>

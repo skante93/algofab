@@ -1,0 +1,383 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'i' ]
+2 info using npm@3.5.2
+3 info using node@v8.10.0
+4 silly loadCurrentTree Starting
+5 silly install loadCurrentTree
+6 silly install readLocalPackageData
+7 silly install normalizeTree
+8 silly loadCurrentTree Finishing
+9 silly loadIdealTree Starting
+10 silly install loadIdealTree
+11 silly cloneCurrentTree Starting
+12 silly install cloneCurrentTreeToIdealTree
+13 silly cloneCurrentTree Finishing
+14 silly loadShrinkwrap Starting
+15 silly install loadShrinkwrap
+16 silly loadShrinkwrap Finishing
+17 silly loadAllDepsIntoIdealTree Starting
+18 silly install loadAllDepsIntoIdealTree
+19 silly fetchNamedPackageData body-parser
+20 silly mapToRegistry name body-parser
+21 silly mapToRegistry using default registry
+22 silly mapToRegistry registry https://registry.npmjs.org/
+23 silly mapToRegistry uri https://registry.npmjs.org/body-parser
+24 silly fetchNamedPackageData cors
+25 silly mapToRegistry name cors
+26 silly mapToRegistry using default registry
+27 silly mapToRegistry registry https://registry.npmjs.org/
+28 silly mapToRegistry uri https://registry.npmjs.org/cors
+29 silly fetchNamedPackageData express
+30 silly mapToRegistry name express
+31 silly mapToRegistry using default registry
+32 silly mapToRegistry registry https://registry.npmjs.org/
+33 silly mapToRegistry uri https://registry.npmjs.org/express
+34 silly fetchNamedPackageData multiparty
+35 silly mapToRegistry name multiparty
+36 silly mapToRegistry using default registry
+37 silly mapToRegistry registry https://registry.npmjs.org/
+38 silly mapToRegistry uri https://registry.npmjs.org/multiparty
+39 silly fetchNamedPackageData swagger-ui-express
+40 silly mapToRegistry name swagger-ui-express
+41 silly mapToRegistry using default registry
+42 silly mapToRegistry registry https://registry.npmjs.org/
+43 silly mapToRegistry uri https://registry.npmjs.org/swagger-ui-express
+44 silly fetchNamedPackageData yaml
+45 silly mapToRegistry name yaml
+46 silly mapToRegistry using default registry
+47 silly mapToRegistry registry https://registry.npmjs.org/
+48 silly mapToRegistry uri https://registry.npmjs.org/yaml
+49 verbose request uri https://registry.npmjs.org/multiparty
+50 verbose request no auth needed
+51 info attempt registry request try #1 at 16:57:53
+52 verbose request id 80189576bc70d8c8
+53 verbose etag W/"24b15af86605624fe5f1e7ad1388899d"
+54 verbose lastModified Tue, 28 Jul 2020 01:40:48 GMT
+55 http request GET https://registry.npmjs.org/multiparty
+56 verbose request uri https://registry.npmjs.org/cors
+57 verbose request no auth needed
+58 info attempt registry request try #1 at 16:57:53
+59 verbose etag W/"767c12bdc7bec542e86f096187e83911"
+60 verbose lastModified Fri, 29 Nov 2019 09:32:44 GMT
+61 http request GET https://registry.npmjs.org/cors
+62 verbose request uri https://registry.npmjs.org/body-parser
+63 verbose request no auth needed
+64 info attempt registry request try #1 at 16:57:53
+65 verbose etag W/"69165633b8917311c8a5b29b5aa3a438"
+66 verbose lastModified Fri, 29 Nov 2019 09:32:45 GMT
+67 http request GET https://registry.npmjs.org/body-parser
+68 verbose request uri https://registry.npmjs.org/express
+69 verbose request no auth needed
+70 info attempt registry request try #1 at 16:57:53
+71 verbose etag W/"75df8f92097b42d791578c084af85171"
+72 verbose lastModified Fri, 26 Jun 2020 20:54:17 GMT
+73 http request GET https://registry.npmjs.org/express
+74 verbose request uri https://registry.npmjs.org/swagger-ui-express
+75 verbose request no auth needed
+76 info attempt registry request try #1 at 16:57:53
+77 verbose etag W/"f05270ab618cf35e7eb023dbed885106"
+78 verbose lastModified Sat, 21 Mar 2020 20:21:26 GMT
+79 http request GET https://registry.npmjs.org/swagger-ui-express
+80 verbose request uri https://registry.npmjs.org/yaml
+81 verbose request no auth needed
+82 info attempt registry request try #1 at 16:57:53
+83 verbose etag W/"bf01063e6637027a8536b9a88151dcb0"
+84 verbose lastModified Sun, 23 Aug 2020 15:02:19 GMT
+85 http request GET https://registry.npmjs.org/yaml
+86 http 304 https://registry.npmjs.org/swagger-ui-express
+87 verbose headers { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+87 verbose headers   connection: 'keep-alive',
+87 verbose headers   'set-cookie':
+87 verbose headers    [ '__cfduid=db5f81988fae3f3f51ff5cfc6e25a2e501601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+87 verbose headers   'cf-ray': '5dbf4747fc4cedfb-CDG',
+87 verbose headers   age: '1929',
+87 verbose headers   'cache-control': 'public, max-age=300',
+87 verbose headers   etag: '"f05270ab618cf35e7eb023dbed885106"',
+87 verbose headers   'last-modified': 'Sat, 21 Mar 2020 20:21:26 GMT',
+87 verbose headers   vary: 'Accept-Encoding',
+87 verbose headers   'cf-cache-status': 'HIT',
+87 verbose headers   'cf-request-id': '058b6ae0f60000edfb18991200000001',
+87 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+87 verbose headers   server: 'cloudflare' }
+88 silly get cb [ 304,
+88 silly get   { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+88 silly get     connection: 'keep-alive',
+88 silly get     'set-cookie':
+88 silly get      [ '__cfduid=db5f81988fae3f3f51ff5cfc6e25a2e501601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+88 silly get     'cf-ray': '5dbf4747fc4cedfb-CDG',
+88 silly get     age: '1929',
+88 silly get     'cache-control': 'public, max-age=300',
+88 silly get     etag: '"f05270ab618cf35e7eb023dbed885106"',
+88 silly get     'last-modified': 'Sat, 21 Mar 2020 20:21:26 GMT',
+88 silly get     vary: 'Accept-Encoding',
+88 silly get     'cf-cache-status': 'HIT',
+88 silly get     'cf-request-id': '058b6ae0f60000edfb18991200000001',
+88 silly get     'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+88 silly get     server: 'cloudflare' } ]
+89 verbose etag https://registry.npmjs.org/swagger-ui-express from cache
+90 verbose get saving swagger-ui-express to /home/skante/.npm/registry.npmjs.org/swagger-ui-express/.cache.json
+91 http 304 https://registry.npmjs.org/multiparty
+92 verbose headers { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+92 verbose headers   connection: 'keep-alive',
+92 verbose headers   'set-cookie':
+92 verbose headers    [ '__cfduid=df4deda69ef2835f1c7cea58e1f1be4991601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+92 verbose headers   'cf-ray': '5dbf4747f935edcf-CDG',
+92 verbose headers   age: '1716',
+92 verbose headers   'cache-control': 'public, max-age=300',
+92 verbose headers   etag: '"24b15af86605624fe5f1e7ad1388899d"',
+92 verbose headers   'last-modified': 'Tue, 28 Jul 2020 01:40:48 GMT',
+92 verbose headers   vary: 'Accept-Encoding',
+92 verbose headers   'cf-cache-status': 'HIT',
+92 verbose headers   'cf-request-id': '058b6ae0f80000edcfd8989200000001',
+92 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+92 verbose headers   server: 'cloudflare' }
+93 silly get cb [ 304,
+93 silly get   { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+93 silly get     connection: 'keep-alive',
+93 silly get     'set-cookie':
+93 silly get      [ '__cfduid=df4deda69ef2835f1c7cea58e1f1be4991601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+93 silly get     'cf-ray': '5dbf4747f935edcf-CDG',
+93 silly get     age: '1716',
+93 silly get     'cache-control': 'public, max-age=300',
+93 silly get     etag: '"24b15af86605624fe5f1e7ad1388899d"',
+93 silly get     'last-modified': 'Tue, 28 Jul 2020 01:40:48 GMT',
+93 silly get     vary: 'Accept-Encoding',
+93 silly get     'cf-cache-status': 'HIT',
+93 silly get     'cf-request-id': '058b6ae0f80000edcfd8989200000001',
+93 silly get     'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+93 silly get     server: 'cloudflare' } ]
+94 verbose etag https://registry.npmjs.org/multiparty from cache
+95 verbose get saving multiparty to /home/skante/.npm/registry.npmjs.org/multiparty/.cache.json
+96 http 304 https://registry.npmjs.org/cors
+97 verbose headers { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+97 verbose headers   connection: 'keep-alive',
+97 verbose headers   'set-cookie':
+97 verbose headers    [ '__cfduid=d5e1988377e2181e8c8a7bc586063b4f71601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+97 verbose headers   'cf-ray': '5dbf4747fa0c084b-CDG',
+97 verbose headers   age: '5521',
+97 verbose headers   'cache-control': 'public, max-age=300',
+97 verbose headers   etag: '"767c12bdc7bec542e86f096187e83911"',
+97 verbose headers   'last-modified': 'Fri, 29 Nov 2019 09:32:44 GMT',
+97 verbose headers   vary: 'Accept-Encoding',
+97 verbose headers   'cf-cache-status': 'HIT',
+97 verbose headers   'cf-request-id': '058b6ae0fe0000084ba02ab200000001',
+97 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+97 verbose headers   server: 'cloudflare' }
+98 silly get cb [ 304,
+98 silly get   { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+98 silly get     connection: 'keep-alive',
+98 silly get     'set-cookie':
+98 silly get      [ '__cfduid=d5e1988377e2181e8c8a7bc586063b4f71601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+98 silly get     'cf-ray': '5dbf4747fa0c084b-CDG',
+98 silly get     age: '5521',
+98 silly get     'cache-control': 'public, max-age=300',
+98 silly get     etag: '"767c12bdc7bec542e86f096187e83911"',
+98 silly get     'last-modified': 'Fri, 29 Nov 2019 09:32:44 GMT',
+98 silly get     vary: 'Accept-Encoding',
+98 silly get     'cf-cache-status': 'HIT',
+98 silly get     'cf-request-id': '058b6ae0fe0000084ba02ab200000001',
+98 silly get     'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+98 silly get     server: 'cloudflare' } ]
+99 verbose etag https://registry.npmjs.org/cors from cache
+100 verbose get saving cors to /home/skante/.npm/registry.npmjs.org/cors/.cache.json
+101 http 304 https://registry.npmjs.org/body-parser
+102 verbose headers { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+102 verbose headers   connection: 'keep-alive',
+102 verbose headers   'set-cookie':
+102 verbose headers    [ '__cfduid=d7f5249c0ac75f42a666923fba15ec3b61601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+102 verbose headers   'cf-ray': '5dbf4747fe23ee50-CDG',
+102 verbose headers   age: '3540',
+102 verbose headers   'cache-control': 'public, max-age=300',
+102 verbose headers   etag: '"69165633b8917311c8a5b29b5aa3a438"',
+102 verbose headers   'last-modified': 'Fri, 29 Nov 2019 09:32:45 GMT',
+102 verbose headers   vary: 'Accept-Encoding',
+102 verbose headers   'cf-cache-status': 'HIT',
+102 verbose headers   'cf-request-id': '058b6ae0fc0000ee5009240200000001',
+102 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+102 verbose headers   server: 'cloudflare' }
+103 silly get cb [ 304,
+103 silly get   { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+103 silly get     connection: 'keep-alive',
+103 silly get     'set-cookie':
+103 silly get      [ '__cfduid=d7f5249c0ac75f42a666923fba15ec3b61601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+103 silly get     'cf-ray': '5dbf4747fe23ee50-CDG',
+103 silly get     age: '3540',
+103 silly get     'cache-control': 'public, max-age=300',
+103 silly get     etag: '"69165633b8917311c8a5b29b5aa3a438"',
+103 silly get     'last-modified': 'Fri, 29 Nov 2019 09:32:45 GMT',
+103 silly get     vary: 'Accept-Encoding',
+103 silly get     'cf-cache-status': 'HIT',
+103 silly get     'cf-request-id': '058b6ae0fc0000ee5009240200000001',
+103 silly get     'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+103 silly get     server: 'cloudflare' } ]
+104 verbose etag https://registry.npmjs.org/body-parser from cache
+105 verbose get saving body-parser to /home/skante/.npm/registry.npmjs.org/body-parser/.cache.json
+106 http 304 https://registry.npmjs.org/express
+107 verbose headers { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+107 verbose headers   connection: 'keep-alive',
+107 verbose headers   'set-cookie':
+107 verbose headers    [ '__cfduid=d1183359d3fe2974ecdffb5a683b9d7081601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+107 verbose headers   'cf-ray': '5dbf4747fe20ee5c-CDG',
+107 verbose headers   age: '2068',
+107 verbose headers   'cache-control': 'public, max-age=300',
+107 verbose headers   etag: '"75df8f92097b42d791578c084af85171"',
+107 verbose headers   'last-modified': 'Fri, 26 Jun 2020 20:54:17 GMT',
+107 verbose headers   vary: 'Accept-Encoding',
+107 verbose headers   'cf-cache-status': 'HIT',
+107 verbose headers   'cf-request-id': '058b6ae0f90000ee5c04049200000001',
+107 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+107 verbose headers   server: 'cloudflare' }
+108 silly get cb [ 304,
+108 silly get   { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+108 silly get     connection: 'keep-alive',
+108 silly get     'set-cookie':
+108 silly get      [ '__cfduid=d1183359d3fe2974ecdffb5a683b9d7081601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+108 silly get     'cf-ray': '5dbf4747fe20ee5c-CDG',
+108 silly get     age: '2068',
+108 silly get     'cache-control': 'public, max-age=300',
+108 silly get     etag: '"75df8f92097b42d791578c084af85171"',
+108 silly get     'last-modified': 'Fri, 26 Jun 2020 20:54:17 GMT',
+108 silly get     vary: 'Accept-Encoding',
+108 silly get     'cf-cache-status': 'HIT',
+108 silly get     'cf-request-id': '058b6ae0f90000ee5c04049200000001',
+108 silly get     'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+108 silly get     server: 'cloudflare' } ]
+109 verbose etag https://registry.npmjs.org/express from cache
+110 verbose get saving express to /home/skante/.npm/registry.npmjs.org/express/.cache.json
+111 http 304 https://registry.npmjs.org/yaml
+112 verbose headers { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+112 verbose headers   connection: 'keep-alive',
+112 verbose headers   'set-cookie':
+112 verbose headers    [ '__cfduid=db185695188bb98b4a7cb89ebdae194961601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+112 verbose headers   'cf-ray': '5dbf47480a2568fa-CDG',
+112 verbose headers   age: '2191',
+112 verbose headers   'cache-control': 'public, max-age=300',
+112 verbose headers   etag: '"bf01063e6637027a8536b9a88151dcb0"',
+112 verbose headers   'last-modified': 'Sun, 23 Aug 2020 15:02:19 GMT',
+112 verbose headers   vary: 'Accept-Encoding',
+112 verbose headers   'cf-cache-status': 'HIT',
+112 verbose headers   'cf-request-id': '058b6ae102000068fa51287200000001',
+112 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+112 verbose headers   server: 'cloudflare' }
+113 silly get cb [ 304,
+113 silly get   { date: 'Fri, 02 Oct 2020 14:57:53 GMT',
+113 silly get     connection: 'keep-alive',
+113 silly get     'set-cookie':
+113 silly get      [ '__cfduid=db185695188bb98b4a7cb89ebdae194961601650673; expires=Sun, 01-Nov-20 14:57:53 GMT; path=/; domain=.npmjs.org; HttpOnly; SameSite=Lax' ],
+113 silly get     'cf-ray': '5dbf47480a2568fa-CDG',
+113 silly get     age: '2191',
+113 silly get     'cache-control': 'public, max-age=300',
+113 silly get     etag: '"bf01063e6637027a8536b9a88151dcb0"',
+113 silly get     'last-modified': 'Sun, 23 Aug 2020 15:02:19 GMT',
+113 silly get     vary: 'Accept-Encoding',
+113 silly get     'cf-cache-status': 'HIT',
+113 silly get     'cf-request-id': '058b6ae102000068fa51287200000001',
+113 silly get     'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+113 silly get     server: 'cloudflare' } ]
+114 verbose etag https://registry.npmjs.org/yaml from cache
+115 verbose get saving yaml to /home/skante/.npm/registry.npmjs.org/yaml/.cache.json
+116 silly resolveWithNewModule swagger-ui-express@4.1.4 checking installable status
+117 silly cache add args [ 'swagger-ui-express@^4.1.4', null ]
+118 verbose cache add spec swagger-ui-express@^4.1.4
+119 silly cache add parsed spec Result {
+119 silly cache add   raw: 'swagger-ui-express@^4.1.4',
+119 silly cache add   scope: null,
+119 silly cache add   name: 'swagger-ui-express',
+119 silly cache add   rawSpec: '^4.1.4',
+119 silly cache add   spec: '>=4.1.4 <5.0.0',
+119 silly cache add   type: 'range' }
+120 silly addNamed swagger-ui-express@>=4.1.4 <5.0.0
+121 verbose addNamed ">=4.1.4 <5.0.0" is a valid semver range for swagger-ui-express
+122 silly addNameRange { name: 'swagger-ui-express',
+122 silly addNameRange   range: '>=4.1.4 <5.0.0',
+122 silly addNameRange   hasData: false }
+123 silly mapToRegistry name swagger-ui-express
+124 silly mapToRegistry using default registry
+125 silly mapToRegistry registry https://registry.npmjs.org/
+126 silly mapToRegistry uri https://registry.npmjs.org/swagger-ui-express
+127 verbose addNameRange registry:https://registry.npmjs.org/swagger-ui-express not in flight; fetching
+128 silly resolveWithNewModule multiparty@4.2.2 checking installable status
+129 silly cache add args [ 'multiparty@^4.2.2', null ]
+130 verbose cache add spec multiparty@^4.2.2
+131 silly cache add parsed spec Result {
+131 silly cache add   raw: 'multiparty@^4.2.2',
+131 silly cache add   scope: null,
+131 silly cache add   name: 'multiparty',
+131 silly cache add   rawSpec: '^4.2.2',
+131 silly cache add   spec: '>=4.2.2 <5.0.0',
+131 silly cache add   type: 'range' }
+132 silly addNamed multiparty@>=4.2.2 <5.0.0
+133 verbose addNamed ">=4.2.2 <5.0.0" is a valid semver range for multiparty
+134 silly addNameRange { name: 'multiparty', range: '>=4.2.2 <5.0.0', hasData: false }
+135 silly mapToRegistry name multiparty
+136 silly mapToRegistry using default registry
+137 silly mapToRegistry registry https://registry.npmjs.org/
+138 silly mapToRegistry uri https://registry.npmjs.org/multiparty
+139 verbose addNameRange registry:https://registry.npmjs.org/multiparty not in flight; fetching
+140 silly resolveWithNewModule body-parser@1.19.0 checking installable status
+141 silly cache add args [ 'body-parser@^1.19.0', null ]
+142 verbose cache add spec body-parser@^1.19.0
+143 silly cache add parsed spec Result {
+143 silly cache add   raw: 'body-parser@^1.19.0',
+143 silly cache add   scope: null,
+143 silly cache add   name: 'body-parser',
+143 silly cache add   rawSpec: '^1.19.0',
+143 silly cache add   spec: '>=1.19.0 <2.0.0',
+143 silly cache add   type: 'range' }
+144 silly addNamed body-parser@>=1.19.0 <2.0.0
+145 verbose addNamed ">=1.19.0 <2.0.0" is a valid semver range for body-parser
+146 silly addNameRange { name: 'body-parser', range: '>=1.19.0 <2.0.0', hasData: false }
+147 silly mapToRegistry name body-parser
+148 silly mapToRegistry using default registry
+149 silly mapToRegistry registry https://registry.npmjs.org/
+150 silly mapToRegistry uri https://registry.npmjs.org/body-parser
+151 verbose addNameRange registry:https://registry.npmjs.org/body-parser not in flight; fetching
+152 silly resolveWithNewModule cors@2.8.5 checking installable status
+153 silly cache add args [ 'cors@^2.8.5', null ]
+154 verbose cache add spec cors@^2.8.5
+155 silly cache add parsed spec Result {
+155 silly cache add   raw: 'cors@^2.8.5',
+155 silly cache add   scope: null,
+155 silly cache add   name: 'cors',
+155 silly cache add   rawSpec: '^2.8.5',
+155 silly cache add   spec: '>=2.8.5 <3.0.0',
+155 silly cache add   type: 'range' }
+156 silly addNamed cors@>=2.8.5 <3.0.0
+157 verbose addNamed ">=2.8.5 <3.0.0" is a valid semver range for cors
+158 silly addNameRange { name: 'cors', range: '>=2.8.5 <3.0.0', hasData: false }
+159 silly mapToRegistry name cors
+160 silly mapToRegistry using default registry
+161 silly mapToRegistry registry https://registry.npmjs.org/
+162 silly mapToRegistry uri https://registry.npmjs.org/cors
+163 verbose addNameRange registry:https://registry.npmjs.org/cors not in flight; fetching
+164 verbose stack Error: Missing required argument #1
+164 verbose stack     at andLogAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:31:3)
+164 verbose stack     at fetchPackageMetadata (/usr/share/npm/lib/fetch-package-metadata.js:51:22)
+164 verbose stack     at resolveWithNewModule (/usr/share/npm/lib/install/deps.js:456:12)
+164 verbose stack     at /usr/share/npm/lib/install/deps.js:457:7
+164 verbose stack     at /usr/share/npm/node_modules/iferr/index.js:13:50
+164 verbose stack     at /usr/share/npm/lib/fetch-package-metadata.js:37:12
+164 verbose stack     at addRequestedAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:82:5)
+164 verbose stack     at returnAndAddMetadata (/usr/share/npm/lib/fetch-package-metadata.js:117:7)
+164 verbose stack     at pickVersionFromRegistryDocument (/usr/share/npm/lib/fetch-package-metadata.js:134:20)
+164 verbose stack     at /usr/share/npm/node_modules/iferr/index.js:13:50
+165 verbose cwd /home/skante/projects/swagger-server
+166 error Linux 5.4.0-48-generic
+167 error argv "/usr/bin/node" "/usr/bin/npm" "i"
+168 error node v8.10.0
+169 error npm  v3.5.2
+170 error code EMISSINGARG
+171 error typeerror Error: Missing required argument #1
+171 error typeerror     at andLogAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:31:3)
+171 error typeerror     at fetchPackageMetadata (/usr/share/npm/lib/fetch-package-metadata.js:51:22)
+171 error typeerror     at resolveWithNewModule (/usr/share/npm/lib/install/deps.js:456:12)
+171 error typeerror     at /usr/share/npm/lib/install/deps.js:457:7
+171 error typeerror     at /usr/share/npm/node_modules/iferr/index.js:13:50
+171 error typeerror     at /usr/share/npm/lib/fetch-package-metadata.js:37:12
+171 error typeerror     at addRequestedAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:82:5)
+171 error typeerror     at returnAndAddMetadata (/usr/share/npm/lib/fetch-package-metadata.js:117:7)
+171 error typeerror     at pickVersionFromRegistryDocument (/usr/share/npm/lib/fetch-package-metadata.js:134:20)
+171 error typeerror     at /usr/share/npm/node_modules/iferr/index.js:13:50
+172 error typeerror This is an error with npm itself. Please report this error at:
+172 error typeerror     <http://github.com/npm/npm/issues>
+173 verbose exit [ 1, true ]

@@ -1,0 +1,161 @@
+
+<ng-template #enumTemplate let-path='path' let-name='name' let-index="index" let-type="type" let-hideName='hideName' let-options='options'>
+    <div class="form-group row">
+        <label *ngIf="!hideName" for="{{name}}" class="col-sm-2"> {{name}}</label>
+        <div class="col-md">
+            <select class="form-control" 
+                id="{{name}}" name="{{name}}" 
+                (change)="modelValueChanged(path, index, $event)" 
+                [required]="options && options.required === true ? true : null">
+                <option *ngFor="let value of options.enum" value="{{value}}">{{value}}</option>
+            </select>
+        </div>
+    </div>
+</ng-template> 
+
+<ng-template #stringTemplate let-path='path' let-name='name' let-index="index" let-hideName='hideName' let-options='options' (onready)="fieldRedered()">
+    <div class="form-group row">
+        <label *ngIf="!hideName" for="{{name}}" class="col-sm-2"> {{name}}</label>
+        <div class="col-md">
+            <input class="form-control" type="{{options && options.isPassword === true ? 'password' : 'text'}}" 
+                id="{{name}}" name="{{name}}" 
+                [attr.pattern]="options && options.pattern ? options.pattern : null" 
+                (change)="modelValueChanged(path, index, $event)" 
+                [required]="options && options.required === true ? true : null">
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #numberTemplate let-path='path' let-name='name' let-index="index" let-hideName='hideName' let-options='options'>
+    <div class="form-group row">
+        <label *ngIf="!hideName" for="{{name}}" class="col-sm-2"> {{name}}</label>
+        <div class="col-md">
+            <input class="form-control" type="number" id="{{name}}" name="{{name}}" 
+                [attr.min]="options && options.min ? options.min : null" 
+                [attr.max]="options && options.max ? options.max : null" 
+                (change)="modelValueChanged(path, index, $event)" 
+                [required]="options && options.required === true ? true : null">
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #booleanTemplate let-path='path' let-name='name' let-index="index" let-hideName='hideName' let-options="options">
+    <div class="form-group row">
+        <label *ngIf="!hideName" for="{{name}}" class="col-sm-2"> {{name}}</label>
+        <div class="col-md">
+            <div class="form-switch">
+                <input type="checkbox" id="{{name}}" name="{{name}}"  
+                    (click)="modelValueChanged(path, index, $event)"
+                    [required]="options && options.required === true ? true : null">
+                <div class="slider"><div class="state"></div></div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #arrayTemplate let-path='path' let-name='name' let-index="index" let-hideName='hideName' let-items='items' let-options="options" let-children="children">
+    <div class="form-group row">
+        <label *ngIf="!hideName" for="{{name}}" class="col-sm-2"> {{name}}</label>
+        <div class="col-md">
+
+            <div class="row" *ngFor="let child of children; index as i">
+                <div class="col-sm" >
+                    <ng-template #fieldTemplate>
+                        <ng-container
+                            *ngFor="let f of items; index as j"
+                            [ngTemplateOutlet]="f.options && f.options.enum? enumTemplate : f.type == 'string' ? stringTemplate : f.type == 'number' ? numberTemplate : f.type == 'boolean' ? booleanTemplate : arrayTemplate"
+                            [ngTemplateOutletContext]="{path:path+'['+i+'].'+f.name, index:j, name:f.name, type:f.type, items:f.items?f.items:null, options: f.options?f.options:null, children: f.type === 'array'?[]:null}"
+                            >
+                        </ng-container>
+                    </ng-template>
+                    <ng-container *ngIf="items === 'string' || items === 'number' || items === 'boolean'; else fieldTemplate"
+                        [ngTemplateOutlet]="items === 'string' ? stringTemplate : items === 'number' ? numberTemplate : booleanTemplate"
+                        [ngTemplateOutletContext]="{path:path+'['+i+']', index:i, name:name+'-'+i, type:items, hideName:true}">
+                    </ng-container>
+                </div>
+                <div class="col-sm-2">
+                    <div class="btn btn-danger" (click)="removeItemFromArrayType(path+'['+i+']', index, i, children)"> Remove Item </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-secondary" (click)="addItemToArrayType(path, index, children)"> Add item </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</ng-template>
+
+<div class="container">
+    <form>
+        <ng-container
+            *ngFor="let f of fields"
+            [ngTemplateOutlet]="f.options && f.options.enum? enumTemplate : f.type == 'string' ? stringTemplate : f.type == 'number' ? numberTemplate : f.type == 'boolean' ? booleanTemplate : arrayTemplate"
+            [ngTemplateOutletContext]="{path:f.name, name:f.name, type:f.type, items:f.items?f.items:null, options: f.options?f.options:null, children: f.type === 'array'?[]:null}"
+            >
+        </ng-container>
+    </form>
+</div>
+
+<!-- <div class="container">
+    <div myFormField format="{{ stringify(exple_f) }}"></div>
+</div> -->
+
+<div class="container">
+    <yo-form [format]="exple_f"></yo-form>
+</div>
+
+
+<!-- <ng-container [ngTemplateOutlet]="stringTemplate" [ngTemplateOutletContext]="{foo:'bar'}">
+</ng-container> -->
+
+<!-- <ng-template [ngIf]="fields != undefined">
+    <div class="container">
+        <form #form="ngForm" (ngSubmit)="onSubmit(form)" style="margin-top: 2em; margin-bottom: 2em;">
+            <ng-container *ngFor="let item of fields | keyvalue">
+                <div class="form-group row">
+                    <label for="{{item.key}}" class="col-md-2">{{item.key}}</label>
+                    <div class="col-md">
+                        
+                        
+                        <ng-container *ngIf="item.value.type == 'string' && item.value.enum != undefined; else inputTypeTemplate">
+                            <select name="{{item.key}}" id="{{item.key}}" [(ngModel)]="model[item.key]" class="form-control">
+                                <option *ngFor="let value of item.value.enum" value="{{value}}">{{value}}</option>
+                            </select>
+                        </ng-container>
+
+                        
+                        <ng-template  #inputTypeTemplate>
+                            <ng-container *ngIf="item.value.type != 'boolean'; else booleanTypeTemplate">
+                                <input name="{{item.key}}" id="{{item.key}}" [(ngModel)]="model[item.key]" class="form-control"
+                                    [attr.type]="item.value.type == 'string'? 'text' : 'number'"
+                                    [attr.pattern]="item.value.type == 'string' && item.value.pattern != undefined? item.value.pattern : null"
+                                    [att.min]="item.value.type == 'number' && item.value.minimum != undefined? item.value.minimum : null"
+                                    [attr.max]="item.value.type == 'number' && item.value.maximum != undefined? item.value.maximum : null"
+                                    >
+                            </ng-container>
+                        </ng-template>
+                        
+                        
+                        <ng-template #booleanTypeTemplate>
+                            <div class="form-switch">
+                                <input
+                                    name="{{item.key}}" [attr.name]="item.key" id="{{item.key}}" [(ngModel)]="model[item.key]" 
+                                    type="checkbox">
+                                <div class="slider"><div class="state"></div></div>
+                            </div>
+                            
+                        </ng-template>
+                    </div>    
+                </div>
+
+            </ng-container>
+            <div class="form-group row">
+                <input type="submit" value="Submit" class="btn btn-primary col-md-2">
+            </div>
+        </form>
+        
+    </div>
+</ng-template> -->

@@ -57,8 +57,8 @@ class LDAPManager {
 	        userPassword: hashPassword(userInfo.password)
 	    }
 
-	    // console.log("userToAdd : ", userToAdd);
-	    // console.log("userInfo : ", userInfo);
+	    console.log("userToAdd : ", userToAdd);
+	    console.log("userInfo : ", userInfo);
 	    
 	    bind((err)=>{
 	        if (err){
@@ -66,15 +66,15 @@ class LDAPManager {
 	            return callback(err);
 	        }
 	        
-	        //console.log("cn : ", cn, "usersToAdd: ", userToAdd);
+	        console.log("cn : ", cn, "usersToAdd: ", userToAdd);
 	        ldapClient.add(cn, userToAdd, (err, addedInfo)=>{
-	        	//console.log("changeIfExists: ", changeIfExists, " | err : ", err);
+	        	console.log("changeIfExists: ", changeIfExists, " | err : ", err);
 	        	if (!err){
 	        		return callback(null, addedInfo);
 	        	}
 	        	
 	        	var acceptableErrs = ["EntryAlreadyExistsError: Entry Already Exists"];
-	        	//console.log("err.toString() : ", err.toString());
+	        	console.log("err.toString() : ", err.toString());
 	        	if (!changeIfExists || (changeIfExists && acceptableErrs.indexOf(err.toString()) < 0 ) ){
 	        		return callback(err);
 	        	}

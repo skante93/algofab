@@ -10,5 +10,5 @@ objectClass: simpleSecurityObject
 objectClass: organizationalRole
 cn: admin
 description: LDAP administrator
-userPassword:: e1NTSEF9N1N2Qld6NHp5dDcyd1o0REl4QzVodlZjSXNUTG1lbXQ=
+userPassword:: e1NTSEF9a0FJazZWeE9xQkt4blV6ekpmWXV1VGhyU1dGaVh2eE8=
 
