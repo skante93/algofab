@@ -1,0 +1,212 @@
+
+
+$resContainerWidth: 96vw;
+
+@mixin margin-top-botttom($value: 1em) {
+    margin-top: $value;
+    margin-bottom: $value;
+}
+@mixin flexDisplay($itemsAlignment: center, $contentJustification: center) {
+    display: flex;
+    align-items: $itemsAlignment;
+    justify-content: $contentJustification;
+}
+
+@mixin sectionMixin($centered: 1) {
+    display: flex;
+    
+    @if $centered == 1 {
+        align-items: center;
+        justify-content: center;
+    }
+    
+    width: $resContainerWidth;
+    box-sizing: border-box;
+    //position: relative;
+    border: 1px black solid;
+    border-radius: 5px;
+
+    @include margin-top-botttom(2em);
+
+    background-image: linear-gradient(350deg, #00b8de 5%, rgba(250,250,250,1) 90%);
+}
+
+
+.res-nav {
+    width: 20em;
+    height: 30vh;
+    position: fixed;
+    display: flex;
+    top: 50vh - 15vh ; // Vertically center
+    background-color: white;
+    
+    border: 2px solid black;
+
+    .res-nav-content {
+        //
+        width: 15em;
+        border: 2px solid green;
+
+    }
+
+    .res-nav-btn {
+        //
+        width: 5em;
+        position: relative;
+        border: 2px solid red;
+        display: flex;
+        justify-content: top;
+        
+        cursor: pointer;
+
+        div {
+            //color: black;
+            width: 30vh;
+            height: 5em;
+            border: 2px solid brown;
+        
+            transform: translateX(-200%) rotate(90deg);
+        }
+    }
+}
+
+[hidden] {
+    display: none;
+}
+
+.res-container {
+
+    display: flex;
+    flex-direction: column;
+    width: $resContainerWidth;
+    margin: auto;
+    margin-top: 1em;
+
+    .title-section {
+        
+        @include sectionMixin();
+
+        .title {
+            width: ($resContainerWidth - 15vw);
+            
+            //border: 1px black solid;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .type-icon {
+            width: 15vw;
+            //position: absolute;
+            //border: 1px green solid;
+            //right: 2em;
+            display: flex;
+            align-items: center;
+            
+            img {
+                padding: 0;
+                position: absolute;
+                transform: scale(1.5);
+                background-color: white;
+                //
+            }
+        }
+    }
+
+    .tags-section {
+        @include flexDisplay(top, space-between);
+        
+        .tags-container {
+            @include sectionMixin(0);
+            flex-direction: column;
+            padding: 1em;
+            width: 48%;
+            
+            .tags {
+                .tag  {
+                    background-color: brown;
+                    border-radius: 4px;
+                    padding: 0.5em;
+                    display: inline-block;
+                    margin-right: 1em;
+                    margin-top: 1em;
+                    color: white;
+                    font-family: 'Lucida Console','Lucida Sans Typewriter',monaco,'Bitstream Vera Sans Mono',monospace;
+                }
+
+                // .tag-name {
+
+                // }
+
+                // .tag-value {
+
+                // }
+            }
+        }
+
+        .ratings-container{
+            @include sectionMixin(0);
+            flex-direction: column;
+            padding: 1em;
+            width: 48%;
+
+            #ratings {
+                
+                #ratings-vote {
+                    @include flexDisplay();
+                    flex-direction: column; 
+                    
+                    #smiley {
+                        
+                        font-size: 3em;
+                    }
+                    #stars {
+                        @include flexDisplay();
+                        span {
+                            margin: 0.5em;
+                        } 
+                    }
+                }
+                
+                // .ratings-my-score {
+            
+                // }
+
+                // .ratings-review {
+
+                // }
+            }
+        }
+    }
+    
+    .description-section {
+        @include flexDisplay(top, $contentJustification: space-between);
+        @include margin-top-botttom(2em);
+
+        .description {
+            //
+            
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 1em;
+            width: 68%;
+        }
+        .logo {
+            //
+            width: 30%;
+
+            img {
+                width: 100%
+            }
+        }
+    }
+    .download-section, .docs-section{
+        @include flexDisplay();
+        @include margin-top-botttom(2em);
+        flex-direction: column;
+
+        border: 1px solid black;
+        border-radius: 5px;
+        padding: 1em;
+        
+    }
+}

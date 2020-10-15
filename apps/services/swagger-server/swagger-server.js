@@ -315,6 +315,7 @@ class ParamsDefinitions {
             case 'array':
                 //console.log("Got here!!!!!");
                 try{
+                    console.log('submitted [', submitted instanceof Array? 'array' : typeof submitted, '] : ', submitted);
                     if (submitted instanceof Array){
                         value = submitted;
                     }
@@ -472,7 +473,7 @@ class ParamsDefinitions {
                         if (error){
                             console.log("fields : ", fields, " | files : ", files);
                             console.log("error : ", error);
-                            return res.status(500).json({ body: "wrongly formatted mulipart request" })
+                            return res.status(500).json({ message: "wrongly formatted mulipart request" })
                         }
                         //console.log("fields : ", fields, " | files : ", files);
 
@@ -487,8 +488,8 @@ class ParamsDefinitions {
                                     
                                     var value = this.parse_param(submitted, param_schema.properties[name]);
                                     if (value instanceof Error){
-                                        //console.log("err : ", value);
-                                        return res.status(405).json({ body: `requesBody "${name}" : ${value.message}`});
+                                        console.log("err : ", value);
+                                        return res.status(405).json({ message: `requesBody "${name}" : ${value.message}`});
                                     }
 
                                     if (typeof res.locals.params === 'undefined') {
@@ -509,7 +510,8 @@ class ParamsDefinitions {
                                     
                                     var value = this.parse_param(submitted, param_schema.properties[name]);
                                     if (value instanceof Error){
-                                        return res.status(400).json({ body: `requestBody "${param_schema.name}" : ${value.message}`});
+                                        console.log(value);
+                                        return res.status(400).json({ message: `requestBody "${param_schema.name}" : ${value.message}`});
                                     }
 
                                     if (typeof res.locals.params === 'undefined') {
@@ -520,7 +522,7 @@ class ParamsDefinitions {
                             }
                         }
                         else{
-                            return res.status(400).json({body: `Non-object requestBody not yet supported`});
+                            return res.status(400).json({message: `Non-object requestBody not yet supported`});
                         }
                         
                         next();
@@ -531,7 +533,7 @@ class ParamsDefinitions {
                     var value = this.parse_param(JSON.stringify(req.body), param_schema);
                     if (value instanceof Error){
                         console.log("reched here, err : ", value);
-                        return res.status(400).json({ body: `requestBody : ${value.message}`});
+                        return res.status(400).json({ message: `requestBody : ${value.message}`});
                     }
                     
                     if (typeof res.locals.params === 'undefined') {
@@ -556,7 +558,8 @@ class ParamsDefinitions {
                 if (this.param_schema.in == 'header'){
                     var value = this.parse_param(req.headers[ this.param_schema.name.toLowerCase() ], this.param_schema.schema);
                     if (value instanceof Error){
-                        return res.status(400).json({ body: `Parameter ${this.param_schema.name} : ${value.message}`});
+                        console.log(value);
+                        return res.status(400).json({ message: `Parameter ${this.param_schema.name} : ${value.message}`});
                     }
                     if (typeof res.locals.params === 'undefined') {
                         res.locals.params = {};
@@ -578,7 +581,8 @@ class ParamsDefinitions {
                     var value = this.parse_param( v , this.param_schema.schema);
                     //console.log('parsed value ', this.param_schema.name, " : ", value);
                     if (value instanceof Error){
-                        return res.status(400).json({ body: `Parameter ${this.param_schema.name} : ${value.message}`});
+                        console.log(value);
+                        return res.status(400).json({ message: `Parameter ${this.param_schema.name} : ${value.message}`});
                     }
                     if (typeof res.locals.params === 'undefined') {
                         res.locals.params = {};
@@ -590,7 +594,8 @@ class ParamsDefinitions {
                 else if (this.param_schema.in == 'path'){
                     var value = this.parse_param(req.params[ this.param_schema.name ], this.param_schema.schema);
                     if (value instanceof Error){
-                        return res.status(400).json({ body: `Parameter ${this.param_schema.name} : ${value.message}`});
+                        console.log(value);
+                        return res.status(400).json({ message: `Parameter ${this.param_schema.name} : ${value.message}`});
                     }
                     if (typeof res.locals.params === 'undefined') {
                         res.locals.params = {};
@@ -605,7 +610,7 @@ class ParamsDefinitions {
                         form.parse(req, (error, fields, files)=>{
                             //
                             if (error){
-                                return res.status(400).json({ body: "wrongly formatted mulipart request" })
+                                return res.status(400).json({ message: "wrongly formatted mulipart request" })
                             }
 
                             if (this.param_schema.schema.type === "string" && this.param_schema.format === "binary"){
@@ -613,7 +618,8 @@ class ParamsDefinitions {
                                 
                                 var value = this.parse_param(submitted, this.param_schema.schema);
                                 if (value instanceof Error){
-                                    return res.status(400).json({ body: `Parameter ${this.param_schema.name} : ${value.message}`});
+                                    console.log(value);
+                                    return res.status(400).json({ message: `Parameter ${this.param_schema.name} : ${value.message}`});
                                 }
 
                                 if (typeof res.locals.params === 'undefined') {
@@ -624,7 +630,8 @@ class ParamsDefinitions {
                             else{
                                 var value = this.parse_param(fields[this.param_schema.name][0], this.param_schema.schema);
                                 if (value instanceof Error){
-                                    return res.status(400).json({ body: `Parameter ${this.param_schema.name} : ${value.message}`});
+                                    console.log(value);
+                                    return res.status(400).json({ message: `Parameter ${this.param_schema.name} : ${value.message}`});
                                 }
 
                                 if (typeof res.locals.params === 'undefined') {
@@ -638,7 +645,8 @@ class ParamsDefinitions {
                     else{
                         var value = this.parse_param(req.body[ this.param_schema.name ], this.param_schema.schema);
                         if (value instanceof Error){
-                            return res.status(400).json({ body: `Parameter ${this.param_schema.name} : ${value.message}`});
+                            console.log(value);
+                            return res.status(400).json({ message: `Parameter ${this.param_schema.name} : ${value.message}`});
                         }
                         if (typeof res.locals.params === 'undefined') {
                             res.locals.params = {};

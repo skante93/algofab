@@ -40,6 +40,9 @@ const licenceIDQuery = (id)=>{
 const agreementIDQuery = (id)=>{
     return {_id: id};
 }
+const ratingsIDQuery = (id)=>{
+    return {_id:id};
+}
 
 const LDAP_AVAILABLE_SWITCH = false;
 
@@ -53,7 +56,17 @@ class UsersManager {
             var selector = {};
             params.fields.forEach((f)=>{selector[f] = 1});
             //console.log("selector: ", selector);
-            var users = await usersModel.find({},selector).populate('profile.photo');
+            //var users = await usersModel.find({},selector).populate('profile.photo');
+            
+            var users;
+            if ('profile' in selector || 'profile.photo' in selector || Object.keys(selector).length == 0){
+                console.log("####### POPULATING PROFILE PHOTO");
+                users = await usersModel.find({},selector).populate('profile.photo');
+            }
+            else{
+                console.log("####### NOT POPULATING PROFILE PHOTO");
+                users = await usersModel.find({},selector);
+            }
             return new RestResponse("Gotten", 200, users);
         } catch (e) {
             return new RestResponse("DBError", 500, e);
@@ -78,7 +91,15 @@ class UsersManager {
         try {
             
             //console.log("selector: ", selector);
-            var user = await usersModel.findOne(userIDQuery(params.userID), selector).populate('profile.photo');
+            var user;
+            if ('profile' in selector || 'profile.photo' in selector){
+                console.log("####### POPULATING PROFILE PHOTO");
+                user = await usersModel.findOne(userIDQuery(params.userID), selector).populate('profile.photo');
+            }
+            else{
+                console.log("####### NOT POPULATING PROFILE PHOTO");
+                user = await usersModel.findOne(userIDQuery(params.userID), selector);
+            }
             if (!user){
                 return new RestResponse("NotFoundError", 404, `user "${params.userID}" does not exist`)
             }
@@ -280,7 +301,15 @@ class UsersManager {
         }
         
         const query = userIDQuery(params.userID); 
-        var user = await usersModel.findOne(query).populate('profile.photo');
+        try{
+            var user = await usersModel.findOne(query).populate('profile.photo');
+        }catch(e){
+            return new RestResponse("DBError", 500, e)
+        };
+        
+        if (!user){
+            return new RestResponse("NotFoundError", 404, `login ${params.userID} not found`);
+        }
         
         //console.log("user.profile.photo : ", user.profile.photo);
 
@@ -344,6 +373,53 @@ class UsersManager {
             return new RestResponse("DBError", 500, e)
         }
     }
+
+    async updatePassword(params, requestedBy) {
+        var err = processParamsFields(params, [
+            {name: "userID", required: true},
+            {name: "currentPassword", required: true},
+            {name: "newPassword", required: true},
+        ]);
+
+        if (err instanceof Error){
+            return new RestResponse("DBError", 500, err);
+        }
+        if (!requestedBy){
+            return RestResponse("AuthorzationDenied", 500, `an unidentified user cannot update a user account`);
+        }
+        // if ('username' in params){
+        //     if (typeof params.username === 'undefined' || params.username == null){
+        //         delete params.username;
+        //     }
+        // }
+        
+        
+        const query = userIDQuery(params.userID); 
+        try{
+            var user = await usersModel.findOne(query).populate('profile.photo');
+        }catch(e){
+            return new RestResponse("DBError", 500, e)
+        };
+        
+        if (!user){
+            return new RestResponse("NotFoundError", 404, `login ${params.login} not found`);
+        }
+
+        if (!compareSync(params.currentPassword, user.profile.password) ){
+            return new RestResponse("WrongValueError", 500, `wrong password`);
+        }
+
+        user.profile.password = createHash(params.newPassword);
+
+
+        try{
+            var updatedUser = await user.save();
+            //console.log("updated user : ", updatedUser);
+            return new RestResponse('Updated', 200, updatedUser);
+        }catch(e){
+            return new RestResponse("DBError", 500, e);
+        }
+    }
 }
 
 class ResourcesManager {
@@ -355,7 +431,13 @@ class ResourcesManager {
             var selector = {};
             params.fields.forEach((f)=>{selector[f] = 1});
             //console.log("selector: ", selector);
-            var resources = await resourcesModel.find({},selector).populate('metadata.logo');
+            var resources;// = await resourcesModel.find({},selector).populate('metadata.logo');
+            if ('metadata' in selector || 'metadata.logo' in selector || Object.keys(selector).length == 0){
+                resources = await resourcesModel.find({},selector).populate('metadata.logo');
+            }
+            else{
+                resources = await resourcesModel.find({},selector);
+            }
             return new RestResponse("Gotten", 200, resources);
         } catch (e) {
             return new RestResponse("DBError", 500, e);
@@ -380,13 +462,119 @@ class ResourcesManager {
         try {
             
             //console.log("selector: ", selector);
-            var resource = await resourcesModel.findOne(resourceIDQuery(params.resourceID), selector).populate('metadata.logo');
+            var resource; // = await resourcesModel.findOne(resourceIDQuery(params.resourceID), selector).populate('metadata.logo');
+            if ('metadata' in selector || 'metadata.logo' in selector || Object.keys(selector).length == 0){
+                resource = await resourcesModel.findOne(resourceIDQuery(params.resourceID), selector).populate('metadata.logo');
+            }
+            else{
+                resource = await resourcesModel.findOne(resourceIDQuery(params.resourceID), selector);
+            }
             if (!resource){
                 return new RestResponse("NotFoundError", 404, `resource "${params.resourceID}" does not exist`)
             }
             return new RestResponse("Gotten", 200, resource);
         } catch (e) {
             return new RestResponse("DBError", 500, e);
+        }
+    }
+
+    async search(params, requestedBy){
+
+        let selector = {};
+
+        if ('fields' in params){
+            params.fields = params.fields.filter(e=>e!=null);
+            params.fields.forEach((f)=>{selector[f] = 1});
+        }
+
+        console.log("PARAMS.Q : ", params.q);
+        let query = params.q ? resourcesModel.find({ $text : { $search: params.q } }) : resourcesModel.find();
+
+
+        console.log("DEALING WITH TYPE FILTERS ....");
+        if (params.type_filter){
+            let types = params.type_filter.split('|').map(e=>e.trim()).filter(e=>e!='');
+            for (let t of types){
+                if (['ai_model', 'notebook', 'dataset', 'docker', 'executable', 'service', 'library'].indexOf(t) < 0){
+                    return new RestResponse("WrongValueError", 500, `filter type "${t}" is not a valid type`);
+                }
+            }
+            let filter = {
+                $or : types.map(t=> {
+                    return {'metadata.type' : t};
+                })
+            }
+
+            query = query.find(filter);
+        }
+
+        console.log("DEALING WITH TAGS FILTERS ....");
+        if (params.tags_filter){
+            let tags = params.tags_filter.split('|').map(e=>e.trim()).filter(e=>e!='');
+
+            let filter = {
+                $or : tags.map(t=>{
+                    if (t.split(':').length == 1){
+                        try{
+                            return {'metadata.tags.name' : new RegExp(t)};
+                        }
+                        catch(e){
+                            return {'metadata.tags.name' : t};
+                        }
+                    }
+                    else {
+                        let seg = t.split(':'), tag_name = seg.shift(), tag_val = seg.join(':');
+                        let $and = [];
+
+                        try{
+                            $and.push({'metadata.tags.name' : new RegExp(tag_name)});
+                        }
+                        catch(e){
+                            $and.push({'metadata.tags.name' : tag_name});
+                        }
+                        try{
+                            $and.push({'metadata.tags.value' : new RegExp(tag_val)});
+                        }
+                        catch(e){
+                            $and.push({'metadata.tags.value' : tag_val});
+                        }
+                        // try{
+                        //     return { $and : [{'metadata.tags.name' : new RegExp(tag_name)}, {'metadata.tags.value' : new RegExp(tag_val)}]};
+                        // }catch(e){
+                        //     return { $and : [{'metadata.tags.name' : tag_name}, {'metadata.tags.value' : tag_val}]};
+                        // }
+                        return {$and : $and};
+                    }
+                })
+            }
+            query = query.find(filter);
+        }
+
+        console.log("DEALING WITH DATE FILTERS ....");
+        if(params.date_filter){
+            let date = params.date_filter.trim();
+            let test = date.startsWith('>=') || date.startsWith('>')? '$gt' : date.startsWith('<=') || date.startsWith('<')? '$lt' : '$eq', 
+                date_point = new Date(date.replace(/^(\<|\>)?\=?/, '').trim());
+            
+            if (isNaN(date_point.valueOf())){
+                return new RestResponse("WrongValueError", 500, `filter date "${date.replace(/^(\<|\>)?\=?/, '').trim()}" is not a valid date`);
+            }
+
+            let filter = {date: {}};
+            filter.date[test] = date_point;
+            
+            console.log('DATE FILTER : ', filter);
+
+            query = query.find(filter);
+        }
+
+        query = query.select(selector).populate('metadata.logo');
+        try{
+            let resources = await query;
+            return new RestResponse("Gotten", 200, resources);
+        }
+        catch(e){
+            return new RestResponse("DbError", 500, e);
         }
     }
 
@@ -644,12 +832,121 @@ class ResourcesManager {
                 return new RestResponse("DBError", 500, e)
             }
         }
+
+        if ('documentations' in params && params.documentations){
+            resource.metadata.documentations = params.documentations;
+        }
         try{
             var updatedUResource = await resource.save();
             //console.log("updated user : ", updatedUser);
             return new RestResponse('Updated', 200, updatedUResource);
         }catch(e){
             return new RestResponse("DBError", 500, e)
+        }
+    }
+
+    async getDocs(params, requestedBy, res){
+        var err = processParamsFields(params, [
+            {name: "resourceID", required: true},
+        ]);
+
+        if (err instanceof Error){
+            return new RestResponse("DBError", 500, err);
+        }
+        if (!requestedBy){
+            return RestResponse("AuthorzationDenied", 500, `an unidentified user cannot update a user account`);
+        }
+
+        var resource = await resourcesModel.findOne(resourceIDQuery(params.resourceID));
+        
+        if (!resource){
+            return new RestResponse("NotFoundError", 404, `resource "${params.resourceID}" does not exist`)
+        }
+
+        if (!resource.metadata.documentations){
+            return new RestResponse("NotFoundError", 404, `resource "${params.resourceID}" does not have any documentation`)
+        }
+
+        if (resource.metadata.documentations.media_type === 'html' || resource.metadata.documentations.media_type === 'external_links'){
+            res.json(resource.metadata.documentations);
+        }
+        else if (resource.metadata.documentations.media_type === 'pdf'){
+            let rs = gfs.createReadStream({_id: resource.metadata.documentations.pdf.toString()}), file = [];
+            rs.pipe(res);
+            // try{
+            //     resource.documentations.pdf = await new Promise((resolve, reject)=> {
+            //         rs.on('data', (chunk)=>{file.push(chunk); });
+            //         rs.on('error', (e)=>{ console.log(e); reject(e); });
+            //         rs.on('end', ()=>{ resolve(Buffer.concat(file)) });
+            //     });
+            //     res.json(resource.metadata.documentations);
+            // }
+            // catch(e){
+            //     res.status(500).json({ message: e});
+            // }
+            
+        }
+
+    }
+
+    async updateDocs(params, requestedBy){
+        var err = processParamsFields(params, [
+            {name: "resourceID", required: true},
+            {name: 'media_type', required: true}
+        ]);
+
+        if (err instanceof Error){
+            return new RestResponse("DBError", 500, err);
+        }
+        if (!requestedBy){
+            return RestResponse("AuthorzationDenied", 500, `an unidentified user cannot update a user account`);
+        }
+
+        var resource = await resourcesModel.findOne(resourceIDQuery(params.resourceID));
+        
+        if (!resource){
+            return new RestResponse("NotFoundError", 404, `resource "${params.resourceID}" does not exist`)
+        }
+
+        if (params.media_type == 'html'){
+            resource.metadata.documentations.media_type = params.media_type;
+            resource.metadata.documentations.html = params.html;
+        }
+        else if(params.media_type == 'external_links'){
+            //
+            resource.metadata.documentations.media_type = params.media_type;
+            resource.metadata.documentations.links = params.links;
+
+        }
+        else if (params.media_type == 'pdf'){
+            console.log("REACHED HERE!!!");
+            resource.metadata.documentations.media_type = params.media_type;
+            resource.metadata.documentations.pdf = mongoose.Types.ObjectId().toString();
+
+            let f = {_id: resource.metadata.documentations.pdf, filename: params.pdf.originalFilename, content_type: params.pdf.headers['content-type']};
+            let writestream = gfs.createWriteStream(f);
+            fs.createReadStream(params.pdf.path).pipe(writestream);
+
+            console.log('PDF recording ....');
+            await new Promise((resolve, reject)=>{
+                writestream.on('close', ()=>{
+                    fs.unlinkSync(params.pdf.path);
+                    resolve();
+                });
+                writestream.on('error', (err)=>{
+                    console.log("Stoooop : ", err);
+                })
+            });
+
+            console.log('PDF recorded!!!');
+            
+        }
+        try{
+            await resource.save();
+            return new RestResponse("Gotten", 200, resource);
+        }
+        catch(e){
+            return new RestResponse("DbError", 500, e);
         }
     }
 
@@ -732,30 +1029,29 @@ class ResourcesManager {
             return new RestResponse("NotFoundError", 404, `resource "${params.resourceID}" does not exist`)
         }
 
+        if (!resource.archiveData){
+            return new RestResponse("NotFoundError", 404, `resource "${params.resourceID}" does not (yet) have any archive`)
+        }
+
         console.log("resource.archiveData.toString()", resource.archiveData.toString());
         
-        FilesMeta.find({_id : resource.archiveData.toString()}).toArray((err, file)=>{
-            
-        });   
-        // gfs.files.find({_id : resource.archiveData.toString()}).toArray((err, file)=>{
-        //     console.log(err || "found : ", file);
-        //     console.log("file.content_type : ", file.content_type);
-        //     console.log("file.filename : ", file.filename);
-        // })
+        try{
+            var archiveMeta = await FilesMeta.findOne({_id : resource.archiveData.toString()});
+        }
+        catch(e){
+            return new RestResponse("DBError", 500, e);
+        }
 
-        // try{
+        //res.writeHead(200, {'Content-Type': archiveMeta.contentType });
+        let rs = gfs.createReadStream({_id: resource.archiveData.toString()}); //.pipe(res);
+        rs.pipe(res);
 
-            // let readstream = gfs.createReadStream({
-            //     _id: resource.archiveData.toString()
-            // });
-            
-            // res.writeHead(200, {'Content-Type': "application/zip"})
-            // readstream.pipe(res);
-        // }
-        // catch(e){
-        //     console.log(e);
-        //     return RestResponse("UnexpectedError")
-        // }
+        // archiveMeta.buffer = gfs.createReadStream({_id: resource.archiveData.toString()}); //.pipe(res);
+        
+        // archiveMeta.buffer.on('end', ()=>{
+        //     res.status(200).json(archiveMeta);
+        // });
+        
     }
 }
 
@@ -989,7 +1285,7 @@ class AgreementManager {
         else{
             try{
                 await agreement.remove();
-                return new RestResponse("Deleted", 200, `licence "${params.agreementID}" successfully deleted`);
+                return new RestResponse("Deleted", 200, `agreement "${params.agreementID}" successfully deleted`);
             }catch(e){
                 return new RestResponse("DBError", 500, e);
             }
@@ -1000,7 +1296,176 @@ class AgreementManager {
         //
     }
 }
+
+class RatingsManager {
+
+    async getAll(params){
+        if ('fields' in params){
+            params.fields = params.fields.filter(e=>e!=null);
+        }
+        try {
+            var selector = {};
+            params.fields.forEach((f)=>{selector[f] = 1});
+            //console.log("selector: ", selector);
+            var query = {};
+            if ('userID' in params && params.userID && 'resourceID' in params && params.resourceID){
+                query = {$or: [{user: params.userID}, {resource: params.resourceID}] };
+            }
+            else if('userID' in params && params.userID){
+                query = {user: params.userID}
+            }
+            else if('resourceID' in params && params.resourceID){
+                query = {resource: params.resourceID};
+            }
+
+            var ratings = await ratingsModel.find(query, selector).populate(['user', 'resource']);
+            return new RestResponse("Gotten", 200, ratings);
+        } catch (e) {
+            return new RestResponse("DBError", 500, e);
+        }
+    }
+
+    async getOne(params){
+
+        var err = processParamsFields(params, [
+            {name: "ratingsID", required: true},
+        ]);
+
+        if (err instanceof Error){
+            return new RestResponse("ParameterSpecError", 500, err);
+        }
+        var selector = {};
+        if ('fields' in params){
+            params.fields = params.fields.filter(e=>e!=null);
+            params.fields.forEach((f)=>{selector[f] = 1});
+        }
+
+        try {
+            
+            //console.log("selector: ", selector);
+            var ratings = await ratingsModel.findOne(ratingsIDQuery(params.ratingsID), selector);
+            if (!ratings){
+                return new RestResponse("NotFoundError", 404, `ratings "${params.ratingsID}" does not exist`)
+            }
+            return new RestResponse("Gotten", 200, ratings);
+        } catch (e) {
+            return new RestResponse("DBError", 500, e);
+        }
+    }
+    
+    async create(params, requestedBy) {
+        //
+        var err = processParamsFields(params, [
+            //{name: "userID", required: true},
+            {name: "resource", required: true},
+        ]);
+
+        if (err instanceof Error){
+            return new RestResponse("ParameterSpecError", 500, err);
+        }
+
+        if (!requestedBy){
+            return RestResponse("AuthorzationDenied", 500, `an unidentified user cannot create an agreement`);
+        }
+        // else if(requestedBy.status != "admin" && requestedBy.status != "super"){
+        //     return RestResponse("AuthorzationDenied", 500, `only admins can create a licence`);
+        // }
+
+        try{
+            //
+            params.user = requestedBy._id.toString();
+            //params.resource = requestedBy._id.toString();
+            
+            var r = new ratingsModel(params);
+            var r = await r.save();
+            return new RestResponse("Created", 201, r);
+        }
+        catch(e){
+            return new RestResponse("DBError", 500, e);
+        }
+    }
+
+    async remove(params, requestedBy) {
+        var err = processParamsFields(params, [
+            {name: "ratingsID", required: true},
+        ]);
+
+        if (err instanceof Error){
+            return new RestResponse("ParameterSpecError", 500, err);
+        }
+        if (!requestedBy){
+            return RestResponse("AuthorzationDenied", 500, `an unidentified user cannot remove an agreement`);
+        }
+
+        try {
+            var ratings = await ratingsModel.findOne(ratingsIDQuery(params.ratingsID) );
+            if (!ratings){
+                return new RestResponse("NotFoundError", 404, `ratings with id "${params.ratings}" does not exist.`)
+            }
+        } catch (e) {
+            return new RestResponse("DBError", 500, e);
+        }
+
+        if (params.delayed === true){
+
+            ratings.deleteAt = Date.now() + settings.api.operations_timing.ratings_deletion_delay;
+            try{
+                await ratings.save();
+                return new RestResponse("Deleted", 200, `ratings "${params.ratingsID}" successfully up for deletion`, "the account will be automatically deleted in x days");
+            }catch(e){
+                return new RestResponse("DBError", 500, e);
+            }
+        }
+        else{
+            try{
+                await ratings.remove();
+                return new RestResponse("Deleted", 200, `ratings "${params.ratingsID}" successfully deleted`);
+            }catch(e){
+                return new RestResponse("DBError", 500, e);
+            }
+        }
+    }
+
+    async update(params, requestedBy){
+        //
+        var err = processParamsFields(params, [
+            {name: "ratingsID", required: true},
+        ]);
+        if (!requestedBy){
+            return RestResponse("AuthorzationDenied", 500, `an unidentified user cannot remove an agreement`);
+        }
+
+        try {
+            var ratings = await ratingsModel.findOne(ratingsIDQuery(params.ratingsID) );
+            if (!ratings){
+                return new RestResponse("NotFoundError", 404, `ratings with id "${params.ratings}" does not exist.`)
+            }
+        } catch (e) {
+            return new RestResponse("DBError", 500, e);
+        }
+
+        if (params.note || params.comment){
+            if (params.note){
+                ratings.note = params.note;
+            }
+            if (params.comment){
+                ratings.comment = params.comment;
+            }
+            ratings.last_edited = Date.now();
+        }
+
+        try{
+            var r = await ratings.save();
+            return new RestResponse("Updated", 200, r);
+        }catch(e){
+            return new RestResponse("DBError", 500, e);
+        }
+    }
+}
+
+
 exports .UsersManager = UsersManager;
 exports .ResourcesManager = ResourcesManager;
 exports .LicencesManager = LicencesManager;
 exports .AgreementManager = AgreementManager;
+exports .RatingsManager = RatingsManager;

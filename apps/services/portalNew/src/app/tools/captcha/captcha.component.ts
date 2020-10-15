@@ -20,7 +20,7 @@ export class CaptchaComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    this.addScript();
+    
   }
 
   setWhenRespond(func: Function){
@@ -39,7 +39,9 @@ export class CaptchaComponent implements OnInit {
       this.renderReCaptcha();
     }
 
-    if ($("script#recaptcha-script").length != 0) return;
+    if ($("script#recaptcha-script").length != 0){ 
+      $("script#recaptcha-script").remove();
+    };
 
     $("body").append( $('<script id="recaptcha-script" src="https://www.google.com/recaptcha/api.js?onload=grecaptchaCallback&amp;render=explicit"></script>') );
     //console.log("reCaptcha | added script");
@@ -76,6 +78,6 @@ export class CaptchaComponent implements OnInit {
   response() { return this.challengeResponse; }
   
   ngAfterViewInit(): void{
-    
+    this.addScript();
   }
 }

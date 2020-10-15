@@ -1,4 +1,13 @@
 
+<div id="search">
+    <div id="search-text">
+        <input class="form-control" name="search-text" [formControl]="search_text" type="text" placeholder="Type text to search here">
+    </div>
+    <div id="search-submit">
+        <button id="search-btn" class="btn btn-primary" (click)="search()"><i class="fas fa-search"></i></button>
+    </div>
+</div>
+
 <ng-template [ngIf]="true">
     <tools-list [items_spec]="store_items"></tools-list>
 </ng-template>

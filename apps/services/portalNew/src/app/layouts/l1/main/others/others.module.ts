@@ -16,17 +16,25 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { SigninComponent, SignupComponent, SignoutComponent } from './login/login.component';
 import { CommonModule } from "@angular/common";
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HomeComponent } from './home/home.component';
+import { AccountComponent } from './account/account.component';
 
 
 const routes : Route[] = [
-    { path: "", pathMatch: "full", component:  HomeComponent },
     { path: "signin", pathMatch: "full", component:  SigninComponent },
     { path: "signup", pathMatch: "full", component:  SignupComponent },
     { path: "signout", pathMatch: "full", component:  SignoutComponent },
     { path: "test", component: TestComponent },
-    
+    { 
+        path: "account", 
+        //pathMatch: "full", 
+        component: HomeComponent, 
+        children: [
+            {path:"", pathMatch:"full", component: AccountComponent}
+        ]
+    },
+    { path: "", pathMatch: "full", component:  HomeComponent },
 ];
 
 
@@ -38,13 +46,15 @@ const routes : Route[] = [
         TestComponent,
         SigninComponent,
         SignupComponent,
-        SignoutComponent
+        SignoutComponent,
+        AccountComponent,
     ],
     imports : [
         CommonModule,
         BrowserModule,
         FormsModule,
         HttpClientModule,
+        ReactiveFormsModule,
         ToolsModule,
         RouterModule.forChild(routes)
     ],
@@ -54,6 +64,7 @@ const routes : Route[] = [
         CommonModule,
         BrowserModule,
         FormsModule,
+        ReactiveFormsModule,
     ]
 })
 export class OthersModule {}

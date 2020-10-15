@@ -8,7 +8,9 @@ var mongoose = require('mongoose');
 const MONGO_URL = 'mongodb://mongo/test_algofab'
 
 var options = {
-	useNewUrlParser: true
+	useNewUrlParser: true,
+	useCreateIndex: true,
+	useUnifiedTopology: true ,
 	//useMongoClient : true,
 	//server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } },
 	//replset: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } }
@@ -33,9 +35,12 @@ var photosSchema = new Schema(
 var ratingsSchema = new Schema(
 	{
 		user: { type: Schema.Types.ObjectId, ref: "Users", required: true},
+		resource: {type: Schema.Types.ObjectId, ref: "Resources", required: true},
 		note: { type: Number, min: 1, max: 5, required: true },
+
 		comment: String,
-		responses: [{ type: Schema.Types.ObjectId, ref: "Ratings" }],
+		//responses: [{ type: Schema.Types.ObjectId, ref: "Ratings" }],
+		last_edited: {type: Date},
 		date: { type : Date, default : Date.now }
 	},
 	{
@@ -156,10 +161,10 @@ var resourcesSchema = new Schema (
 			introduction: String,
 			description : String,
 			documentations : {
-				media_type: { type: String, enum : ["html", "file", "external_links"] },
-				html_docs: {type: String},
-				file_docs: {type: Buffer},
-				doc_links: [ String ]
+				media_type: { type: String, enum : ["html", "pdf", "external_links"] },
+				html: {type: String},
+				pdf: {type: Schema.Types.ObjectId},
+				links: [ String ]
 			},
 			//logo : { content_type: String, buffer: Buffer },
 			logo: { type: Schema.Types.ObjectId, ref : 'Photos' },
@@ -194,7 +199,14 @@ var resourcesSchema = new Schema (
 		usePushEach: true
 	}
 );
-resourcesSchema.index( { "metadata.name": "text", "metadata.description": "text", "metadata.tags": "text" } ); 
+
+//resourcesSchema.index({'$**': 'text'}); 
+resourcesSchema.index({ 
+	"metadata.name": "text", 
+	"metadata.description": "text", 
+	"metadata.introduction": "text", 
+	//"metadata.tags": "text" 
+} ); 
 
 // var resourceVersionSchema = new Schema(
 // 	{

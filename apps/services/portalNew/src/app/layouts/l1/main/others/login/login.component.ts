@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { MainService } from "../../../../../tools/services/main";
 import { CaptchaComponent } from "../../../../../tools/captcha/captcha.component";
 import { Router, ActivatedRoute } from '@angular/router';
@@ -28,7 +28,8 @@ export class SigninComponent implements OnInit {
             
         // })
     }
-
+    ngAfterViewInit(){
+    }
     onSubmit(form){
         console.log('form values :', form.value);
         console.log('form valid :', form.valid);
@@ -81,16 +82,18 @@ export class SignupComponent implements OnInit {
     from: string = "signup";
     ready: boolean = false;
 
+    @ViewChild('reCaptcha', {static:false}) reCaptchaContainer : ElementRef;
     @ViewChild('reCaptcha', {static:false}) reCaptcha : CaptchaComponent;
 
     constructor(private mainService: MainService, private router: Router){}
 
     ngOnInit(): void {
-        console.log("SigninComponent started!!!");
+        console.log("SignupComponent started!!!");
 
     }
 
     ngAfterViewInit(){
+        
         console.log("recapcha equals : ", this.reCaptcha.response() );
         // this.reCaptcha.setWhenRespond(()=>{ this.readyToGo() } );
         // this.reCaptcha.setWhenExpired(()=>{ this.readyToGo() } );
@@ -133,7 +136,10 @@ export class SignupComponent implements OnInit {
             return;
         }
 
-        this.mainService.createAPIObject('user', form.value).subscribe(
+        this.mainService.createAPIObject({
+            kind: 'user', 
+            body: form.value
+        }).subscribe(
             (res)=>{
                 $.notify("Successfully signed up! Check your email for futrther information", "success");
                 this.router.navigate(["/signin"]);

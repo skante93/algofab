@@ -1,245 +1,442 @@
 import { Component, OnInit } from "@angular/core";
-import { MainService } from 'src/app/tools/services/main';
+import { MainService } from '../../../../../tools/services/main';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Buffer } from 'buffer';
 import { FormControl, Validators, FormArray, FormGroup } from '@angular/forms';
+
 
 const $ = window['$'];
 
 const tinymce = window['tinymce'];
 
+
+function arrayBufferToBase64( buffer: BlobPart, callback: { (blob_url: any): void; (arg0: string | ArrayBuffer): void; } ) {
+    var blob = new Blob([buffer],{type:'application/octet-binary'});
+    var reader = new FileReader();
+    reader.onload = function(evt){
+        var dataurl = evt.target.result;
+        callback(dataurl);//dataurl.substr(dataurl.indexOf(',')+1));
+    };
+    reader.readAsDataURL(blob);
+}
+
+
 @Component({
-    selector: '',
+    selector: 'store-item',
     templateUrl: './item.component.html',
     styleUrls: ['./item.component.scss']
 })
 export class StoreItemComponent implements OnInit{
-    id: string;
-	resource: any;
-    default_logo: string = "/assets/img/algofab_white_bg.PNG";
-    logo: string;
+    resource_fetched: boolean = false;
+    resourceForm: FormGroup = new FormGroup({
+        _id: new FormControl(''),
+        metadata: new FormGroup({
+            name: new FormControl('', Validators.required),
+            version: new FormControl(''),
+            type: new FormControl('', Validators.required),
+            introduction: new FormControl(''),
+            description: new FormControl(''),
+            private: new FormControl(false),
+            tags: new FormArray([
+                // new FormGroup({ 
+                //     name: new FormControl(''), 
+                //     value: new FormControl('') 
+                // })
+            ]),
+            docs: new FormGroup({
+                media_type: new FormControl('', Validators.required),
+                html: new FormControl(''),
+                links: new FormArray([]),
+                pdf: new FormControl(''),
+            }),
+            logo: new FormControl(''),
+            licence: new FormControl(''),
+            agreement: new FormControl('')
+        }),
+        author: new FormControl(''),
+        archiveData: new FormControl('')
+    });
 
-    formGroup: any = {
-        name: new FormControl('', Validators.required),
-        version: new FormControl(''),
-        type: new FormControl(''),
-        tags: new FormArray([
-            new FormGroup({ 
-                name: new FormControl(''), 
-                value: new FormControl('') 
-            })
-        ]),
-        introduction: new FormControl(''),
-        description: new FormControl(''),
-        licence: new FormControl(''),
-        agreement: new FormControl(''),
-        archive: new FormControl(''),
-        archiveFile: new FormControl('')
-    };
+    edit_property:string;
+
+    default_icon: string = "/assets/img/algofab.PNG";
+
+    docTypeDisplay: string ;
+
+    has_archiveData: boolean = false;
+    has_logo: boolean = false;
+    pdf_docs_ready:boolean = false;
 
     constructor(private activatedRoute: ActivatedRoute, private router: Router, private mainService: MainService){}
 
     ngOnInit(): void {
         console.log("StoreItemComponent started!!!");
-
-        this.activatedRoute.params.subscribe(p=> {
-			this.id = p['id'];
-			this.mainService.getAPIObject('resource', this.id, null).subscribe(
-				(res:any)=>{
-					console.log("res : ", res);
-                    this.resource = res.response;
-                    console.log("this.resource.metadata : ", this.resource.metadata);
-                    //console.log("this.resource.metadata.tags : ", this.resource.metadata.tags[0].name);
-                    if (this.resource.metadata.logo != null){
-                        console.log("this.resource.metadata.logo : ", this.resource.metadata.logo);
-                        var ct = this.resource.metadata.logo.content_type;
-                        var data = this.resource.metadata.logo.data;
-                        data = typeof data === 'string' ? data : Buffer.from(data.data).toString('base64');
-                        //console.log("data : ", data);
-                        this.logo = `data:${ct};base64,${data}`;
-
-                        var img = new Image();
-                        img.src = this.logo;
-                        this.resource.metadata.logo = img;
-                    }
-                    
-                    for (var m in this.resource.metadata){
-                        if (m in this.formGroup ){
-                            if (m == "tags"){
-                                //
-                                this.resource.metadata.tags.forEach((t)=>{ this.formGroup.tags.push(t) });
-                            }
-                            else{
-                                this.formGroup[m].setValue(this.resource.metadata[m]);
-                            }
-                        }
-                    }
-				},
-				(err)=>{
-					console.log("err: ", err);
-				},
-				()=>{
-					console.log("Done!!!");
-				}
-			)
-		});
     }
 
-    onArchiveChange(event){
+    iAmAuthor():boolean {
+        return this.mainService.getUserAccount()._id == this.resourceForm.get('author').value;
+    }
+
+    getProperty(prop:string){
+        switch(prop){
+            case '_id':
+                return this.resourceForm.get('_id').value;
+            case 'name':
+                return this.resourceForm.get('metadata').get('name').value;
+            case 'version':
+                return this.resourceForm.get('metadata').get('version').value;
+            case 'type':
+                return this.resourceForm.get('metadata').get('type').value;
+            case 'icon':
+                let iconSrc = this.resourceForm.get('metadata').get('type').value;
+                return iconSrc == '' ? this.default_icon : `/assets/img/${iconSrc}.svg`;
+            case 'introduction':
+                return this.resourceForm.get('metadata').get('introduction').value;
+            case 'description':
+                return this.resourceForm.get('metadata').get('description').value;
+            case 'private':
+                return this.resourceForm.get('metadata').get('private').value.toString().toUpperCase();
+            case 'tags':
+                return this.resourceForm.get('metadata').get('tags').value;
+            case 'docs':
+                return this.resourceForm.get('metadata').get('docs').value;
+            case 'docs_type':
+                return this.resourceForm.get('metadata').get('docs').get('media_type').value;
+            case 'docs_html':
+                return this.resourceForm.get('metadata').get('docs').get('html').value;
+            case 'docs_links':
+                return this.resourceForm.get('metadata').get('docs').get('links').value;
+            case 'docs_pdf':
+                return this.resourceForm.get('metadata').get('docs').get('pdf').value;
+            case 'logo':
+                return this.resourceForm.get('metadata').get('logo').value;
+            case 'licence':
+                return this.resourceForm.get('metadata').get('licence').value;
+            case 'agreement':
+                return this.resourceForm.get('metadata').get('agreement').value;
+            case 'archiveData':
+                return this.resourceForm.get('archiveData').value;
+            default:
+                console.warn(`Don't know property "${prop}"`);
+        }
+    }
+
+    changeDocTypeDisplay(){
+        let dt = this.resourceForm.get('metadata').get('docs').get('media_type').value;
+        //alert('changeDocTypeDisplay('+dt+')!!!!');
+        this.docTypeDisplay = dt;
+    }
+
+    editArchiveDataChanged(event){
         if (event.target.files.length > 0) {
             const file = event.target.files[0];
             // this.formGroup.patchValue({
             //     archiveFile: file
             // });
-            if (this.formGroup.archiveFile.value != ''){
-                this.formGroup.archiveFile.setValue('');
+            if (this.resourceForm.get('archiveData').value != ''){
+                this.resourceForm.get('archiveData').setValue('');
             }
-            this.formGroup.archiveFile.setValue(file);      
-          }
+            this.resourceForm.get('archiveData').setValue(file);      
+        }
     }
 
-    editField(field: string){
-        var subUrl = (field == "download" ? 'archive' : 'metadata')
+    editDocsPDFChanged(event){
+        if (event.target.files.length > 0) {
+            const file = event.target.files[0];
+            // this.formGroup.patchValue({
+            //     archiveFile: file
+            // });
+            if (this.resourceForm.get('metadata').get('docs').get('pdf').value != ''){
+                this.resourceForm.get('metadata').get('docs').get('pdf').setValue('');
+            }
+            this.resourceForm.get('metadata').get('docs').get('pdf').setValue(file);      
+        }
+    }
+
+    editLogoDataChanged(event){
+        if (event.target.files.length > 0) {
+            const file = event.target.files[0];
+            // this.formGroup.patchValue({
+            //     archiveFile: file
+            // });
+            if (this.resourceForm.get('metadata').get('logo').value != ''){
+                this.resourceForm.get('metadata').get('logo').setValue('');
+            }
+            console.log("File : ",file);
+            //let reader = new FileReaderSync();
+            
+            this.resourceForm.get('metadata').get('logo').setValue(file);  
+        }
+    }
+    
+    loadResource(){
+        this.activatedRoute.params.subscribe(p=> {
+			
+			this.mainService.getAPIObject({
+                kind: 'resource', 
+                objectID: p.id
+            }).subscribe(
+				async (res:any)=>{
+                    console.log("res : ", res);
+                    var resource = res.response;
+                    
+                    try {
+                        if ('licence' in resource.metadata && resource.metadata.licence && typeof resource.metadata.licence === 'string' ){
+                            var licence = await this.mainService.getAPIObject({
+                                kind: 'licence', 
+                                objectID: resource.metadata.licence
+                            }).toPromise();
+
+                            resource.metadata.licence = licence;
+                        }
+                    } catch (e) {
+                        console.log("Failed to fetch licence!!!", e);
+                    }
+
+                    try {
+                        if ('agreement' in resource.metadata && resource.metadata.agreement && typeof resource.metadata.agreement === 'string'){
+                            var agreement = await this.mainService.getAPIObject({
+                                kind: 'agreement', 
+                                objectID: resource.metadata.agreement
+                            }).toPromise();
+
+                            resource.metadata.agreement = agreement;
+                        }
+                    } catch (e) {
+                        console.log("Failed to fetch agreement!!!", e);
+                    }
+                    
+                    try {
+                        if ('documentations' in resource.metadata && resource.metadata.documentations && resource.metadata.documentations.media_type == 'pdf' && typeof resource.metadata.documentations.pdf == 'string'){
+
+                            var docsPDF = await this.mainService.getAPIObject({
+                                kind: 'resource', 
+                                objectID: resource._id,
+                                subUrl:"docs",
+                                requestedBy: this.mainService.getUserAccount().auth_token
+                            }).toPromise();
+                            resource.metadata.documentations.pdf = await new Promise((resolve, reject)=>{
+                                arrayBufferToBase64(docsPDF, (blob_url: any)=>{
+
+                                    console.log("download link:", $('#docs-pdf-download'));
+                                    //debugger;
+
+                                    setTimeout(()=>{
+                                        console.log("download link:", $('#docs-pdf-download'));
+                                        $('#docs-pdf-download').attr('href', blob_url);
+                                        //alert('now that we are ready all is fine!!');
+                                        this.pdf_docs_ready = true;
+                                    }, 2000);
+
+                                    resolve(blob_url);
+                                    
+                                });
+                            });
+                        }
+                    } catch (e) {
+                        console.log("Failed to fetch agreement!!!", e);
+                    }
+                    
+                    try {
+                        if ('archiveData' in resource && resource.archiveData && typeof resource.archiveData === 'string'){
+                            var archiveData = await this.mainService.getAPIObject({
+                                kind: 'resource', 
+                                objectID: resource._id,
+                                subUrl:"archive",
+                                requestedBy: this.mainService.getUserAccount().auth_token
+                            }).toPromise();
+                            resource.archiveData = await new Promise((resolve, reject)=>{
+                                arrayBufferToBase64(archiveData, (blob_url: any)=>{
+
+                                    console.log("download link:", $('#download-container a'));
+                                    //debugger;
+
+                                    $('#download-container a').ready(()=>{
+                                        $('#download-container a').attr('href', blob_url);
+                                        //alert('now that we are ready all is fine!!');
+                                    });
+                                    resolve(blob_url);
+                                    
+                                });
+                            });
+                            this.has_archiveData = true;
+                        }
+                    } catch (e) {
+                        console.log("Failed to fetch archiveData!!!", e);
+                    }
+                    
+                    if (resource.metadata.logo && resource.metadata.logo.content_type){
+                        var ct = resource.metadata.logo.content_type;
+                        var data = resource.metadata.logo.data;
+                        data = typeof data === 'string' ? data : Buffer.from(data.data).toString('base64');
+                        //console.log("data : ", data);
+                        resource.metadata.logo = `data:${ct};base64,${data}`;
+                        this.has_logo = true;
+                    }
+                    this.updateResourceForm(resource);
+				},
+				(err: { error: { message: any; }; })=>{
+                    console.log("err: ", err);
+                    $.notify(err.error.message);
+                    this.router.navigate(['store']);
+				},
+				()=>{
+					console.log("Done!!!");
+				}
+			)
+        });
+    }
+
+    updateResourceForm(resource: any){
+
+        this.resourceForm.get('_id').setValue(resource._id);
+        // Updating Metadata
+        var meta = resource.metadata;
+        for (var m in meta){
+            if (['name', 'introduction', 'description', 'type', 'logo', 'version', 'private'].indexOf(m) >= 0 ){
+                this.resourceForm.get('metadata').get(m).setValue(meta[m]) ;
+            }
+            else if(m == 'tags' && meta[m]){
+                meta[m].forEach( (t: { name: any; value: any; }) => {
+                    (this.resourceForm.get('metadata').get(m) as FormArray).push(new FormGroup({ name: new FormControl(t.name), value: new FormControl(t.value)})) ;
+                });
+            }
+            else if (m == 'documentations' && meta[m]){
+                if (meta[m].media_type === 'html'){
+                    this.resourceForm.get('metadata').get('docs').get('media_type').setValue('html');
+                    this.resourceForm.get('metadata').get('docs').get('html').setValue(meta[m].html);
+                }
+                else if (meta[m].media_type === 'external_links'){
+                    this.resourceForm.get('metadata').get('docs').get('media_type').setValue('external_links');
+                    
+                    meta[m].links.forEach((l:string)=>{
+                        alert('link : '+l); 
+                        (this.resourceForm.get('metadata').get('docs').get('links') as FormArray).push(new FormControl(l)); 
+                    });
+                }
+                else if (meta[m].media_type === 'pdf'){
+                    this.resourceForm.get('metadata').get('docs').get('media_type').setValue('pdf');
+                    console.log("meta[m]..pdf : ", meta[m].pdf);
+                    //alert("Handling docs PDF");
+                    this.resourceForm.get('metadata').get('docs').get('pdf').setValue(meta[m].pdf);
+                }
+            }
+            
+        }
+
+        // ArchiveData
+        if("archiveData" in resource && resource.archiveData){
+            this.resourceForm.get('archiveData').setValue(resource.archiveData); 
+        }
+
+        // Author
+        if("author" in resource && resource.author){
+            //alert("UID : "+this.mainService.getUserAccount()._id + ' | author : '+resource.author);
+            this.resourceForm.get('author').setValue(resource.author); 
+        }
+
+        this.resource_fetched = true;
+    }
+
+    editPropertyForm(prop:string){
+        //alert('editPropertyForm : '+prop);
+        this.edit_property = prop;
+
+        $('#edit-form').modal('show');
+    }
+
+    addTag(){
+        (this.resourceForm.get('metadata').get('tags') as FormArray).push(new FormGroup({ name: new FormControl(''), value: new FormControl('') }));
+    }
+
+    removeTag(index){
+        (this.resourceForm.get('metadata').get('tags') as FormArray).removeAt(index);
+    }
+    addLink(){
+        (this.resourceForm.get('metadata').get('docs').get('links') as FormArray).push(new FormControl(''));
+    }
+
+    removeLink(index){
+        (this.resourceForm.get('metadata').get('docs').get('links') as FormArray).removeAt(index);
+    }
+
+    updateProperty(){
+        let body = new FormData(), subUrl = this.edit_property == "archiveData" ? 'archive' : this.edit_property == 'docs'? 'docs' : 'metadata';
+
+        if (['name', 'introduction', 'description', 'type', 'version', 'logo', 'tags', 'licence', 'agreement', 'private'].indexOf(this.edit_property)>=0){
+            body.append(this.edit_property, 
+                this.edit_property == 'tags' ? JSON.stringify(this.resourceForm.get('metadata').get('tags').value) : 
+                    this.resourceForm.get('metadata').get(this.edit_property).value 
+            );
+        }
+        else if(this.edit_property == 'archiveData'){
+            body.append('archive', this.resourceForm.get('archiveData').value);
+        }
+        else if(this.edit_property == 'docs'){
+            body.append('media_type', this.resourceForm.get('metadata').get('docs').get('media_type').value);
+            //alert('docTypeDisplay : '+this.resourceForm.get('metadata').get('docs').get('media_type').value);
+            switch (this.resourceForm.get('metadata').get('docs').get('media_type').value){
+                case 'html':
+                    body.append('html', this.resourceForm.get('metadata').get('docs').get('html').value);
+                break;
+                case 'external_links':
+                    alert('links are : '+ JSON.stringify(this.resourceForm.get('metadata').get('docs').get('links').value ));
+                    body.append('links', JSON.stringify(this.resourceForm.get('metadata').get('docs').get('links').value ));
+                break;
+                default :
+                    body.append('pdf', this.resourceForm.get('metadata').get('docs').get('pdf').value);
+                break;
+            }
+        }
         
-        let body;
-
-        if (field == "download"){
-            console.log("this.formGroup.archive : ", this.formGroup.archive.value);
-            body = new FormData();
-            body.append("archive", );
-            return;
-        }
-        else{
-            body[field] = this.formGroup[field].value;
-        }
-
-        console.log("Edit field : ", body);
 
         this.mainService.updateAPIObject({
             kind: 'resource', 
             subUrl: subUrl,
-            objectID: this.resource._id, 
+            objectID: this.resourceForm.get('_id').value, 
             body: body, 
-            author: this.mainService.getUserAccount().auth_token, 
+            requestedBy: this.mainService.getUserAccount().auth_token, 
             query: null, 
-            isMultipart: true
         }).subscribe(
             (res:any)=>{
-                console.log("Done!!");
-                $.notify("update successful!", 'success')
-                if (field == "download"){
-                    //
-                }
-                else{
-                    this.resource.metadata[field] = body[field];
-                }
+                $.notify(`${this.edit_property} successfully updated!`, 'success')
             },
             (err)=>{
-                console.log("err", err);
-                debugger;
                 $.notify(err.error.message);
-            },
-            ()=>{
-                console.log("Done guys");
             }
         );
-
     }
 
     ngAfterViewInit(){
+        this.loadResource();
+        
+        
+
         setTimeout(()=>{
-            $('[editable]').each((i,e)=>{
-                console.log("Editable # ", i, ": ", e);
-
-                var parent_dim = [$(e).width(), $(e).height()];
-                var parent_pos = $(e).position();
-                console.log("parent_dim : ", parent_dim);
-                console.log("parent_pos : ", parent_pos);
-
-
-                var edit = $(`<div>Edit</div>`).css({
-                    "background-color":"red",
-                    "color":"white",
-                    "text-decoration":"bold",
-                    // "width":"2em",
-                    // "font-size":"1em",
-                    // "height":parent_dim[1]*0.4,
-                    // "font-size": parent_dim[1]*0.3,
-                    "display":"none",
-                    "align-items":"center",
-                    "justify-content":"center",
-                    "padding":".4em",
-                    "border-radius":"5px",
-                    "position":"absolute",
-                    "cursor":"pointer",
-                    "text-align":"center"
-                });
-
-                edit.click(()=>{ 
-                    //this.editModal($(e).attr('editable'));
-                    var id = '#update-'+$(e).attr('editable');
-                    console.log("displaying model id : \"", id, "\"");
-                    $(id).modal('show'); 
-                });
-                $(e).append(edit);
-                // const editMinWidth = 20, editMaxWidth = 40;
-                // const editMinHeight = 20, editMaxHeight = 40;
-                $(e).hover(
-                    ()=>{
-                        // var w = Math.max( Math.min( parent_dim[0] * .2, editMaxWidth), editMinWidth);
-                        // var h = Math.max( Math.min( parent_dim[1] * .2, editMaxHeight), editMinHeight);
-                        edit.css({
-                            "display": "flex",
-                            "width": "60px",
-                            "height": "30px",
-                            "font-size": "15px",
-                            "left": (parent_dim[0]-60)
-                            
-                        });
-                    },
-                    ()=>{
-                        edit.hide();
-                    }
-                );
-            });
-
+            //alert("DOnin my part");
             tinymce.init({
-                selector: '#description',
+                selector: '#edit-description-property',
+                plugins: 'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+                toolbar_mode: 'floating',
                 setup: (editor)=> {
                     editor.on('change', ()=> {
-                        this.formGroup.description.setValue(editor.save());
+                        //console.log("Just saved : ", editor.save());
+                        this.resourceForm.get('metadata').get('description').setValue(editor.save());
                     });
                 }
             });
+            tinymce.init({
+                selector: '#edit-docs-html-property',
+                plugins: 'advlist autolink lists link image charmap print preview hr anchor pagebreak',
+                toolbar_mode: 'floating',
+                setup: (editor)=> {
+                    editor.on('change', ()=> {
+                        //console.log("Just saved : ", editor.save());
+                        this.resourceForm.get('metadata').get('docs').get('html').setValue(editor.save());
+                    });
+                }
+            });
+            
         }, 1000);
-
-        
-    }
-
-    hoverStar(index: number){
-        //console.log("Hoverd on i = ", index);
-        $("#smiley i").attr('class', ()=>{
-            return index == 0 ? 'fas fa-angry' : 
-                        index == 1? 'fas fa-frown' : 
-                            index == 2 ? 'fas fa-meh' : 
-                                index == 3 ? 'fas fa-smile' : 'fas fa-smile-beam';
-        }); 
-        var stars = $("#stars span i").css('color', 'black');
-
-        for (var i=0; i<=index; i++){
-            $(stars[i]).css('color', 'yellow');
-        }
-    }
-
-    logoSrc() {
-        // if (this.resource != undefined && this.resource.metadata.logo != undefined && this.resource.metadata.logo != null){
-        //     // TODO get logo from it
-        //     return this.resource.metadata.logo;
-        // }
-        // else{
-        //     return this.default_logo;
-        // }
-        //console.log("my logo : ", this.resource.metadata.logo);
-        return this.logo? this.logo : this.default_logo;
     }
 }

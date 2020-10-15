@@ -84,7 +84,8 @@ var example_settings = {
             operations_timing: {
                 user_deletion_delay: 60 * 1000, // 1m
                 resource_deletion_delay: 60 * 1000, // 1m
-                licence_dleetion_delay: 60 * 1000, // 1m 
+                licence_deletion_delay: 60 * 1000, // 1m
+                ratings_deletion_delay: 60 * 1000, // 1m 
                 daemon_cycles: {
                     all: 60 * 1000, // 1m
                     remove_outdated: 60 * 1000 // 1m

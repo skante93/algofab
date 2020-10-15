@@ -54,14 +54,14 @@ export class ListComponent implements OnInit {
 
     changeBackgrounds(){
 
-        setTimeout(()=>{
-            console.log("All bg images : ", document.querySelector('[bg-img]') );
+        setInterval(()=>{
+            //console.log("All bg images : ", document.querySelector('[bg-img]') );
             $('[bg-img]').each((i, e)=>{
                 $(e).css ({
                     "background-image": `url(${$(e).attr("bg-img")})`,
                 });
             });
-        },100);
+        },300);
     }
 
     changeStyle(s){

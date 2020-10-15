@@ -1,74 +1,162 @@
 
 
-<ng-template [ngIf]="resource">
-
-    <div class="res-container">
-        <div class="title-section">
-            <div class="title" editable="name">{{resource.metadata.name}}</div>
-            <div class="type-icon" >
-                <img src="/assets/img/{{resource.metadata.type}}.svg" alt="" editable="logo">
-            </div>
-        </div>
-
-        <div class="tags-section">
-            <div class="tags-container" editable="tags">
-                <h4> Tags </h4>
-                <div class="tags">
-                    <ng-template [ngIf]="resource.metadata.tags == undefined || resource.metadata.tags.length == 0">
-                        No tags available
-                    </ng-template>
-
-                    <ng-template [ngIf]="resource.metadata.tags != undefined">
-                        <div class="tag" *ngFor="let tag of resource.metadata.tags">
-                            <span class="tag-name">{{tag.name}}</span> : <span class="tag-value">{{tag.value}}</span>
-                        </div>
-                        <div class="tag" *ngFor="let tag of resource.metadata.tags">
-                            <span class="tag-name">t2</span> : <span class="tag-value">v2</span>
-                        </div>
-                    </ng-template>
-                </div>
-            </div>
-            <div class="ratings-container">
-                <h4>Rating</h4>
-                <div id="ratings">
-                    <div id="ratings-vote">
-                        <div id="smiley">
-                            <i class="fas fa-smile-beam"></i>
-                        </div>
-                        <div id="stars">
-                            <span *ngFor="let i of [0,1,2,3,4]" (mouseenter)="hoverStar(i)" (click)="vote(i+1)"><i class="fa fa-star"></i> </span>
-                        </div>
-
-                        <div id="current-note-container">Current note : <span id="current-note">0/5</span></div>
+<ng-template #itemTemplate >
+    <div class="container">
+        <div class="row">
+            <div class="col-sm" id="section-one">
+                <div class="row align-middle">
+                    <div class="col-sm-2" id="manage" *ngIf="iAmAuthor()"> <i class="fas fa-cog"></i> </div>
+                    <div class="offset-sm-1 col-sm" id="r-name-display"> 
+                        <div class="prop-value">{{ getProperty('name') }}</div>
+                        <div class="edit-property" (click)="editPropertyForm('name')" *ngIf="iAmAuthor()"> <i class="fas fa-feather" ></i></div>
                     </div>
-                    <div class="ratings-my-score"></div>
-                    <div class="ratings-review"></div>
+                    <div class="offset-sm-1 col-sm-2" id="r-icon-display"> 
+                        <img src="{{ getProperty('icon') }}" width="100%" height="100%">
+                        <div class="edit-property" (click)="editPropertyForm('type')" *ngIf="iAmAuthor()"> <i class="fas fa-feather" ></i></div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="description-section">
-            <div class="description" [innerHTML]="resource.metadata.description" editable="description"></div>
-            <div class="logo">
-                <img src="{{logoSrc()}}" alt="">
-            </div>
-        </div>
-
-        <div class="download-section" editable="download">
-            <h4>Download</h4>
-            
-            <div [hidden]="resource.data != undefined"> No data archive </div>
-            <button class="btn btn-primary" [hidden]="resource.data == undefined"> Download archive</button>
             
         </div>
+
+        <div class="row">
+            <div class="col-sm" id="section-two">
+                <div class="row">
+                    <div class="col-sm-2" id="private-display">
+                        <div class="prop-heading"> Is private </div>
+                        <div class="prop-value">{{ getProperty('private') }}</div>
+                        <div class="edit-property" (click)="editPropertyForm('private')" *ngIf="iAmAuthor()"> <i class="fas fa-feather"></i></div>
+                    </div>
+                    <div class="col-sm" id="tags-display">
+                        <div class="prop-heading"> Tags </div>
+                        <div class="row prop-value" style="padding-left:1em">
+                            <div *ngFor="let tag of getProperty('tags')" class="tag">
+                                <span class="tag-name">{{ tag.name }}</span> <span class="tag-value" *ngIf="tag.value"> : {{ tag.value }}</span>
+                            </div>
+                        </div>
+                        <div class="edit-property" (click)="editPropertyForm('tags')" *ngIf="iAmAuthor()"> <i class="fas fa-feather"></i></div>
+                    </div>
+                    <div class="col-sm-3" id="ratings-display">
+                        <div class="prop-heading"> Ratings </div>
+                        <div class="row" >
+                            <div class="col-sm" ratings [resourceID]="getProperty('_id')">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div id="section-three" class="col-sm">
+                <div class="card">
+                    <div class="card-header">
+                        <a class="card-link" data-toggle="collapse" href="#descriptionCollapse">
+                            Description
+                        </a>
+                    </div>
+                    <div id="descriptionCollapse" class="collapse show" data-parent="#section-three">
+                        <div class="card-body">
+                            <div id="r-description-display" class="col-sm">
+                                <div class="col-sm-2">
+                                    <div class="prop-heading"> Logo </div>
+                                    <div [hidden]="has_logo">No Logo</div>
+                                    <img src="{{getProperty('logo')}}" width="100%" height="100%" [hidden]="!has_logo"> 
+                                    <div class="edit-property" (click)="editPropertyForm('logo')" *ngIf="iAmAuthor()"> <i class="fas fa-feather"></i></div> 
+                                </div>
+                                <div class="col-sm">
+                                    <div class="row">
+                                        <div class="col-sm" style="margin-bottom: 2em;"> 
+                                            <div class="prop-heading"> Introduction </div>
+                                            <div class="col-sm"> {{ getProperty('introduction') }} </div>
+                                            <div class="edit-property" (click)="editPropertyForm('introduction')" *ngIf="iAmAuthor()"> <i class="fas fa-feather"></i></div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm"> 
+                                            <div class="prop-heading"> Description </div>
+                                            <div class="col-sm" [innerHTML]="getProperty('description')"></div>
+                                            <div class="edit-property" (click)="editPropertyForm('description')" *ngIf="iAmAuthor()"> <i class="fas fa-feather"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <a class="collapsed card-link" data-toggle="collapse" href="#docsCollapse">
+                            Documentation
+                        </a>
+                    </div>
+                    <div id="docsCollapse" class="collapse" data-parent="#section-three">
+                        <div class="card-body">
+                            <div id="r-docs-display" class="col-sm">
+                                <!-- <div class="prop-value" [innerHTML]="getProperty('docs')"></div> -->
+                                <div class="prop-value">
+                                    <div class="col-sm" *ngIf="getProperty('docs_type') == 'html'" [innerHTML]="getProperty('docs_html')"></div>
+                                    <div class="col-sm" *ngIf="getProperty('docs_type') == 'external_links'">
+                                        Documentation available at the following destinations: 
+
+                                        <ul>
+                                            <li *ngFor="let link of getProperty('docs_links')"> <a href="{{link}}">{{link}}</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-sm" *ngIf="getProperty('docs_type') == 'pdf'" >
+                                        <a href="#" id="docs-pdf-download" download="docs.pdf" [hidden]="!pdf_docs_ready">Download the documentation PDF</a>
+                                    </div>
+                                </div>
+
+                                <div class="edit-property" (click)="editPropertyForm('docs')" *ngIf="iAmAuthor()"> <i class="fas fa-feather"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <a class="collapsed card-link" data-toggle="collapse" href="#archiveCollapse">
+                            Donwload
+                        </a>
+                    </div>
+                    <div id="archiveCollapse" class="collapse" data-parent="#section-three">
+                        <div class="card-body">
+                            <div id="r-download-display" class="col-sm">
+                                <div class="prop-value">
+                                    <div class="my-warning row">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        Before you download make sure you read the Licence and Terms of Use. 
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2"> Licence </div>
+                                        <div class="col-sm"> Licence </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2"> Terms of Use </div>
+                                        <div class="col-sm"> Licence </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm" id="download-container">
+                                            <a download="archive.zip" [hidden]="!has_archiveData"><button class="btn btn-primary"> Download Archive </button></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="edit-property" (click)="editPropertyForm('archiveData')" *ngIf="iAmAuthor()"> <i class="fas fa-feather"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- MODALS-->
-
-    <div class="modal fade" id="update-name" tabindex="-1" role="dialog" aria-labelledby="update-name-label" aria-hidden="true">
+    <div class="modal fade" id="edit-form" tabindex="-1" role="dialog" aria-labelledby="edit-form-label" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="update-name-label">Update name</h5>
+                    <h5 class="modal-title" id="edit-form-label">Edit property {{edit_property}} </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -76,76 +164,127 @@
                 <div class="modal-body">
                     <div class="container">
                         <div class="row">
-                            <form class="col-sm" >
-                                <input type="text" class="form-control" [formControl]="formGroup.name">
+                            <form action="" class="col-sm" [formGroup]="resourceForm">
+                                <ng-container  formGroupName="metadata">
+                                    <div class="form-group row" [hidden]="edit_property != 'name'">
+                                        <input type="text" class="form-control" formControlName="name">
+                                    </div>
+                                    <div class="form-group row" [hidden]="edit_property != 'private'">
+                                        <input type="checkbox" class="form-control" formControlName="private">
+                                    </div>
+                                    <div class="form-group row" [hidden]="edit_property != 'type'">
+                                        <select class="form-control" formContrlName="type">
+                                            <option value="ai_model">AI Model</option>
+                                            <option value="notebook">Notebook</option>
+                                            <option value="docker">Docker container</option>
+                                            <option value="dataset">Dataset</option>
+                                            <option value="library">Library</option>
+                                            <option value="executable">Executable</option>
+                                            <option value="service">As A Service</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" [hidden]="edit_property != 'tags'">
+                                        
+                                        <ng-container 
+                                            formArrayName="tags" 
+                                            *ngFor="let tag of resourceForm.get('metadata').get('tags')['controls']; index as i" >
+                                            <ng-container [formGroupName]="i">
+                                                <div class="row" style="margin-bottom: 1em;">
+                                                    <div class="col-sm">
+                                                        <input class="form-control" formControlName="name" placeholder="Name of the tag">
+                                                    </div>
+                                                    <div class="offset-sm-1 col-sm">
+                                                        <input class="form-control" formControlName="value" placeholder="Value of the tag">
+                                                    </div>
+                                                    <div class="offset-sm-1 col-sm-2">
+                                                        <button type="button" class="btn btn-danger" (click)="removeTag(i)">Remove Item</button>
+                                                    </div>
+                                                </div>
+                                            </ng-container>
+                                            
+                                        </ng-container>
+                                        <div class="row">
+                                            <div class="col-sm-2">
+                                                <button type="button" class="btn btn-secondary" (click)="addTag()"> Add Item</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row" [hidden]="edit_property != 'introduction'">
+                                        <input type="text" class="form-control" formControlName="introduction">
+                                    </div>
+                                    <div class="form-group" [hidden]="edit_property != 'description'">
+                                        <textarea formControlName="description" id="edit-description-property"></textarea>
+                                    </div>
+                                    <div class="form-group row" [hidden]="edit_property != 'licence'">
+                                        <select class="form-control" formContrlName="licence">
+                                            <option value="ai_model">Fake</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group row" [hidden]="edit_property != 'agreement'">
+                                        <select class="form-control" formContrlName="agreement">
+                                            <option value="ai_model">Fake</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group" [hidden]="edit_property != 'docs'" formGroupName="docs">
+                                        
+                                        <div class="row" style="margin-bottom: 1em;">
+                                            <label class="col-sm-2"> Media Type : </label>
+                                            <div class="col-sm">
+                                                <select formControlName="media_type" class="form-control">
+                                                    <option value="html">HTML</option>
+                                                    <option value="external_links">External Links</option>
+                                                    <option value="pdf">PDF</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm" [hidden]="getProperty('docs_type') != 'html'">
+                                            <textarea formontrolName="html" id="edit-docs-html-property" ></textarea>
+                                        </div>
+                                        <div [hidden]="getProperty('docs_type') != 'external_links'" formArrayName="links">
+                                            <div class="row" *ngFor="let tag of resourceForm.get('metadata').get('docs').get('links').controls; index as i" style="margin-bottom: 1em;">
+                                                
+                                                    <div class="col-sm">
+                                                        <input class="form-control" type="text" [formControl]="resourceForm.get('metadata').get('docs').get('links').controls[i]">
+                                                    </div>
+                                                    <div class="col-sm-2"> 
+                                                        <button type="button" class="btn btn-danger" (click)="removeLink(i)">Remove Item</button>
+                                                    </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-2"> 
+                                                    <button type="button" class="btn btn-secondary" (click)="addLink()">Add item</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row" [hidden]="getProperty('docs_type') != 'pdf'">
+                                            <input type="file" (change)="editDocsPDFChanged($event)" accept=".pdf">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row" [hidden]="edit_property != 'archiveData'">
+                                        <input type="file" (change)="editArchiveDataChanged($event)" accept=".zip">
+                                    </div>
+
+                                    <div class="form-group row" [hidden]="edit_property != 'logo'">
+                                        <input type="file" (change)="editLogoDataChanged($event)" accept=".jpeg,.jpg,.png">
+                                    </div>
+
+                                </ng-container>
                             </form>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" (click)="editField('name')">Save changes</button>
+                    <button type="button" class="btn btn-primary" (click)="updateProperty()">Save changes</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="modal fade" id="update-description" tabindex="-1" role="dialog" aria-labelledby="update-description-label" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="update-description-label">Update description</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="container">
-                        <div class="row">
-                            <form class="col-sm" >
-                                <textarea class="form-control" id="description" [formControl]="formGroup.description" placeholder="Make a full description of your resource here">
-                                    {{resource.metadata.description}}
-                                </textarea>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" (click)="editField('description')">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="update-download" tabindex="-1" role="dialog" aria-labelledby="update-download-label" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="update-download-label">Update Archive</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="container">
-                        <div class="row">
-                            <form class="col-sm" >
-                                <input type="file" [formControl]="formGroup.archive" (change)="onArchiveChange($event)">
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" (click)="editField('download')" [disabled]="formGroup.archive.value == ''">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </ng-template>
 
-<ng-template [ngIf]="!resource">
+<ng-container *ngIf="!resource_fetched; else itemTemplate">
     Now loading!!!
-</ng-template>
+</ng-container>
