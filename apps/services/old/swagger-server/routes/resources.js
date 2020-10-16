@@ -19,6 +19,13 @@ var handlers = {
         //console.log('r : ', r);
         r.reply(req, res);
     },
+    search_resources : async (req, res, next)=>{
+        console.log('## SEARCH RESOURCEs : ', res.locals.params);
+        // res.status(405).json({body: "Not yet implemented!!"})
+        var r = await resourcesManager.search(res.locals.params, res.locals.user);
+        console.log('r : ', r);
+        r.reply(req, res);
+    },
     get_one_resource: async (req, res, next) =>{
         console.log('## GET ONE RESOURCE : ', res.locals.params);
         //res.status(405).json({body: "Not yet implemented!!"})
@@ -39,6 +46,20 @@ var handlers = {
         var r = await resourcesManager.updateMetadata(res.locals.params, res.locals.user);
         console.log('r : ', r);
         r.reply(req, res, filterResource);
+    },
+    update_resource_docs: async(req, res, next)=>{
+        console.log('## UPDATE RESOURCE DOCS: ', res.locals.params);
+        // res.status(405).json({body: "Not yet implemented!!"})
+        var r = await resourcesManager.updateDocs(res.locals.params, res.locals.user);
+        console.log('r : ', r);
+        r.reply(req, res, filterResource);
+    },
+    get_resource_docs: async(req, res, next)=>{
+        console.log('## GET RESOURCE DOCS: ', res.locals.params);
+        // res.status(405).json({body: "Not yet implemented!!"})
+        var r = await resourcesManager.getDocs(res.locals.params, res.locals.user, res);
+        //console.log('r : ', r);
+        //r.reply(req, res, filterResource);
     },
     update_resource_archive: async(req, res, next)=>{
         console.log('## UPDATE RESOURCE ARCHIVE: ', res.locals.params);
@@ -101,6 +122,44 @@ var definition = {
                     }
                 }
             }
+        }
+    },
+    '/search': {
+        get: {
+            handler: "routes/resources#handlers#search_resources",
+            tags: [ "resources" ],
+            parameters: [
+                {
+                    name: "fields", 
+                    in: "query", 
+                    schema: { 
+                        type: "array", 
+                        items: { 
+                            type: "string" 
+                        }
+                    }
+                },
+                {
+                    name: 'q',
+                    in: 'query',
+                    type: 'string'
+                },
+                {
+                    name: 'type_filter',
+                    in: 'query',
+                    type: 'string'
+                },
+                {
+                    name: 'tags_filter',
+                    in: 'query',
+                    type: 'string'
+                },
+                {
+                    name: 'date_filter',
+                    in: 'query',
+                    type: 'string'
+                }
+            ]
         }
     },
     '/{resourceID}': {
@@ -181,6 +240,59 @@ var definition = {
                 content: {
                     'multipart/form-data': {
                         schema: { $ref : "#/definitions/resourceMetadata" }
+                    }
+                }
+            }
+        }
+    },
+    '/{resourceID}/docs': {
+        get: {
+            handler: "routes/resources#handlers#get_resource_docs",
+            tags: [ "resources" ],
+            authorization_middleware: {
+                middleware: "routes/auths#authorizations#api_token",
+                security: {
+                    apiKeyAuth: {
+                        type: 'apiKey',
+                        in: 'header',
+                        name: "X-API-KEY"
+                    } 
+                }
+            },
+            parameters: [
+                {
+                    name: "resourceID",
+                    in: "path",
+                    required: true,
+                    type: "string"
+                }
+            ]
+        },
+        put: {
+            handler: "routes/resources#handlers#update_resource_docs",
+            tags: [ "resources" ],
+            authorization_middleware: {
+                middleware: "routes/auths#authorizations#api_token",
+                security: {
+                    apiKeyAuth: {
+                        type: 'apiKey',
+                        in: 'header',
+                        name: "X-API-KEY"
+                    } 
+                }
+            },
+            parameters: [
+                {
+                    name: "resourceID",
+                    in: "path",
+                    required: true,
+                    type: "string"
+                }
+            ],
+            requestBody: {
+                content: {
+                    'multipart/form-data': {
+                        schema: { $ref : "#/definitions/resourceDocs" }
                     }
                 }
             }

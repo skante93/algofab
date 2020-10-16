@@ -28,7 +28,7 @@ export class ListComponent implements OnInit {
     constructor(private router: Router) {}
 
     ngOnInit(): void {
-        if (typeof this.items_spec !== 'undefined'){
+        if (typeof this.items_spec === 'string' ){
             this.items_spec = JSON.parse(this.items_spec);
         }
         for (var s in this.styles){
@@ -37,24 +37,31 @@ export class ListComponent implements OnInit {
                 break;
             }
         }
-        if (typeof this.listStyle === 'undefined') {
+        if (typeof this.listStyle === 'undefined' || this.listStyle == null) {
             this.listStyle = 'list';
             this.styles['list'].selected = true;
+            this.styles['gallery'].selected = false;
         }
         
         //console.log("items_spec [", typeof this.items_spec, "] : ", this.items_spec);
     }
+
     ngAfterViewInit(){
         //console.log("### after view init!!!", this.galleryStyleComponent.nativeElement);
         //$(this.galleryStyleComponent.nativeElement);
         this.changeBackgrounds();
     }
+
     changeBackgrounds(){
-        $('[bg-img]').each((i, e)=>{
-            $(e).css ({
-                "background-image": `url(${$(e).attr("bg-img")})`,
+
+        setInterval(()=>{
+            //console.log("All bg images : ", document.querySelector('[bg-img]') );
+            $('[bg-img]').each((i, e)=>{
+                $(e).css ({
+                    "background-image": `url(${$(e).attr("bg-img")})`,
+                });
             });
-        });
+        },300);
     }
 
     changeStyle(s){

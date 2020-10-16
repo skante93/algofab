@@ -35,7 +35,8 @@
                     <div class="item-icon" [attr.bg-img]="item.icon ? item.icon : default_icon"></div>
                 </div>
     
-                <div class="item-content" [attr.bg-img]="item.logo ? item.logo : default_logo">
+                <div class="item-content" [attr.bg-img]="item.logo ? item.logo : null">
+                    <div class="item-intro">{{ item.logo? '' : item.introduction }}</div>
                     <button class="item-redirect btn btn-primary" (click)="redirectToPage(item.redirect)"> More... </button>
                 </div>
             </div>

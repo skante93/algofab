@@ -1,210 +1,142 @@
 
-
-$resContainerWidth: 96vw;
-
-@mixin margin-top-botttom($value: 1em) {
-    margin-top: $value;
-    margin-bottom: $value;
+@mixin simpleBorder($line: solid, $breadth: 1px, $color: black, $radius:5px) {
+    border: $breadth $line $color;
+    border-radius: $radius;
 }
-@mixin flexDisplay($itemsAlignment: center, $contentJustification: center) {
+
+@mixin flexCenter {
     display: flex;
-    align-items: $itemsAlignment;
-    justify-content: $contentJustification;
-}
-
-@mixin sectionMixin($centered: 1) {
-    display: flex;
-    
-    @if $centered == 1 {
-        align-items: center;
-        justify-content: center;
-    }
-    
-    width: $resContainerWidth;
-    box-sizing: border-box;
-    //position: relative;
-    border: 1px black solid;
-    border-radius: 5px;
-
-    @include margin-top-botttom(2em);
-
-    background-image: linear-gradient(350deg, #00b8de 5%, rgba(250,250,250,1) 90%);
+    align-items: center;
+    justify-content: center;
 }
 
 
-.res-nav {
-    width: 20em;
-    height: 30vh;
-    position: fixed;
-    display: flex;
-    top: 50vh - 15vh ; // Vertically center
-    background-color: white;
-    
-    border: 2px solid black;
 
-    .res-nav-content {
-        //
-        width: 15em;
-        border: 2px solid green;
-
-    }
-
-    .res-nav-btn {
-        //
-        width: 5em;
-        position: relative;
-        border: 2px solid red;
-        display: flex;
-        justify-content: top;
-        
-        cursor: pointer;
-
-        div {
-            //color: black;
-            width: 30vh;
-            height: 5em;
-            border: 2px solid brown;
-        
-            transform: translateX(-200%) rotate(90deg);
-        }
-    }
+.prop-heading {
+    font-size: 1.5em;
+    //border: 1px solid yellow;
 }
 
-[hidden] {
-    display: none;
-}
-
-.res-container {
-
-    display: flex;
-    flex-direction: column;
-    width: $resContainerWidth;
-    margin: auto;
+.prop-value {
     margin-top: 1em;
+    //align-items: center;
+}
 
-    .title-section {
-        
-        @include sectionMixin();
-
-        .title {
-            width: ($resContainerWidth - 15vw);
-            
-            //border: 1px black solid;
-            text-align: center;
-            font-size: 2em;
-        }
-
-        .type-icon {
-            width: 15vw;
-            //position: absolute;
-            //border: 1px green solid;
-            //right: 2em;
-            display: flex;
-            align-items: center;
-            
-            img {
-                padding: 0;
-                position: absolute;
-                transform: scale(1.5);
-                background-color: white;
-                //
-            }
-        }
-    }
-
-    .tags-section {
-        @include flexDisplay(top, space-between);
-        
-        .tags-container {
-            @include sectionMixin(0);
-            flex-direction: column;
-            padding: 1em;
-            width: 48%;
-            
-            .tags {
-                .tag  {
-                    background-color: brown;
-                    border-radius: 4px;
-                    padding: 0.5em;
-                    display: inline-block;
-                    margin-right: 1em;
-                    color: white;
-                    font-family: 'Lucida Console','Lucida Sans Typewriter',monaco,'Bitstream Vera Sans Mono',monospace;
-                }
-
-                // .tag-name {
-
-                // }
-
-                // .tag-value {
-
-                // }
-            }
-        }
-
-        .ratings-container{
-            @include sectionMixin(0);
-            flex-direction: column;
-            padding: 1em;
-            width: 48%;
-
-            #ratings {
-                
-                #ratings-vote {
-                    @include flexDisplay();
-                    flex-direction: column; 
-                    
-                    #smiley {
-                        
-                        font-size: 3em;
-                    }
-                    #stars {
-                        @include flexDisplay();
-                        span {
-                            margin: 0.5em;
-                        } 
-                    }
-                }
-                
-                // .ratings-my-score {
-            
-                // }
-
-                // .ratings-review {
-
-                // }
-            }
-        }
-    }
+#section-one {
+    @include simpleBorder();
+    margin-top: 2em;
+    margin-bottom: 2em;
+    padding: 1em;
+    font-size: 1.5em;
     
-    .description-section {
-        @include flexDisplay(top, $contentJustification: space-between);
-        @include margin-top-botttom(2em);
+    #manage {
+        text-align: center;
+        @include flexCenter();
 
-        .description {
-            //
-            border: 1px solid black;
-            border-radius: 5px;
-            padding: 1em;
-            width: 68%;
-        }
-        .logo {
-            //
-            width: 30%;
-
-            img {
-                width: 100%
-            }
+        i {
+            font-size: 3em;
+            cursor: pointer;
         }
     }
-    .download-section{
-        @include flexDisplay();
-        @include margin-top-botttom(2em);
-        flex-direction: column;
-
-        border: 1px solid black;
-        border-radius: 5px;
-        padding: 1em;
+    #r-name-display {
+        @include simpleBorder($line: dashed);
+        @include flexCenter();
+    }
+    #r-icon-display {
         
+        right: 1em;
+        top: -25%;
+        // border-radius: 5px;
+        // border: 1px solid black;
+
+        .img {
+            border-radius: 5px;
+        }
+    }
+}
+
+#section-two {
+    #private-display {
+        @include simpleBorder();
+    }
+    #tags-display {
+        @include simpleBorder();
+        
+        //padding: 2em;
+        vertical-align: top;
+        .tag {
+            background-color: brown;
+            font-family: 'Lucida Console','Lucida Sans Typewriter',monaco,'Bitstream Vera Sans Mono',monospace;
+            display: inline-block;
+            padding:.3em;
+            color:white;
+            margin-right: .8em;
+            margin-top:.5em;
+            //border-radius: 0 5px 5px 0;
+            border-radius: 5px;
+            position: relative;
+            //transform: rotate(-2deg);
+
+            // &::before{
+            //     content:"";
+            //     position: absolute;
+            //     width: 1em;
+            //     height: 100%;
+            //     top: 0;
+            //     left: -.9em;
+            //     border-radius: 1em 0 0 1em;
+            //     background-color: brown;
+            // }
+        }
+    }
+    #ratings-display {
+        @include simpleBorder();
+    }
+}
+
+#section-three{
+    margin-top: 2em;
+    margin-bottom: 2em;
+
+    #r-description-display{
+        //@include simpleBorder();
+        display: flex;
+        align-items: center;
+    }
+    #r-download-display {
+        #download-container{
+            @include flexCenter();
+            @include simpleBorder($breadth: 3px, $line: dashed);
+            margin-top: 2em;
+            margin-bottom: 2em;
+            padding: 1em;
+            
+        }
+    }
+}
+
+
+.my-warning {
+    padding: 1em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    background-color: rgb(245, 196, 90);
+    border-radius: 5px;
+    
+    i {
+        margin-right: 1em;
+        font-size: 2em;
+    }
+}
+.edit-property{
+    position: absolute;
+    cursor: pointer;
+    color: red;
+    right:0;
+    top:0;
+
+    i{
+        margin-right: 10;
+        margin-top: 10;
     }
 }

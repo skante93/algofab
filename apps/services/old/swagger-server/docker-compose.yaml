@@ -7,7 +7,8 @@ services:
     volumes:
       - db:/data/db
   api:
-    image: node
+    #image: node
+    build: ./
     ports:
       - 3000:3000
     volumes:

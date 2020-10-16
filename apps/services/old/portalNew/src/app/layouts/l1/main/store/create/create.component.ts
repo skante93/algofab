@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { MainService } from 'src/app/tools/services/main';
+import { MainService } from '../../../../../tools/services/main';
 import { Router } from '@angular/router';
 
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
@@ -40,8 +40,8 @@ export class StoreCreateComponent implements OnInit{
         
         if (! this.mainService.isLoggedIn()){
             $.notify("You need to be logged in to create resources.")
-            //this.router.navigate(['signin'], {queryParams: { redirectTo: '/store/create'}});
-            //return ;
+            this.router.navigate(['signin'], {queryParams: { redirectTo: '/store/create'}});
+            return ;
         }
 
         this.createFormGroup();
@@ -78,7 +78,10 @@ export class StoreCreateComponent implements OnInit{
     }
 
     fetchLicencesAndAgreements(){
-        this.mainService.getAPIObject('licence').subscribe(
+        this.mainService.getAPIObject({
+            kind:'licence',
+            requestedBy: this.mainService.getUserAccount().auth_token
+        }).subscribe(
             (res:any)=>{
                 this.licences = res.response;
 
@@ -93,7 +96,11 @@ export class StoreCreateComponent implements OnInit{
             }
         );
         
-        this.mainService.getAPIObject('agreement', null, {author: "5f7ec2cac1724904c181534c"}).subscribe(
+        this.mainService.getAPIObject({
+            kind: 'agreement',
+            requestedBy: this.mainService.getUserAccount().auth_token,
+            query: {author: this.mainService.getUserAccount()._id}
+        }).subscribe(
             (res:any)=>{
                 this.user_agreements = res.response;
 
@@ -126,9 +133,15 @@ export class StoreCreateComponent implements OnInit{
             return;
         }
         var resource = this.formGroup.value;
-        resource.tags = resource.tags.filter(t=> t.name != '');
-
-        this.mainService.createAPIObject('resource', resource, this.mainService.getUserAccount().auth_token, null, true).subscribe(
+        resource.tags = JSON.stringify(resource.tags.filter(t=> t.name != ''));
+        //alert('resource : '+JSON.stringify(resource, null, 2));
+        
+        this.mainService.createAPIObject({
+            kind: 'resource', 
+            body: resource, 
+            requestedBy: this.mainService.getUserAccount().auth_token, 
+            isMultipart: true
+        }).subscribe(
             (res:any)=>{
                 //
                 $.notify("Resource successfully created, redirecting to its page ...", 'success');

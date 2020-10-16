@@ -1,25 +1,18 @@
-FROM ubuntu:18.04
 
-EXPOSE 4200
+FROM ubuntu
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get upgrade -y
 
-RUN apt-get install -y sudo curl nodejs npm
+RUN apt-get install -y nodejs npm curl
 
-RUN npm install -g n && n stable
+RUN npm install -g n
+
+RUN n stable
 
 RUN npm install -g @angular/cli
 
-RUN useradd -m skante
+WORKDIR /root/server
 
-RUN echo "skante ALL=(ALL) NOPASSWD: ALL"> /etc/sudoers.d/skante
-
-USER skante
-
-WORKDIR /home/skante/server
-
-
-
-CMD ng serve --disable-host-check
-
-
+CMD ng serve --host 0.0.0.0

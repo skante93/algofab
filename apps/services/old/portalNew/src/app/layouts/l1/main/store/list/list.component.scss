@@ -1,0 +1,19 @@
+
+
+#search {
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin: auto; 
+    margin-top: 1em; 
+    width: 96vw; 
+    //border: 1px solid black;
+
+    #search-text{
+        width: 90vw;
+    }
+
+    #search-submit{
+        width: 4vw;
+    }
+}

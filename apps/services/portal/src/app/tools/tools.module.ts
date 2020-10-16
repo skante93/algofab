@@ -20,6 +20,9 @@ import { NumberInputComponent, AutoFormComponent } from './auto-form/auto-form.c
 
 //import { MainService } from './services/main';
 
+import { CaptchaComponent } from './captcha/captcha.component';
+import { RatingsDirective } from "./ratings/ratings.directive";
+
 @NgModule({
     declarations: [
         NavItemComponent,
@@ -27,6 +30,8 @@ import { NumberInputComponent, AutoFormComponent } from './auto-form/auto-form.c
         ListComponent,
         NumberInputComponent,
         AutoFormComponent,
+        CaptchaComponent,
+        RatingsDirective
         // FormInputComponent,
         // YoFormComponent,        
         //FormFieldDirective
@@ -47,6 +52,8 @@ import { NumberInputComponent, AutoFormComponent } from './auto-form/auto-form.c
         ListComponent,
         NumberInputComponent,
         AutoFormComponent,
+        CaptchaComponent,
+        RatingsDirective
         //FormFieldDirective
     ]
 })

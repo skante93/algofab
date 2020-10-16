@@ -55,6 +55,13 @@ var handlers = {
         console.log('r : ', r);
         r.reply(req, res, filteruserAccount);
     },
+    update_user_password: async(req, res, next)=>{
+        console.log('## UPDATE USER PASSWORD: ', res.locals.params);
+        // res.status(405).json({body: "Not yet implemented!!"})
+        var r = await userManager.updatePassword(res.locals.params, res.locals.user);
+        console.log('r : ', r);
+        r.reply(req, res, filteruserAccount);
+    },
     remove_user: async(req, res, next)=>{
         console.log('## REMOVE USER : ', res.locals.params);
         //res.status(405).json({body: "Not yet implemented!!"})
@@ -194,6 +201,41 @@ var definition = {
                 content: {
                     'multipart/form-data': {
                         schema: { $ref : "#/definitions/accountProfile" }
+                    }
+                }
+            }
+        }
+    },
+    '/{userID}/password': {
+        put: {
+            handler: "routes/users#handlers#update_user_password",
+            tags: [ "users" ],
+            authorization_middleware: {
+                middleware: "routes/auths#authorizations#api_token",
+                security: {
+                    apiKeyAuth: {
+                        type: 'apiKey',
+                        in: 'header',
+                        name: "X-API-KEY"
+                    } 
+                }
+            },
+            parameters: [
+                {
+                    name: "userID",
+                    in: "path",
+                    required: true,
+                    type: "string"
+                }
+            ],
+            requestBody: {
+                content: {
+                    'application/json': {
+                        type: "object",
+                        properties: {
+                            currentPassword: { type:"string", required:true },
+                            newPassword: { type:"string", required:true },
+                        }
                     }
                 }
             }

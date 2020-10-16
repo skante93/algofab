@@ -1,0 +1,218 @@
+
+
+<div class="container">
+    <div id="accordion">
+      <div class="card">
+        <div class="card-header">
+          <a class="card-link" data-toggle="collapse" href="#profileCollapse">
+            Profile
+          </a>
+        </div>
+        <div id="profileCollapse" class="collapse show" data-parent="#accordion">
+          <div class="card-body">
+            <div class="row" id="profile-display">
+                <div class="col-sm-3">
+                    <img id="profile-image" src="{{getPhotoSrc()}}" alt="Profile image" width="100%" height="100%">
+                </div>
+                <div class="col-sm">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            Username
+                        </div>
+                        <div class="col-sm" *ngIf="account">
+                            {{account.profile.username}}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-2">
+                            Firstname
+                        </div>
+                        <div class="col-sm" *ngIf="account">
+                            {{account.profile.firstname}}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-sm-2">
+                            Lastname
+                        </div>
+                        <div class="col-sm" *ngIf="account">
+                            {{account.profile.lastname}}
+                        </div>
+                    </div>
+
+                    
+                    <div class="row">
+                        <div class="col-sm-2">
+                            Email
+                        </div>
+                        <div class="col-sm" *ngIf="account">
+                            {{account.profile.email}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm align-left">
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#update-profile"> Update profile </button>
+                </div>
+                <div class="col-sm align-center">
+                    <button class="btn btn-info" data-toggle="modal" data-target="#update-password"> Update Password </button>
+                </div>
+                <div class="col-sm align-right">
+                    <button class="btn btn-danger" data-toggle="modal" data-target="#remove-account"> Remove Profile </button>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <a class="collapsed card-link" data-toggle="collapse" href="#activitiesColleapse">
+          Activities
+        </a>
+        </div>
+        <div id="activitiesColleapse" class="collapse" data-parent="#accordion">
+          <div class="card-body">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <a class="collapsed card-link" data-toggle="collapse" href="#preferencesCollapse">
+            Preferences
+          </a>
+        </div>
+        <div id="preferencesCollapse" class="collapse" data-parent="#accordion">
+          <div class="card-body">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade" id="update-profile" tabindex="-1" role="dialog" aria-labelledby="update-profile-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="update-profile-label">Update profile</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <form class="col-sm" [formGroup]="updateFG" (submit)="onUpdateProfileSubmit()">
+                            <div class="form-group row">
+                                <label class="col-sm-2" for="firstname"> Firstname </label>
+                                <div class="col-sm">
+                                    <input type="text" class="form-control" id="firstname" name="firstname" formControlName="firstname" placeholder="Your firstname">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2" for="lastname"> Lastname </label>
+                                <div class="col-sm">
+                                    <input type="text" class="form-control" id="lastname" name="lastname" formControlName="lastname" placeholder="Your lastname">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2" for="email"> Email </label>
+                                <div class="col-sm">
+                                    <input type="email" class="form-control" id="email" name="email" formControlName="email" placeholder="Your email address">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2" for="email"> Photo </label>
+                                <div class="col-sm">
+                                    <input 
+                                        type="file" class="form-control" id="photo" name="photo" 
+                                        formControlName="photo" (change)="onPhotoChange($event)" 
+                                        accept=".jpg,.jpeg,.png">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" (click)="onUpdateProfileSubmit()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="update-password" tabindex="-1" role="dialog" aria-labelledby="update-password-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="update-password-label">Update password</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <form class="col-sm" [formGroup]="passwdFG" (submit)="onupdatePasswordSubmit()">
+                            <div class="form-group row">
+                                <label class="col-sm-2" for="currentPassword"> Current Password </label>
+                                <div class="col-sm">
+                                    <input type="text" class="form-control" id="currentPassword" name="currentPassword" formControlName="currentPassword" placeholder="Your current password">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2" for="newPassword"> New Password </label>
+                                <div class="col-sm">
+                                    <input type="text" class="form-control" id="newPassword" name="newPassword" formControlName="newPassword" placeholder="Your new password">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" (click)="onupdatePasswordSubmit()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="remove-account" tabindex="-1" role="dialog" aria-labelledby="remove-account-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="remove-account-label">Update password</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm">
+                            <p>
+                                You are about to remove your account, please confirm the decision.
+                            </p>
+                            <p>
+                                Additionnally you can choose to remove you account the normal way, 
+                                i.e with a grace period allowing you to cancel your decision if you change your mind, 
+                                or remove your account right away with <a href="">all the implications</a> considered.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I changed my mind</button>
+                <button type="button" class="btn btn-primary" (click)="removeAccount(true)">I confirm</button>
+                <button type="button" class="btn btn-danger" (click)="removeAccount(false)">I confirm and want it done right away</button>
+            </div>
+        </div>
+    </div>
+</div>

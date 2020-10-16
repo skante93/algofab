@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "portalNew"
+    }
+  },
+  "defaultProject": "portalNew",
+  "cli": {
+    "analytics": "a6ecf0fc-137d-43a1-ad21-a4b691b674b5"
+  }
 }

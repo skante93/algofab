@@ -37,14 +37,22 @@
 		<script type="text/javascript" src="/assets/js/notify.min.js"></script>
 		<!-- <script src='https://www.google.com/recaptcha/api.js?onbload=grecaptchaCallback' async defer></script> -->
 
-		<script src="https://cdn.tiny.cloud/1/9okwn8j9eycis1dke2d5t4yajjsb62mgx085z35orwfi3epk/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+		<script src="https://cdn.tiny.cloud/1/e13a4f9bpz5poi7pmr4uiztlg073eussm1efw62kex8cz4qh/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 		
-		<title>Hello, world!</title>
+		<title>TeraLab Shop</title>
 		<base href="/">
 	</head>
 	<body>
 		<app-root></app-root>
 
 		<!-- <script type="text/javascript" src="/assets/js/script.js"></script> -->
+		<script>
+			$(()=>{
+				$(document).on('focusin', function(e) {
+        if ($(e.target).closest(".tox-textfield").length)
+            e.stopImmediatePropagation();
+});
+			})
+		</script>
 	</body>
 </html>

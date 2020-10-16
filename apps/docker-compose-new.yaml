@@ -3,11 +3,11 @@ version: "3"
 services:
   portal:
     #image: node
-    build: ./services/portalNew
+    build: ./services/portal
     ports:
-      - 4200:4200
+      - ${PORTAL_COMPOSE_PORT}:4200
     volumes:
-      - ./services/portalNew:/root/server
+      - ./services/portal:/root/server
 
   mongo:
     image: mongo
@@ -18,7 +18,7 @@ services:
     #image: node
     build: ./services/swagger-server
     ports:
-      - 3000:3000
+      - ${RH_COMPOSE_PORT}:3000
     volumes:
       - ./services/swagger-server:/root/server
     depends_on:

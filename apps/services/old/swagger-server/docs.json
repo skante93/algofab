@@ -42,15 +42,6 @@
                 },
                 "introduction": { "type": "string" },
                 "description": { "type": "string" },
-                "documentations": { 
-                    "type": "object",
-                    "properties": {
-                        "media_type": { "type":"string", "enum":["html", "file", "external_links"] },
-                        "html_docs": { "type": "string" },
-                        "file_docs": {"type": "string", "format": "binary"},
-                        "doc_links": { "type": "array", "items": { "type": "string"} }
-                    } 
-                },
                 "logo": { "type": "string", "format": "binary" },
                 "tags": {
                     "type": "array",
@@ -65,6 +56,18 @@
                 "private": { "type": "boolean", "default":true},
                 "licence": { "type": "string"},
                 "agreement": { "type": "string"}                
+            }
+        },
+        "resourceDocs": {
+            "type": "object",
+            "properties": {
+                "media_type": { "type": "string", "enum": ["html", "pdf", "external_links"] },
+                "html": {"type":"string"},   
+                "pdf": {"type":"string", "format": "binary"},   
+                "links": {
+                    "type":"array",
+                    "items": { "type":"string" }
+                }   
             }
         },
         "licence": {
@@ -96,6 +99,14 @@
                         "file_content": { "type": "string", "format": "binary" }
                     }
                 }
+            }
+        },
+        "ratings": {
+            "type": "object",
+            "properties": {
+                "resource": {"type":"string"},
+                "note": {"type":"number"},
+                "comment": {"type":"string"}
             }
         },
         "account": {

@@ -25,9 +25,9 @@ const routes : Route[] = [
         StoreModule,
         WorkshopModule,
         OthersModule,
-        //ReactiveFormsModule,
+        ReactiveFormsModule,
         RouterModule.forChild(routes)
     ],
-    exports: [RouterModule]
+    exports: [RouterModule, ReactiveFormsModule]
 })
 export class MainL1Module {}

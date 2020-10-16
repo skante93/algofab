@@ -1,0 +1,66 @@
+
+<!--
+<ng-template #singleFieldTemplate let-format="format" let-path="path" let-hide_name="hide_name">
+    <ng-container *ngIf="format.type === 'number'">
+        <number-input 
+            [path]="path+'.'+format.name"
+            [rootModel]="model"
+            [name]="format.name"
+            [hide_name]="hide_name"
+            [min]="format.min"
+            [max]="format.max"
+            [required]="format.required"
+            ></number-input>
+    </ng-container>
+
+</ng-template>
+
+<ng-template #arrayFieldTemplate let-fields="fields" let-path="path" let-items="arrayItems">
+    <div class="col-sm">
+        <div class="form-group row" *ngFor="let item of items; index as j">
+            <div class="col-sm">
+                <ng-container
+                    *ngFor="let f of fields; index as i"
+                    [ngTemplateOutlet]="singleFieldTemplate"
+                    [ngTemplateOutletContext]="{path: path+'['+j+']', format: f, hide_name: true}">
+                </ng-container>
+            </div>
+
+            <div class="col-sm-2">
+                <button type="button" class="btn btn-danger" (click)="items.splice(j, 1)">Remove Item</button>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-2">
+                <button type="button" class="btn btn-secondary" (click)="items.push(items.length)">Add Item</button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<div class="container">
+    <div class="row">
+        <form action="" class="col-sm" (submit)="onSubmit($event)">
+            <ng-container 
+                [ngTemplateOutlet]="typeofFromInput(fields) === 'array' ? arrayFieldTemplate : singleFieldTemplate"
+                [ngTemplateOutletContext]="{path: '', fields:fields, format: fields, arrayItems: []}">
+            </ng-container>
+        </form>
+    </div>
+</div>
+
+-->
+
+<div class="container">
+    <div class="row">
+        <form action="" #form="ngForm" class="col-sm" (submit)="onSubmit(form, $event)">
+            <div #autoFormRoot></div>
+
+            <div class="form-group row">
+                <div class="col-sm-2">
+                    <input type="submit" class="btn btn-primary" value="submit">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

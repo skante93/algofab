@@ -1,6 +1,21 @@
+<!-- <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PortalNew</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html> -->
+
 <!doctype html>
 <html lang="en">
 	<head>
+		<script> var global = global || window; </script>
   		<!-- Required meta tags -->
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -22,12 +37,22 @@
 		<script type="text/javascript" src="/assets/js/notify.min.js"></script>
 		<!-- <script src='https://www.google.com/recaptcha/api.js?onbload=grecaptchaCallback' async defer></script> -->
 
-		<title>Hello, world!</title>
+		<script src="https://cdn.tiny.cloud/1/e13a4f9bpz5poi7pmr4uiztlg073eussm1efw62kex8cz4qh/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+		
+		<title>TeraLab Shop</title>
 		<base href="/">
 	</head>
 	<body>
 		<app-root></app-root>
 
 		<!-- <script type="text/javascript" src="/assets/js/script.js"></script> -->
+		<script>
+			$(()=>{
+				$(document).on('focusin', function(e) {
+        if ($(e.target).closest(".tox-textfield").length)
+            e.stopImmediatePropagation();
+});
+			})
+		</script>
 	</body>
 </html>

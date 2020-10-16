@@ -5,6 +5,7 @@
         "nav_home": { "en" : "Home", "fr": "Acceuil" },
         "nav_store": { "en" : "Store", "fr": "Marché" },
         "nav_workshop": { "en" : "Workshop", "fr": "Atélier" },
+        "nav_docs": { "en" : "Docs", "fr": "Docs" },
         "nav_signin": { "en" : "Singin", "fr": "Connexion" },
         "nav_signup": { "en" : "Signup", "fr": "Inscription" },
         "nav_signout": { "en" : "Signout", "fr": "Deconnexion" },

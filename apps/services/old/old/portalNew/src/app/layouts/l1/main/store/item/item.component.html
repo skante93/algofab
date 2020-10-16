@@ -1,0 +1,151 @@
+
+
+<ng-template [ngIf]="resource">
+
+    <div class="res-container">
+        <div class="title-section">
+            <div class="title" editable="name">{{resource.metadata.name}}</div>
+            <div class="type-icon" >
+                <img src="/assets/img/{{resource.metadata.type}}.svg" alt="" editable="logo">
+            </div>
+        </div>
+
+        <div class="tags-section">
+            <div class="tags-container" editable="tags">
+                <h4> Tags </h4>
+                <div class="tags">
+                    <ng-template [ngIf]="resource.metadata.tags == undefined || resource.metadata.tags.length == 0">
+                        No tags available
+                    </ng-template>
+
+                    <ng-template [ngIf]="resource.metadata.tags != undefined">
+                        <div class="tag" *ngFor="let tag of resource.metadata.tags">
+                            <span class="tag-name">{{tag.name}}</span> : <span class="tag-value">{{tag.value}}</span>
+                        </div>
+                        <div class="tag" *ngFor="let tag of resource.metadata.tags">
+                            <span class="tag-name">t2</span> : <span class="tag-value">v2</span>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+            <div class="ratings-container">
+                <h4>Rating</h4>
+                <div id="ratings">
+                    <div id="ratings-vote">
+                        <div id="smiley">
+                            <i class="fas fa-smile-beam"></i>
+                        </div>
+                        <div id="stars">
+                            <span *ngFor="let i of [0,1,2,3,4]" (mouseenter)="hoverStar(i)" (click)="vote(i+1)"><i class="fa fa-star"></i> </span>
+                        </div>
+
+                        <div id="current-note-container">Current note : <span id="current-note">0/5</span></div>
+                    </div>
+                    <div class="ratings-my-score"></div>
+                    <div class="ratings-review"></div>
+                </div>
+            </div>
+        </div>
+        <div class="description-section">
+            <div class="description" [innerHTML]="resource.metadata.description" editable="description"></div>
+            <div class="logo">
+                <img src="{{logoSrc()}}" alt="">
+            </div>
+        </div>
+
+        <div class="download-section" editable="download">
+            <h4>Download</h4>
+            
+            <div [hidden]="resource.data != undefined"> No data archive </div>
+            <button class="btn btn-primary" [hidden]="resource.data == undefined"> Download archive</button>
+            
+        </div>
+    </div>
+
+    <!-- MODALS-->
+
+    <div class="modal fade" id="update-name" tabindex="-1" role="dialog" aria-labelledby="update-name-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="update-name-label">Update name</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <form class="col-sm" >
+                                <input type="text" class="form-control" [formControl]="formGroup.name">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" (click)="editField('name')">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="update-description" tabindex="-1" role="dialog" aria-labelledby="update-description-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="update-description-label">Update description</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <form class="col-sm" >
+                                <textarea class="form-control" id="description" [formControl]="formGroup.description" placeholder="Make a full description of your resource here">
+                                    {{resource.metadata.description}}
+                                </textarea>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" (click)="editField('description')">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="update-download" tabindex="-1" role="dialog" aria-labelledby="update-download-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="update-download-label">Update Archive</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row">
+                            <form class="col-sm" >
+                                <input type="file" [formControl]="formGroup.archive" (change)="onArchiveChange($event)">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" (click)="editField('download')" [disabled]="formGroup.archive.value == ''">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</ng-template>
+
+<ng-template [ngIf]="!resource">
+    Now loading!!!
+</ng-template>

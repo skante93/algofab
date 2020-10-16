@@ -8,6 +8,7 @@ var paths = {
     '/resources': require('./routes/resources').router,
     '/licences': require('./routes/licences').router,
     '/agreements': require('./routes/agreements').router,
+    '/ratings': require('./routes/ratings').router,
 }
 
 var config = new ServerConfig({

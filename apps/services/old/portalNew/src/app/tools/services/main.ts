@@ -12,13 +12,75 @@ import { Observable } from 'rxjs';
 import { APP_SETTINGS } from './settings';
 
 var isAPIKind = (kind)=> {
-    if (['user', 'resource', 'licence', 'agreement', 'algotemplate', 'algoinstance'].indexOf(kind) >=0 ){
+    if (['user', 'resource', 'licence', 'agreement', 'rating', 'algotemplate', 'algoinstance'].indexOf(kind) >=0 ){
         kind = kind+'s';
     }
-    else if (['users', 'resources', 'licences', 'agreements', 'algotemplates', 'algoinstances'].indexOf(kind) < 0 ){
+    else if (['users', 'resources', 'licences', 'agreements', 'ratings', 'algotemplates', 'algoinstances'].indexOf(kind) < 0 ){
         throw new Error(`API Kind "${kind}" is incorrect`);
     }
     return kind;
+}
+
+export interface CallOptions {
+    kind: 'user' | 'users' | 'resource' | 'resources' | 'licence' | 'licences' | 'agreement' | 'agreements' | 'rating' | 'ratings' | 'algotemplate' | 'algotemplates' | 'algoinstance' | 'algoinstances',
+    objectID?: string,
+    requestedBy?: string,
+    subUrl?: string,
+    body?: FormData | Object,
+    query?: Object,
+    isMultipart?: boolean 
+}
+
+function requestOptions(options : CallOptions){
+    options.kind = isAPIKind( options.kind.trim().toLocaleLowerCase() );
+
+    if (options.query){
+        options.query = '?' + (<any>Object).entries(options.query).map(entry => {
+            if (entry[1] instanceof Array){
+                return entry[1].map(e=> entry[0] + '=' + e).join('&');
+            }
+            else {
+                return entry[0] + '=' + entry[1];
+            }
+        }).join('&');
+    }
+    else{
+        options.query = '';
+    }
+
+    
+    let call_url , body, call_options:any = {};
+    
+    call_url = APP_SETTINGS.apiServerAddress + '/' + options.kind + (options.objectID ? '/' + options.objectID: '') +(options.subUrl? '/'+options.subUrl:'') + options.query;
+
+    if (options.requestedBy){
+        call_options.headers = {};
+        call_options.headers['X-API-KEY'] = options.requestedBy;
+    }
+    
+    if (options.kind == 'resources' && (options.subUrl === 'archive' || options.subUrl === 'docs')){
+        call_options.responseType = 'arraybuffer';
+    }
+
+    if (options.body instanceof FormData || options.isMultipart === true){
+        //
+        console.log("#################### MULTIPART ASUMED")
+        if ( options.body instanceof FormData ){
+            console.log("#################### WAS INDEED FROMDATA")
+            body = options.body;
+        }
+        else{
+            body = new FormData();
+            for (var b in options.body){
+                body.append(b, options.body[b]);
+            }
+        }
+    }
+    else{
+        body = options.body;
+    }
+
+    return [call_url, body, call_options];
 }
 
 @Injectable({
@@ -63,18 +125,18 @@ export class MainService implements OnInit{
 
     updateActiveAccount(account: any = null){
         //
-        console.log("updating useracoount..");
+        //console.log("updating useracoount..");
         if (account == null){
-            console.log("no account provided whatso ever trying to fetch from sessionstore");
-            var u = sessionStorage.getItem('userAccount');
+            //console.log("no account provided whatso ever trying to fetch from sessionstore");
+            var u = localStorage.getItem('userAccount');
             if (u != null) {
                 this.userAccount = JSON.parse(u);
             }
         }
         else{
-            console.log("Gotten a user account, updating it.");
+            //console.log("Gotten a user account, updating it.");
             this.userAccount = Object.assign({}, account);
-            sessionStorage.setItem('userAccount', JSON.stringify(this.userAccount));
+            localStorage.setItem('userAccount', JSON.stringify(this.userAccount));
         }
     }
 
@@ -87,25 +149,27 @@ export class MainService implements OnInit{
             this.http.post(call_url, body).subscribe( 
                 // Success
                 (res: any)=>{
-                    console.log("[MAIN SERVICE HTTP CALLBACK] Login succeeded, response :", res);
-                    console.log('res.response : ', res.response);
+                    // console.log("[MAIN SERVICE HTTP CALLBACK] Login succeeded, response :", res);
+                    // console.log('res.response : ', res.response);
                     this.updateActiveAccount(res.response);
-                    //sessionStorage.setItem("user", JSON.stringify(res.body));
+                    // localStorage.setItem("user", JSON.stringify(res.body));
                     observale.next(res);
                 },
                 // Error
                 err => {
-                    console.log("[MAIN SERVICE HTTP CALLBACK] err : ", err);
+                    //console.log("[MAIN SERVICE HTTP CALLBACK] err : ", err);
                     observale.error(err);
                 }, 
                 // Done
-                ()=>{ console.log("[MAIN SERVICE HTTP CALLBACK] Done logging in !!"); observale.complete(); }
+                ()=>{ 
+                    // console.log("[MAIN SERVICE HTTP CALLBACK] Done logging in !!"); observale.complete(); 
+                }
             );
         });
     }
 
     logout(){
-        sessionStorage.removeItem('userAccount');
+        localStorage.removeItem('userAccount');
         this.userAccount = null;
     }
 
@@ -116,38 +180,64 @@ export class MainService implements OnInit{
 
     getUserAccount () { return this.userAccount; }
 
-    getAPIObject(objectKind: string, objectID: string = null, options: any = null){
+    getAPIObject(options:CallOptions): Observable<any>{
+        // objectKind: string, 
+        // objectID: string = null, 
+        // options: any = null
         console.log("### GETAPIOBJECT CALLED ###");
-        var kind = objectKind.trim().toLocaleLowerCase();
-        kind = isAPIKind(kind);
+        // options.kind = isAPIKind( options.kind.trim().toLocaleLowerCase() );
 
-        const query: string = options == null ? '' : '?'+(<any>Object).entries(options).map(entry => {
-            if (entry[1] instanceof Array){
-                return entry[1].map(e=> entry[0] + '=' + e).join('&');
-            }
-            else {
-                return entry[0] + '=' + entry[1];
-            }
-        }).join('&');
+        // if (options.query){
+        //     options.query = '?' + (<any>Object).entries(options.query).map(entry => {
+        //         if (entry[1] instanceof Array){
+        //             return entry[1].map(e=> entry[0] + '=' + e).join('&');
+        //         }
+        //         else {
+        //             return entry[0] + '=' + entry[1];
+        //         }
+        //     }).join('&');
+        // }
+        // else{
+        //     options.query = '';
+        // }
 
-        const call_url = APP_SETTINGS.apiServerAddress + ('/'+kind) + (objectID == null ? '' : '/'+objectID) + query;
         
-        console.log("Getting users [", call_url, "]...");
+        // let call_url , call_options:any = {};
         
+        // call_url = APP_SETTINGS.apiServerAddress + '/' + options.kind + (options.objectID ? '/' + options.objectID: '') +(options.subUrl? '/'+options.subUrl:'') + options.query;
+
+        // if (options.author){
+        //     call_options.headers = {};
+        //     call_options.headers['X-API-KEY'] = options.author;
+        // }
+
+        
+        
+        var ro = requestOptions(options);
+        
+        
+
+        console.log("######### call_url : ", ro[0]);
+
+        console.log("######### HEADER : ", ro[2]);
+
         return new Observable(observale =>{
-            this.http.get(call_url).subscribe(
+            this.http.get(ro[0], ro[2]).subscribe(
                 // Success
                 (res: any)=>{
-                    console.log(`[MAIN SERVICE HTTP CALLBACK] Getting ${kind} ${objectID == null? '' : objectID+' '}succeeded, response :`, res);
+                    //console.log(`[MAIN SERVICE HTTP CALLBACK] Getting ${options.kind} ${options.objectID == null? '' : options.objectID+' '}succeeded, response :`, res);
                     observale.next(res);
                 },
                 // Error
                 err => {
-                    console.log("[MAIN SERVICE HTTP CALLBACK] err : ", err);
+                    //console.log("[MAIN SERVICE HTTP CALLBACK] err : ", err);
                     observale.error(err);
                 }, 
                 // Done
-                ()=>{ console.log(`[MAIN SERVICE HTTP CALLBACK] Done getting ${kind} ${objectID == null? '' : objectID}`); observale.complete(); }
+                ()=>{ 
+                    //console.log(`[MAIN SERVICE HTTP CALLBACK] Done getting ${options.kind} ${options.objectID == null? '' : options.objectID}`); 
+                    observale.complete(); 
+                }
             );
         });
     }
@@ -173,7 +263,15 @@ export class MainService implements OnInit{
     //     });
     // }
 
-    createAPIObject(objectKind: string, info: any, author: string = null, options: any = null, isMultipart:boolean= false){
+    createAPIObject(options:CallOptions){
+        //objectKind: string, 
+        //info: any, 
+        //author: string = null, 
+        //options: any = null, 
+        //isMultipart:boolean= false
+        
+        
+        /*
         console.log("### CREATEAPIOBJECT CALLED ###");
         var kind = objectKind.trim().toLocaleLowerCase();
         kind = isAPIKind(kind);
@@ -207,88 +305,64 @@ export class MainService implements OnInit{
         console.log("######### HEADER : ", headers);
         
         console.log("######### body : ", body);
+        */
+        
+        // options.kind = isAPIKind( options.kind.trim().toLocaleLowerCase() );
+
+        // if (options.query){
+        //     options.query = '?' + (<any>Object).entries(options.query).map(entry => {
+        //         if (entry[1] instanceof Array){
+        //             return entry[1].map(e=> entry[0] + '=' + e).join('&');
+        //         }
+        //         else {
+        //             return entry[0] + '=' + entry[1];
+        //         }
+        //     }).join('&');
+        // }
+        // else{
+        //     options.query = '';
+        // }
+
+        
+        // let call_url , headers : any ={}, body;
+        
+        // call_url = APP_SETTINGS.apiServerAddress + '/' + options.kind + (options.objectID? '/' + options.objectID:'') +(options.subUrl? '/'+options.subUrl:'') + options.query;
+
+        // if (options.author){
+        //     headers['X-API-KEY'] = options.author;
+        // }
+
+        // if (options.body instanceof FormData || options.isMultipart === true){
+        //     //
+        //     console.log("#################### MULTIPART ASUMED")
+        //     if ( options.body instanceof FormData ){
+        //         console.log("#################### WAS INDEED FROMDATA")
+        //         body = options.body;
+        //     }
+        //     else{
+        //         body = new  FormData();
+        //         for (var b in options.body){
+        //             body.append(b, options.body[b]);
+        //         }
+        //     }
+        // }
+        // else{
+        //     body = options.body;
+        // }
+        
+        var ro = requestOptions(options);
+
+        console.log("######### call_url : ", ro[0]);
+
+        console.log("######### HEADER : ", ro[2]);
+        
+        console.log("######### body : ", ro[1]);
 
         return new Observable(observale =>{
-            this.http.post(call_url, body, {headers: headers}).subscribe(
+            this.http.post(ro[0], ro[1], ro[2]).subscribe(
                 // Success
                 (res: any)=>{
-                    console.log(`[MAIN SERVICE HTTP CALLBACK] Created ${kind} successfully : `, res);
-                    observale.next(res);
-                },
-                // Error
-                err => {
-                    console.log("err : ", err);
-                    observale.error(err);
-                }, 
-                // Done
-                ()=>{ console.log(`[MAIN SERVICE HTTP CALLBACK] Done creating ${kind}`); observale.complete(); }
-            );
-        });
-    }
-
-    updateAPIObject(options:any){
-        // objectKind: string, 
-        // objectID: string, 
-        // info: any, 
-        // author: string = null, 
-        // options: any = null, 
-        // isMultipart:boolean= false
-        
-        console.log("### UPDATEAPIOBJECT CALLED ###");
-        console.log("info : ", options.info);
-        
-        options.kind = isAPIKind( options.kind.trim().toLocaleLowerCase() );
-
-        if (options.query){
-            options.query = '?' + (<any>Object).entries(options.query).map(entry => {
-                if (entry[1] instanceof Array){
-                    return entry[1].map(e=> entry[0] + '=' + e).join('&');
-                }
-                else {
-                    return entry[0] + '=' + entry[1];
-                }
-            }).join('&');
-        }
-        else{
-            options.query = '';
-        }
-
-        
-        let call_url , headers : any ={}, body;
-        
-        call_url = APP_SETTINGS.apiServerAddress + '/' + options.kind + '/' + options.objectID +(options.subUrl? '/'+options.subUrl:'') + options.query;
-
-        if (options.author){
-            headers['X-API-KEY'] = options.author;
-        }
-
-        if (options.body instanceof FormData || options.isMultipart === true){
-            //
-            if ( options.body instanceof FormData ){
-                body = body;
-            }
-            else{
-                body = new  FormData();
-                for (var b in options.body){
-                    body.append(b, options.body[b]);
-                }
-            }
-        }
-        else{
-            body = options.body;
-        }
-        
-        console.log("######### call_url : ", call_url);
-
-        console.log("######### HEADER : ", headers);
-        
-        console.log("######### body : ", body);
-
-        return new Observable(observale =>{
-            this.http.put(call_url, body, {headers: headers}).subscribe(
-                // Success
-                (res: any)=>{
-                    console.log(`[MAIN SERVICE HTTP CALLBACK] Updated ${options.kind} successfully : `, res);
+                    console.log(`[MAIN SERVICE HTTP CALLBACK] Created ${options.kind} successfully : `, res);
                     observale.next(res);
                 },
                 // Error
@@ -298,6 +372,131 @@ export class MainService implements OnInit{
                 }, 
                 // Done
                 ()=>{ console.log(`[MAIN SERVICE HTTP CALLBACK] Done creating ${options.kind}`); observale.complete(); }
+            );
+        });
+    }
+
+    updateAPIObject(options:CallOptions){
+        // objectKind: string, 
+        // objectID: string, 
+        // info: any, 
+        // author: string = null, 
+        // options: any = null, 
+        // isMultipart:boolean= false
+        
+        console.log("### UPDATEAPIOBJECT CALLED ###");
+        
+        var ro = requestOptions(options);
+        
+        console.log("######### call_url : ", ro[0]);
+
+        console.log("######### HEADER : ", ro[2]);
+        
+        console.log("######### body : ", ro[1]);
+
+        return new Observable(observale =>{
+            this.http.put(ro[0], ro[1], ro[2]).subscribe(
+                // Success
+                (res: any)=>{
+                    // console.log(`[MAIN SERVICE HTTP CALLBACK] Updated ${options.kind} successfully : `, res);
+                    if (options.kind == 'users' && options.objectID === this.userAccount._id){
+                        this.updateActiveAccount(res.response);
+                    }
+                    observale.next(res);
+                },
+                // Error
+                err => {
+                    // console.log("err : ", err);
+                    observale.error(err);
+                }, 
+                // Done
+                ()=>{ 
+                    // console.log(`[MAIN SERVICE HTTP CALLBACK] Done creating ${options.kind}`); observale.complete(); 
+                }
+            );
+        });
+    }
+    removeAPIObject(options:CallOptions){
+        // objectKind: string, 
+        // objectID: string, 
+        // info: any, 
+        // author: string = null, 
+        // options: any = null, 
+        // isMultipart:boolean= false
+        
+        console.log("### UPDATEAPIOBJECT CALLED ###");
+        // console.log("body : ", options.body);
+        
+        // options.kind = isAPIKind( options.kind.trim().toLocaleLowerCase() );
+
+        // if (options.query){
+        //     options.query = '?' + (<any>Object).entries(options.query).map(entry => {
+        //         if (entry[1] instanceof Array){
+        //             return entry[1].map(e=> entry[0] + '=' + e).join('&');
+        //         }
+        //         else {
+        //             return entry[0] + '=' + entry[1];
+        //         }
+        //     }).join('&');
+        // }
+        // else{
+        //     options.query = '';
+        // }
+
+        
+        // let call_url , headers : any ={}, body;
+        
+        // call_url = APP_SETTINGS.apiServerAddress + '/' + options.kind + '/' + options.objectID +(options.subUrl? '/'+options.subUrl:'') + options.query;
+
+        // if (options.author){
+        //     headers['X-API-KEY'] = options.author;
+        // }
+
+        // if (options.body instanceof FormData || options.isMultipart === true){
+        //     //
+        //     console.log("#################### MULTIPART ASUMED")
+        //     if ( options.body instanceof FormData ){
+        //         console.log("#################### WAS INDEED FROMDATA")
+        //         body = options.body;
+        //     }
+        //     else{
+        //         body = new  FormData();
+        //         for (var b in options.body){
+        //             body.append(b, options.body[b]);
+        //         }
+        //     }
+        // }
+        // else{
+        //     body = options.body;
+        // }
+
+        var ro = requestOptions(options);
+
+        console.log("######### call_url : ", ro[0]);
+
+        console.log("######### HEADER : ", ro[2]);
+        
+        console.log("######### body : ", ro[1]);
+
+        return new Observable(observale =>{
+            this.http.delete(ro[0], ro[2]).subscribe(
+                // Success
+                (res: any)=>{
+                    // console.log(`[MAIN SERVICE HTTP CALLBACK] Updated ${options.kind} successfully : `, res);
+                    if (options.kind == 'users' && options.objectID === this.userAccount._id){
+                        this.logout();
+                    }
+                    observale.next(res);
+                },
+                // Error
+                err => {
+                    // console.log("err : ", err);
+                    observale.error(err);
+                }, 
+                // Done
+                ()=>{ 
+                    // console.log(`[MAIN SERVICE HTTP CALLBACK] Done creating ${options.kind}`); observale.complete(); 
+                }
             );
         });
     }
