@@ -1,0 +1,61 @@
+
+<ng-template #readyToGo>
+    <div class="container">
+        <div class="row">
+            <a routerLink="/home" id="home-link"> <i class="fas fa-home" id="home-icon" title="Back to home"></i> </a>
+        </div>
+
+        <div class="row" *ngIf="!recoverID">
+            <form class="offset-sm-2 col-sm-8" id="recoverForm" #recoverForm="ngForm" (submit)="onRecoverFormSubmit(recoverForm)">
+                <div class="form-group row">
+                    <label class="col-sm-2" for="email"> Email </label>
+                    <div class="col-sm">
+                        <input type= "email" id="email" name="email" ngModel #email="ngModel" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-2" for="recover"> Recover </label>
+                    <div class="col-sm">
+                        <select class="form-control" id="recover" name="recover" ngModel #recover="ngModel" required>
+                            <option value="username">Username</option>
+                            <option value="password" selected>Password</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="submit" value="Submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="row" *ngIf="recoverID">
+            <div *ngIf="errMsg" style="z-index:2; display: flex; align-items: center; justify-content: center; width: 100vw;" >
+                <div class="bg-danger text-warning" style="padding:1em">{{errMsg}}</div>
+            </div>
+            <form *ngIf="!errMsg" class="offset-sm-2 col-sm-8" id="newPasswordForm" #newPasswordForm="ngForm" (submit)="onNewPasswordFormSubmit(newPasswordForm)">
+                <div class="form-group row">
+                    <label class="col-sm-2"for="password"> Password : </label>
+                    <div class="col-sm">
+                        <input type="password" class="form-control" id="password" name="password" ngModel #password="ngModel" required placeholder="Enter your new password">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="submit" value="Submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</ng-template>
+
+<div class="one-page-form">
+    <ng-container *ngIf="ready == false; else readyToGo">
+        <div style="animation: blinker 1s linear infinite; z-index:2;">
+            <h1> Loading ... </h1>
+        </div>
+    </ng-container>
+</div>
