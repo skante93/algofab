@@ -1,1 +1,50 @@
 /* You can add global styles to this file, and also import other style files */
+
+.construction-page {
+    //
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    width: 100vw; 
+    height: 100vh; 
+    border: 1pw solid black
+}
+
+.construction-window {
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    width: 50vw; 
+    height: 50vh; 
+    border: 2px dotted green; 
+    border-radius: 5px;
+
+    &::before {
+        content: "";
+        position: absolute;
+        width: 50vw;
+        height: 50vh; 
+        z-index: -1;
+        opacity: .3;
+        background-image: url(/assets/img/construction.jpeg);
+        // background-repeat: no-repeat;
+        background-position: center center;
+    }
+    
+    
+    .construction-title {
+        font-size: 5em;
+        text-decoration: underline;
+    }
+    .construction-text {
+        font-size: 2.5em;
+    }
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}

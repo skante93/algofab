@@ -12,7 +12,7 @@ $banner-img: '/assets/img/banner_bg.jpg';
     @include flexCenter();
 
     width: 100vw;
-    height: 90vh;
+    height: 75vh;
     background-image: url($banner-img);
 	
 	.banner-content{

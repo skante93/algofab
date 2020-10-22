@@ -1,6 +1,6 @@
 
 export let APP_SETTINGS: any = {
-    "apiServerAddress" : "http://localhost:3000",
+    "apiServerAddress" : "http://localhost:9312",
     "default_lang": "en",
     "texts": {
         "nav_home": { "en" : "Home", "fr": "Acceuil" },

@@ -14,6 +14,7 @@ const tokenModel = mongoose.model('Tokens');
 const usersModel = mongoose.model('Users');
 const groupsModel= mongoose.model('Groups');
 const resourcesModel = mongoose.model('Resources');
+const recoverModel = mongoose.model('Recover');
 //const liveDataModel = mongoose.model('LiveData');
 //const algoTemplatesModel = mongoose.model('AlgoTemplates');
 //const algoInstancesModel = mongoose.model('AlgoInstances');
@@ -258,6 +259,79 @@ class UsersManager {
         }
     }
 
+    async recover (params) {
+        if (params.recoverID){
+            var rcvr = await recoverModel.findById(params.recoverID).populate('user');
+            if (!rcvr){
+                return new RestResponse("NotFoundError", 404, `recovery link is not (or no longer) available`);
+            }
+            if (params.password){
+                rcvr.user.profile.password = createHash(params.password);
+                await rcvr.user.save();
+
+                try{
+                    if (typeof mailer !== 'undefined'){
+                        await mailer.recoverPasswordNotification(rcvr.user);
+                    }
+                }
+                catch(e){
+                    return new RestResponse("MailingError", 500, e);
+                }
+                await rcvr.remove();
+
+                return new RestResponse("Done", 200, "Password changed");
+            }
+            else{
+                return new RestResponse("Gotten", 200, rcvr);
+            }
+            
+        }
+        else{
+            if (!params.email){
+                return new RestResponse("MissingParameterError", 400, `field "email" is required`);
+            }
+            if (params.recover != null && ['username', 'password'].indexOf(params.recover) < 0){
+                return new RestResponse("BadParameterError", 400, `recover fields expects either "username" or "password", not ${params.recover}`);
+            }
+            else if (params.recover == null){
+                params.recover = 'password';
+            }
+
+            let user = await usersModel.findOne({"profile.email" : params.email});
+            if (!user){
+                return new RestResponse("NotFoundError", 404, `user with email ${params.userID} not found`);
+            }
+            
+            if (params.recover == "username"){
+                //
+                try{
+                    if (typeof mailer !== 'undefined'){
+                        await mailer.recoverUsernameNotification(user);
+                    }
+                }
+                catch(e){
+                    return new RestResponse("MailingError", 500, e);
+                }
+            }
+            else{
+                //
+                var rcvr = new recoverModel({user: user._id.toString()});
+                rcvr = await rcvr.save();
+
+                try{
+                    if (typeof mailer !== 'undefined'){
+                        await mailer.recoverPasswordInformation(user, rcvr);
+                    }
+                }
+                catch(e){
+                    return new RestResponse("MailingError", 500, e);
+                }
+
+            }
+            return new RestResponse("Done", 200, "Mail sent!!");
+        }
+
+    }
     async updateProfile(params, requestedBy) {
         var err = processParamsFields(params, [
             {name: "userID", required: true},

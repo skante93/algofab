@@ -3,6 +3,7 @@ import { RouterModule, Route } from '@angular/router';
 
 import { StoreModule } from './store/store.module';
 import { WorkshopModule } from './workshop/workshop.module';
+import { DocsModule } from './docs/docs.module';
 import { OthersModule } from './others/others.module';
 
 import { ToolsModule } from '../../../tools/tools.module';
@@ -24,6 +25,7 @@ const routes : Route[] = [
         //ToolsModule,
         StoreModule,
         WorkshopModule,
+        DocsModule,
         OthersModule,
         ReactiveFormsModule,
         RouterModule.forChild(routes)

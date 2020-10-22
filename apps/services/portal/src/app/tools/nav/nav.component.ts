@@ -29,7 +29,7 @@ var $ = window['$'];
 
 			<a *ngIf="dropdown == undefined; else dropDownItemView"
 				[hidden]="!display"
-				[routerLink]="dropdown == undefined ? link : null"
+				[attr.href]="dropdown == undefined ? link : null"
 				[attr.class]="itemsClasses()">
 				
 				<ng-template [ngIf]="img != undefined">
@@ -81,10 +81,10 @@ export class NavItemComponent implements OnInit{
 		else{
 			this.applyLargeScreenDropDown();
 		}
-		setTimeout(()=>{ 
+		//setTimeout(()=>{ 
 			this.ready = true;
 			//console.log(`**** [${this.name}] | display [${typeof this.display}]:`, this.display, ` ****`);
-		}, 1000);
+		//}, 0);
 	}
 
 	itemsClasses(){
@@ -266,7 +266,7 @@ export class NavComponent implements OnInit {
 					}
 				});
 			});
-		}, 1000);
+		}, 200);
 	}
 
 	setItemDisplay(name:string, diplayed:boolean) {

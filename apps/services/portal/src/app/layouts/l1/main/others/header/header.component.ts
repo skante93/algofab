@@ -16,8 +16,8 @@ export class HeaderComponent implements OnInit {
     connected: boolean = false;
 
     left_nav: Array<any> = [
-        { "name": "logo_algofab", "link": "/", "img": "/assets/img/algofab_white_bg.PNG", "classes": "header-nav-img" },
-        { "name": "logo_imt", "link": "/", "img": "/assets/img/imt_logo_photoshop.png", "classes": "header-nav-img" }
+        { "name": "logo_teralab", "link": "https://www.teralab-datascience.fr", "img": "/assets/img/teralab.png", "classes": "header-nav-img" },
+        { "name": "logo_imt", "link": "https://www.imt.fr", "img": "/assets/img/imt_logo_photoshop.png", "classes": "header-nav-img" }
     ];
 
     middle_nav: Array<any> = [

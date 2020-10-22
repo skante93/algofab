@@ -74,6 +74,12 @@ var handlers = {
         var r = await userManager.loginUser(res.locals.params, res.locals.user);
         //console.log('r : ', r);
         r.reply(req, res);
+    },
+    recover: async (req, res, next)=>{
+        console.log("## RECOVER : ", res.locals.params);
+        var r = await userManager.recover(res.locals.params);//, res.locals.user);
+        //console.log('r : ', r);
+        r.reply(req, res);
     }
 }
 
@@ -121,6 +127,38 @@ var definition = {
                     }
                 }
             }
+        }
+    },
+    '/login': {
+        post: {
+            tags: [ "users" ],
+            handler: "routes/users#handlers#login_user",
+            requestBody: {
+                content:{
+                    'application/x-www-form-urlencoded': {
+                        schema : {
+                            $ref: "#/definitions/login"
+                        }
+                    },
+                    'application/json':{
+                        schema : {
+                            $ref: "#/definitions/login"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    '/recover': {
+        get: {
+            tags: [ "users" ],
+            handler: "routes/users#handlers#recover",
+            parameters: [
+                {name: "email", in: "query", type:"string"},
+                {name: "recover", in: "query", type:"string", enum: ["username", "password"]},
+                {name: "recoverID", in: "query", type:"string"},
+                {name: "password", in: "query", type:"string"},
+            ]
         }
     },
     '/{userID}': {
@@ -241,26 +279,7 @@ var definition = {
             }
         }
     },
-    '/login': {
-        post: {
-            tags: [ "users" ],
-            handler: "routes/users#handlers#login_user",
-            requestBody: {
-                content:{
-                    'application/x-www-form-urlencoded': {
-                        schema : {
-                            $ref: "#/definitions/login"
-                        }
-                    },
-                    'application/json':{
-                        schema : {
-                            $ref: "#/definitions/login"
-                        }
-                    }
-                }
-            }
-        }
-    }
+    
 }
 
 const { SwaggerRouter } = require('../swagger-server'), swaggerDocs = require('../docs.json');

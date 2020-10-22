@@ -19,12 +19,14 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HomeComponent } from './home/home.component';
 import { AccountComponent } from './account/account.component';
+import { RecoverComponent } from './recover/recover.component';
 
 
 const routes : Route[] = [
     { path: "signin", pathMatch: "full", component:  SigninComponent },
     { path: "signup", pathMatch: "full", component:  SignupComponent },
     { path: "signout", pathMatch: "full", component:  SignoutComponent },
+    { path: "recover", pathMatch: "full", component:  RecoverComponent },
     { path: "test", component: TestComponent },
     { 
         path: "account", 
@@ -34,7 +36,8 @@ const routes : Route[] = [
             {path:"", pathMatch:"full", component: AccountComponent}
         ]
     },
-    { path: "", pathMatch: "full", component:  HomeComponent },
+    { path: "home", pathMatch: "full", component:  HomeComponent },
+    { path: "", pathMatch: "full", redirectTo: "home" },
 ];
 
 
@@ -48,6 +51,7 @@ const routes : Route[] = [
         SignupComponent,
         SignoutComponent,
         AccountComponent,
+        RecoverComponent,
     ],
     imports : [
         CommonModule,

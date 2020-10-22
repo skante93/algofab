@@ -1,14 +1,7 @@
 version: "3"
 
 services:
-  portal:
-    #image: node
-    build: ./services/portal
-    ports:
-      - ${PORTAL_COMPOSE_PORT}:4200
-    volumes:
-      - ./services/portal:/root/server
-
+  
   mongo:
     image: mongo
     volumes:
@@ -24,6 +17,15 @@ services:
     depends_on:
       - mongo
 
+  portal:
+    #image: node
+    build: ./services/portal
+    ports:
+      - ${PORTAL_COMPOSE_PORT}:4200
+    volumes:
+      - ./services/portal:/root/server
+    depends_on:
+      - api
 volumes:
   db:
 

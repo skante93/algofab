@@ -308,6 +308,9 @@ resourcesSchema.index({
 // 	data: String
 // }, {collection: "articles_versions_data"});
 
+var recoverSchema = new Schema({
+	user: { type: Schema.Types.ObjectId, ref: "Users" }
+}, {collection: "recover"});
 
 var gfsSchema = new Schema({filename: String, contentType: String}, {collection: 'fs.files'});
 
@@ -320,6 +323,7 @@ mongoose.model('Tokens', tokenSchema);
 mongoose.model('Users', usersSchema);
 mongoose.model('Groups', groupsSchema);
 mongoose.model('Resources', resourcesSchema);
+mongoose.model('Recover', recoverSchema);
 //mongoose.model('LiveData', liveDataSchema);
 //mongoose.model('AlgoTemplates', algoTemplateSchema);
 //mongoose.model('AlgoInstances', algoInstanceSchema);

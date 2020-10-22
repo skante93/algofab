@@ -1,4 +1,4 @@
-<tools-nav #navbar></tools-nav>
+<tools-nav [items]="{left: left_nav, middle: middle_nav, right: right_nav }" #navbar></tools-nav>
 
 
 <div class="banner" [hidden]="mainService.isLoggedIn()">
